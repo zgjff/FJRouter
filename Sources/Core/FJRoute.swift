@@ -76,7 +76,7 @@ public struct FJRoute: Sendable {
     ///   - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
     ///   - builder: 构建路由的`controller`指向
-    ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
+    ///   - interceptor: 路由拦截器
     ///   - displayAction: 匹配成功之后的非手动显示逻辑
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
     public init(path: String, name: String? = nil, builder: PageBuilder?, interceptor: (any FJRouteInterceptor)? = nil, displayAction: DisplayAction? = nil, routes: [FJRoute] = []) throws {

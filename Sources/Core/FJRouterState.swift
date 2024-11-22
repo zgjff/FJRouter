@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+/// 匹配路由的状态
 public struct FJRouterState: @unchecked Sendable {
     /// 要匹配的原始url
     public let url: URL

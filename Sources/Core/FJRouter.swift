@@ -4,6 +4,7 @@
 import Foundation
 import UIKit
 
+/// 路由管理中心
 final public class FJRouter: Sendable {
     public static let shared = FJRouter()
     fileprivate let store: FJRouterStore
