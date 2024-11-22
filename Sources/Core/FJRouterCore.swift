@@ -75,7 +75,7 @@ extension FJRouterCore {
         let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
         guard let fromController else {
             // FIXME: 是否需要这样做
-            UIApplication.shared.versionkKeyWindow?.rootViewController = sourceController
+            UIApplication.shared.versionkKeyWindow?.rootViewController = destController
             return
         }
         if let navi = fromController.navigationController {
