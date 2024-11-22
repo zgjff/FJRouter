@@ -200,7 +200,6 @@ extension FJRouter {
     }
     
     /// 通过路由路径获取对应的控制器
-    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -219,7 +218,6 @@ extension FJRouter {
     }
     
     /// 通过路由名称获取对应的控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -235,7 +233,6 @@ extension FJRouter {
     }
     
     /// 通过路由名称获取对应的控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -269,7 +266,6 @@ extension FJRouter {
     }
     
     /// 导航至对应路由路径控制器
-    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -282,7 +278,6 @@ extension FJRouter {
     }
     
     /// 导航至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -298,7 +293,6 @@ extension FJRouter {
     }
     
     /// 导航至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -339,7 +333,6 @@ extension FJRouter {
     }
     
     /// push至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -355,7 +348,6 @@ extension FJRouter {
     }
     
     /// push至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -396,7 +388,6 @@ extension FJRouter {
     }
     
     /// present至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -412,7 +403,6 @@ extension FJRouter {
     }
     
     /// present至对应路由名称控制器
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
