@@ -9,10 +9,10 @@ import UIKit
 
 public struct FJRoute: Sendable {
     /// 构建路由的`controller`
-    public typealias PageBuilder = (@MainActor (_ state: FJRouterState) -> UIViewController)
+    public typealias PageBuilder = (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
     
     /// 构建路由的显示逻辑
-    public typealias DisplayAction = (@MainActor (_ sourceController: UIViewController, _ destController: UIViewController, _ state: FJRouterState) -> ())
+    public typealias DisplayAction = (@MainActor @Sendable (_ sourceController: UIViewController, _ destController: UIViewController, _ state: FJRouterState) -> ())
     
     /// 路由的名称
     ///
