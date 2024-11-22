@@ -64,9 +64,7 @@ extension FJRouterCore {
             }
             if match.route.displayAction != nil {
                 let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-                if let fromController {
-                    match.route.displayAction?(fromController, viewController, state)
-                }
+                match.route.displayAction?(fromController, viewController, state)
                 return
             }
             private_go(to: viewController, from: sourceController, animated: flag, isError: false)
@@ -76,6 +74,8 @@ extension FJRouterCore {
     @MainActor func private_go(to destController: UIViewController, from sourceController: UIViewController?, animated flag: Bool, isError: Bool) {
         let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
         guard let fromController else {
+            // FIXME: 是否需要这样做
+            UIApplication.shared.versionkKeyWindow?.rootViewController = sourceController
             return
         }
         if let navi = fromController.navigationController {
