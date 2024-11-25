@@ -35,9 +35,6 @@ pod 'FJRouter'
 
 #### 路由拦截器`interceptor`: 这是一个路由拦截器协议, 具体要求如下：
 ```swift
-/// 是否需要重定向
-func needRedirect(state: FJRouterState) async -> Bool
-    
 /// 指向需要重定向的路由。
 ///
 /// 可以携带参数.eg, 目标路由是`/family/:fid`, 则需要完整传入`fid`, 即`/family/123`
