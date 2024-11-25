@@ -119,9 +119,7 @@ private extension FJRouterStore {
             components.path = String(describing: cp[startIndex..<endIndex])
         }
         let newUrl = components.url ?? url
-        let newUrlStr = newUrl.absoluteString
-        let decodeUrlStr = newUrlStr.removingPercentEncoding ?? newUrlStr
-        return URL(string: decodeUrlStr) ?? newUrl
+        return newUrl
     }
     
     func findMatch(url: URL, extra: Any?) -> FJRouteMatchList {
