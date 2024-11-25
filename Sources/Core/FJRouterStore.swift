@@ -69,7 +69,7 @@ extension FJRouterStore {
         }
         let newParams = params.reduce([String: String]()) { partialResult, pairs in
             var f = partialResult
-            f.updateValue(pairs.value.removingPercentEncoding ?? pairs.value, forKey: pairs.key)
+            f.updateValue(pairs.value, forKey: pairs.key)
             return f
         }
         let location = FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
