@@ -39,98 +39,32 @@ extension FJRouter {
     
     /// 通过path注册路由
     ///
-    /// 注意:`builder`、`displayBuilder`和`interceptor`必须至少提供一项, 否则注册失败。如果提供了`displayBuilder`则必须使用`go`以及`goNamed`方法进行显示
+    /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
     ///
     /// 如果已经存在路由, 则会替换旧路由信息。简单通过路由`path`判断两个路由是否相同
-    ///
-    /// displayBuilder一般用于匹配成功之后, 非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
-    ///
     /// - Parameters:
     ///   - path: 要注册的路由path
     ///   - name: 路由名称
-    ///   - builder: 构建路由的`controller`指向
-    ///   - displayBuilder: 构建+显示路由的`controller`指向。一般用于匹配成功之后,
+    ///   - builder: 构建路由的`controller`方式
     ///     非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
     ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    ///
-    /// ```
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    sourceController.navigationController?.pushViewController(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .fullScreen
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    UIApplication.shared.keyWindow?.rootViewController = vc
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .custom
-    ///    vc.transitioningDelegate = xxx
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    /// ```
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, displayBuilder: FJRoute.DisplayBuilder? = nil, interceptor: (any FJRouteInterceptor)? = nil) async throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, displayBuilder: displayBuilder, interceptor: interceptor)
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, interceptor: (any FJRouteInterceptor)? = nil) async throws {
+        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor)
         await store.addRoute(route)
     }
     
     /// 通过path注册路由
     ///
-    /// 注意:`builder`、`displayBuilder`和`interceptor`, 否则注册失败。如果提供了`displayBuilder`则必须使用`go`以及`goNamed`方法进行显示
+    /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
     ///
     /// 如果已经存在路由, 则会替换旧路由信息。简单通过路由`path`判断两个路由是否相同
-    ///
     /// - Parameters:
     ///   - path: 要注册的路由path
     ///   - name: 路由名称
-    ///   - builder: 构建路由的`controller`指向
-    ///   - displayBuilder: 构建+显示路由的`controller`指向。一般用于匹配成功之后,
-    ///    非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
-    ///
+    ///   - builder: 构建路由的`controller`指向方式
     ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    ///
-    /// ```
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    sourceController.navigationController?.pushViewController(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .fullScreen
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    UIApplication.shared.keyWindow?.rootViewController = vc
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .custom
-    ///    vc.transitioningDelegate = xxx
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    /// ```
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, displayBuilder: FJRoute.DisplayBuilder? = nil, interceptor: (any FJRouteInterceptor)? = nil) throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, displayBuilder: displayBuilder, interceptor: interceptor)
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, interceptor: (any FJRouteInterceptor)? = nil) throws {
+        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor)
         Task {
             await store.addRoute(route)
         }
@@ -143,7 +77,6 @@ extension FJRouter {
     /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
     ///
     /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -158,7 +91,6 @@ extension FJRouter {
     /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
     ///
     /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -181,7 +113,7 @@ extension FJRouter {
     
     /// 设置路由匹配失败时的页面
     /// - Parameter builder: 失败时的页面创建逻辑
-    public func setErrorBuilder(_ builder: @escaping FJRoute.PageBuilder) {
+    public func setErrorBuilder(_ builder: @escaping (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)) {
         core.errorBuilder = builder
     }
     
@@ -204,11 +136,10 @@ extension FJRouter {
     /// 3: 如果路由匹配失败, 且`ignoreError`为`false`, 则会返回`errorBuilder`返回的控制器
     ///
     /// 4: 如果路由匹配失败, 且`ignoreError`为`true`, 则会返回`nil`
-    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不返回至`error`页面
     /// - Returns: 控制器
     public func viewController(forLocation location: String, extra: (any Sendable)? = nil, ignoreError: Bool = false) async -> UIViewController? {
         guard let url = URL(string: location) else {
@@ -222,7 +153,7 @@ extension FJRouter {
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不返回至`error`页面
     ///   - completion: 回调获取的控制器
     public func viewController(forLocation location: String, extra: (any Sendable)? = nil, ignoreError: Bool = false, completion: @Sendable @escaping (_ controller: UIViewController) -> ()) {
         guard let url = URL(string: location) else {
@@ -242,7 +173,7 @@ extension FJRouter {
     ///   - params: 路由参数
     ///   - queryParams: 查询参数
     ///   - extra: 携带的参数
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不返回至`error`页面
     /// - Returns: 控制器
     public func viewController(forName name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, ignoreError: Bool = false) async -> UIViewController? {
         guard let loc = await convertLocationBy(name: name, params: params, queryParams: queryParams) else {
@@ -257,7 +188,7 @@ extension FJRouter {
     ///   - params: 路由参数
     ///   - queryParams: 查询参数
     ///   - extra: 携带的参数
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不返回至`error`页面
     ///   - completion: 回调
     public func viewController(forName name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, ignoreError: Bool = false, completion: @Sendable @escaping (_ controller: UIViewController) -> ()) {
         Task {
@@ -269,13 +200,14 @@ extension FJRouter {
     
     /// 导航至对应路由路径控制器。
     ///
-    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    /// 若路由的`builder`为`default`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func go(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let url = URL(string: location) else {
             return
@@ -286,13 +218,14 @@ extension FJRouter {
     
     /// 导航至对应路由路径控制器
     ///
-    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    /// 若路由的`builder`为`default`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func go(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
             await go(location: location, extra: extra, sourceController: sourceController, ignoreError: ignoreError)
@@ -301,15 +234,16 @@ extension FJRouter {
     
     /// 导航至对应路由名称控制器
     ///
-    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    /// 若路由的`builder`为`default`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let loc = await convertLocationBy(name: name, params: params, queryParams: queryParams) else {
             return
@@ -319,27 +253,30 @@ extension FJRouter {
     
     /// 导航至对应路由名称控制器
     ///
-    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    /// 若路由的`builder`为`default`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
             await goNamed(name, params: params, queryParams: queryParams, extra: extra, sourceController: sourceController, ignoreError: ignoreError)
         }
     }
     
-    /// push到对应路由路径控制器
+    /// `push`到对应路由路径控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func push(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let url = URL(string: location) else {
             return
@@ -348,25 +285,29 @@ extension FJRouter {
         await core.push(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
     }
     
-    /// push到对应路由路径控制器
+    /// `push`到对应路由路径控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
     /// - Parameters:
     ///   - location: 路由路径
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - extra: 携带的参数
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func push(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
             await push(location: location, extra: extra, sourceController: sourceController, ignoreError: ignoreError)
         }
     }
     
-    /// push至对应路由名称控制器
+    /// `push`至对应路由名称控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     ///   - extra: 携带的参数
     public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let loc = await convertLocationBy(name: name, params: params, queryParams: queryParams) else {
@@ -375,13 +316,15 @@ extension FJRouter {
         await push(location: loc, extra: extra, sourceController: sourceController, ignoreError: ignoreError)
     }
     
-    /// push至对应路由名称控制器
+    /// `push`至对应路由名称控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     ///   - extra: 携带的参数
     public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
@@ -389,12 +332,14 @@ extension FJRouter {
         }
     }
     
-    /// present到对应路由路径控制器
+    /// `present`到对应路由路径控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func present(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let url = URL(string: location) else {
             return
@@ -404,11 +349,13 @@ extension FJRouter {
     }
     
     /// present到对应路由路径控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func present(location: String, extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
             await present(location: location, extra: extra, sourceController: sourceController, ignoreError: ignoreError)
@@ -416,13 +363,15 @@ extension FJRouter {
     }
     
     /// present至对应路由名称控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) async {
         guard let loc = await convertLocationBy(name: name, params: params, queryParams: queryParams) else {
             return
@@ -431,13 +380,15 @@ extension FJRouter {
     }
     
     /// present至对应路由名称控制器
+    ///
+    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, sourceController: UIViewController? = nil, ignoreError: Bool = false) {
         Task {
             await presentNamed(name, params: params, queryParams: queryParams, extra: extra, sourceController: sourceController, ignoreError: ignoreError)

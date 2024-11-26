@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FJRouter"
-  s.version      = "1.2.2"
+  s.version      = "1.2.3"
   s.summary      = "正则、重定向、支持参数、子路由"
   s.homepage     = "https://github.com/zgjff/FJRouter"
   s.license      = "MIT"

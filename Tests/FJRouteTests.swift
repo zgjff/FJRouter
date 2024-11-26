@@ -6,17 +6,17 @@ import UIKit
 struct FJRouteTests {
     @Test func emptyPath() {
         #expect(throws: FJRoute.CreateError.emptyPath) {
-            let _ = try FJRoute(path: "") { state in
+            let _ = try FJRoute(path: "", builder: .default({ state in
                 return UIViewController()
-            }
+            }))
         }
     }
     
     @Test func emptyName() {
         #expect(throws: FJRoute.CreateError.emptyName) {
-            let _ = try FJRoute(path: "/", name: "") { state in
+            let _ = try FJRoute(path: "/", name: "", builder: .default({ state in
                 return UIViewController()
-            }
+            }))
         }
     }
     
@@ -28,9 +28,9 @@ struct FJRouteTests {
     
     @Test func matchRegExpAsPrefixWithoutParameter() {
         let pattern = "/settings/detail"
-        let route = try! FJRoute(path: pattern) { state in
+        let route = try! FJRoute(path: pattern, builder: .default({ state in
             return UIViewController()
-        }
+        }))
         
         #expect(route.matchRegExpHasPrefix("/settings/detail") != nil)
         #expect(route.matchRegExpHasPrefix("/settings/detail/abc") != nil)

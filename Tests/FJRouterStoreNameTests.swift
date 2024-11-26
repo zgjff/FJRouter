@@ -85,7 +85,7 @@ struct FJRouterStoreNameTests {
         #expect(nameALoc == "/b")
     }
     
-    fileprivate var _builder: (@MainActor (_ state: FJRouterState) -> UIViewController) = { _ in
+    fileprivate var _builder: FJRoute.Builder = .default { state in
         return UIViewController()
     }
 }

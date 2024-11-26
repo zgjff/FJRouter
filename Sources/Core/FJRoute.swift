@@ -8,12 +8,6 @@
 import UIKit
 
 public struct FJRoute: Sendable {
-    /// 构建路由的`controller`
-    public typealias PageBuilder = (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
-    
-    /// 构建路由的显示逻辑: 当未设置window的`rootController`的时候`sourceController`为nil
-    public typealias DisplayBuilder = (@MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
-    
     /// 路由的名称
     ///
     /// 如果赋值, 必须提供唯一的字符串名称, 且不能为空
@@ -29,41 +23,9 @@ public struct FJRoute: Sendable {
     /// 路由参数将被解析并储存在`JJRouterState`中, 用于`builder`和`redirect`
     public let path: String
     
-    /// 构建路由的`controller`指向
-    public let builder: PageBuilder?
-    
-    /// 构建+显示路由的`controller`指向.eg:
-    ///
-    /// ```
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    sourceController.navigationController?.pushViewController(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .fullScreen
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    UIApplication.shared.keyWindow?.rootViewController = vc
-    ///    return vc
-    /// }
-    ///
-    /// displayBuilder: { sourceController, state in
-    ///    let vc = UIViewController()
-    ///    vc.modalPresentationStyle = .custom
-    ///    vc.transitioningDelegate = xxx
-    ///    sourceController.present(vc, animated: true)
-    ///    return vc
-    /// }
-    /// ```
-    public let displayBuilder: DisplayBuilder?
-    
+    /// 构建路由方式
+    public let builder: FJRoute.Builder?
+
     /// 路由拦截器
     public let interceptor: (any FJRouteInterceptor)?
     
@@ -76,18 +38,7 @@ public struct FJRoute: Sendable {
     /// 关联的子路由
     public let routes: [FJRoute]
     
-    /// 初始化。注意:
-    ///
-    /// 1: `builder`、`displayBuilder`和`interceptor`必须至少提供一项, 否则初始化失败
-    ///
-    /// 2: `builder`和`displayBuilder`都是提供创建路由控制器的构建, 但是`builder`一般是只提供创建, 而`displayBuilder`则
-    /// 必须需要额外提供显示对应控制器的方法
-    ///
-    /// 3: 因为`displayBuilder`方法需要额外提供显示对应控制器的方法, 要配合路由的`go`或`goNamed`方法进行显示,
-    /// 不支持手动调用`push`和`present`
-    ///
-    /// 4: `builder`和`displayBuilder`只需提供一个即可, 但是若要两者都提供, 则以`displayBuilder`方法为主; 如果提供了`displayBuilder`则必须使用`go`以及`goNamed`方法进行显示
-    ///
+    /// 初始化. 注意:`builder`和`interceptor`必须至少提供一项, 否则初始化失败
     /// - Parameters:
     ///   - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
@@ -95,7 +46,7 @@ public struct FJRoute: Sendable {
     ///   - displayBuilder: 构建+显示路由的`controller`指向
     ///   - interceptor: 路由拦截器
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: PageBuilder?, displayBuilder: DisplayBuilder? = nil, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws {
+    public init(path: String, name: String? = nil, builder: Builder?, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
@@ -104,14 +55,13 @@ public struct FJRoute: Sendable {
         if let n, n.isEmpty {
             throw CreateError.emptyName
         }
-        if builder == nil && interceptor == nil && displayBuilder == nil {
+        if builder == nil && interceptor == nil {
             throw CreateError.noPageBuilder
         }
         self.path = p
         self.name = n
         self.builder = builder
         self.interceptor = interceptor
-        self.displayBuilder = displayBuilder
         self.routes = routes
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
@@ -152,6 +102,60 @@ extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
     
     public var debugDescription: String {
         description
+    }
+}
+
+extension FJRoute {
+    /// 构建路由的`controller`构建器
+    public enum Builder: Sendable {
+        /// 默认构建方式: 只创建并返回路由的指向`controller`
+        ///
+        /// 注意不需要在必包内部处理`controller`的显示逻辑
+        ///
+        /// ```swift
+        /// builder: .default({ state in
+        ///    let vc = UIViewController()
+        ///    return vc
+        /// })
+        /// ```
+        case `default`(_ action: @MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
+        
+        /// 构建+展示构建方式: 创建, 并且需要在内部处理跳转逻辑并返回路由的指向`controller`。
+        /// 要配合路由的`go`或`goNamed`方法进行显示, 不支持手动调用`push`和`present`
+        ///
+        /// 就算是调用路由的`push`和`present`方法也不会跳转
+        ///
+        /// 注意一定要在必包内部处理`controller`的显示逻辑: push、present、rootController、自定义转场等等
+        ///
+        /// ```
+        /// builder: .display({ sourceController, state in
+        ///    let vc = UIViewController()
+        ///    sourceController.navigationController?.pushViewController(vc, animated: true)
+        ///    return vc
+        /// })
+        ///
+        /// builder: .display({ sourceController, state in
+        ///    let vc = UIViewController()
+        ///    vc.modalPresentationStyle = .fullScreen
+        ///    sourceController.present(vc, animated: true)
+        ///    return vc
+        /// })
+        ///
+        /// builder: .display({ sourceController, state in
+        ///    let vc = UIViewController()
+        ///    UIApplication.shared.keyWindow?.rootViewController = vc
+        ///    return vc
+        /// })
+        ///
+        /// builder: .display({ sourceController, state in
+        ///    let vc = UIViewController()
+        ///    vc.modalPresentationStyle = .custom
+        ///    vc.transitioningDelegate = xxx
+        ///    sourceController.present(vc, animated: true)
+        ///    return vc
+        /// })
+        /// ```
+        case display(_ action: @MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
     }
 }
 

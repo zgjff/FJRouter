@@ -104,7 +104,7 @@ struct FJRouterMatchTests {
         #expect(pathParameters3["url"] == "https://cn.bing.com/search?q=天气&cvid=df4490e4326d4fbeb")
     }
     
-    private var _builder: (@MainActor (_ state: FJRouterState) -> UIViewController) = { _ in
+    fileprivate var _builder: FJRoute.Builder = .default { state in
         return UIViewController()
     }
 }
