@@ -42,42 +42,50 @@ func redirectRoute(state: FJRouterState) async -> String
 ```
 框架已经提供了一个通用的拦截器实现`FJRouteCommonInterceptor`
 
-#### 路由的显示逻辑`displayAction`: 一般用于匹配成功之后, 非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`等以`go`开头的跳转方法。 在这里可以随意的指定此路由对应控制器的配皮显示逻辑。eg:
+#### 路由的显示逻辑`displayBuilder`: 一般用于匹配成功之后, 非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`等以`go`开头的跳转方法。 在这里可以随意的指定此路由对应控制器的配皮显示逻辑。eg:
 
 push
 ```swift 
-displayAction: { sourceController, destController, state in
-    sourceController.navigationController?.pushViewController(viewController, animated: true)
+displayAction: { sourceController, state in
+    let vc = UIViewController()
+    sourceController.navigationController?.pushViewController(vc, animated: true)
+    return vc
 }
 ```
 
 present
 ```swift
-displayAction: { sourceController, destController, state in
-    matchController.modalPresentationStyle = .fullScreen
-    sourceController.present(viewController, animated: true)
+displayBuilder: { sourceController, state in
+    let vc = UIViewController()
+    vc.modalPresentationStyle = .fullScreen
+    sourceController.present(vc, animated: true)
+    return vc
 }
+```
 
 设置app的rootViewController
 ```swift
-displayAction: { sourceController, destController, state in
-    UIApplication.shared.keyWindow?.rootViewController = matchController
+displayBuilder: { sourceController, state in
+    let vc = UIViewController()
+    UIApplication.shared.keyWindow?.rootViewController = vc
+    return vc
 }
-
 ```
  自定义转场动画
 ```swift
-displayAction: { sourceController, destController, state in
-    matchController.modalPresentationStyle = .custom
-    matchController.transitioningDelegate = xxx
-    sourceController.present(matchController, animated: true)
+displayBuilder: { sourceController, state in
+   let vc = UIViewController()
+   vc.modalPresentationStyle = .custom
+   vc.transitioningDelegate = xxx
+   sourceController.present(vc, animated: true)
+   return vc
 }
 ```
 
 甚至可以不用跳转至新控制器。如在观察到当前控制器与路由匹配到的是同一个控制器的情况下, 不跳转新的, 而是刷新当前的控制器内容
 ```swift 
-displayAction: { sourceController, destController, state in
-    if type(of: sourceController) == type(of: destController) {
+displayAction: { sourceController, state in
+    if let vc = sourceController as? xxxx {
         sourceController.update(with: xxxxx)
     }
 }
@@ -133,7 +141,7 @@ FJRouter.shared.presentNamed("login")
 ```
 
 #### `go`到匹配路由页面: 框架内部处理跳转到匹配路由页面的方式
-> 会优先调用路由的`displayAction`方法; 若是`displayAction`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+> 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
 
 ```swift 
 FJRouter.shared.go(location: "/login")

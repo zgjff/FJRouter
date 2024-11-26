@@ -32,7 +32,11 @@ extension FJRouterCore {
             return viewController
         }
         let state = FJRouterState(matches: matchList, match: match)
-        let viewController = match.route.builder?(state)
+        if match.route.builder != nil {
+            return match.route.builder?(state)
+        }
+        let tvc = apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+        let viewController = match.route.displayBuilder?(tvc, state)
         return viewController
     }
     
@@ -56,15 +60,15 @@ extension FJRouterCore {
                 return
             }
             let state = FJRouterState(matches: matchList, match: match)
+            if match.route.displayBuilder != nil {
+                let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+                let _ = match.route.displayBuilder?(fromController, state)
+                return
+            }
             guard let viewController = match.route.builder?(state) else {
                 let state = FJRouterState(matches: matchList)
                 let viewController = errorBuilder(state)
                 private_go(to: viewController, from: sourceController, animated: true, isError: true)
-                return
-            }
-            if match.route.displayAction != nil {
-                let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-                match.route.displayAction?(fromController, viewController, state)
                 return
             }
             private_go(to: viewController, from: sourceController, animated: flag, isError: false)
@@ -91,6 +95,12 @@ extension FJRouterCore {
     }
     
     @MainActor func push(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
+        if let match = matchList.lastMatch, match.route.displayBuilder != nil {
+            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+            let state = FJRouterState(matches: matchList, match: match)
+            _ = match.route.displayBuilder?(fromController, state)
+            return
+        }
         guard let viewController = viewController(for: matchList, ignoreError: ignoreError)else {
             return
         }
@@ -102,6 +112,12 @@ extension FJRouterCore {
     }
     
     @MainActor func present(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
+        if let match = matchList.lastMatch, match.route.displayBuilder != nil {
+            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+            let state = FJRouterState(matches: matchList, match: match)
+            _ = match.route.displayBuilder?(fromController, state)
+            return
+        }
         guard let viewController = viewController(for: matchList, ignoreError: ignoreError) else {
             return
         }

@@ -39,47 +39,56 @@ extension FJRouter {
     
     /// 通过path注册路由
     ///
-    /// 注意:`builder`和`guards`必须至少提供一项, 否则注册失败。
+    /// 注意:`builder`、`displayBuilder`和`interceptor`必须至少提供一项, 否则注册失败。如果提供了`displayBuilder`则必须使用`go`以及`goNamed`方法进行显示
     ///
     /// 如果已经存在路由, 则会替换旧路由信息。简单通过路由`path`判断两个路由是否相同
     ///
-    /// displayAction一般用于匹配成功之后, 非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
+    /// displayBuilder一般用于匹配成功之后, 非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
     ///
     /// - Parameters:
     ///   - path: 要注册的路由path
     ///   - name: 路由名称
     ///   - builder: 构建路由的`controller`指向
+    ///   - displayBuilder: 构建+显示路由的`controller`指向。一般用于匹配成功之后,
+    ///     非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
     ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    ///   - displayAction: 匹配成功之后的非手动显示逻辑。一般用于匹配成功之后,
-    ///    非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
+    ///
     /// ```
-    /// displayAction: { sourceController, destController, state in
-    ///    sourceController.navigationController?.pushViewController(viewController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    sourceController.navigationController?.pushViewController(vc, animated: true)
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    matchController.modalPresentationStyle = .fullScreen
-    ///    sourceController.present(viewController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    vc.modalPresentationStyle = .fullScreen
+    ///    sourceController.present(vc, animated: true)
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    UIApplication.shared.keyWindow?.rootViewController = matchController
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    UIApplication.shared.keyWindow?.rootViewController = vc
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    matchController.modalPresentationStyle = .custom
-    ///    matchController.transitioningDelegate = xxx
-    ///    sourceController.present(matchController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    vc.modalPresentationStyle = .custom
+    ///    vc.transitioningDelegate = xxx
+    ///    sourceController.present(vc, animated: true)
+    ///    return vc
     /// }
     /// ```
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, interceptor: (any FJRouteInterceptor)? = nil, displayAction: FJRoute.DisplayAction? = nil) async throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor, displayAction: displayAction)
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, displayBuilder: FJRoute.DisplayBuilder? = nil, interceptor: (any FJRouteInterceptor)? = nil) async throws {
+        let route = try FJRoute(path: path, name: name, builder: builder, displayBuilder: displayBuilder, interceptor: interceptor)
         await store.addRoute(route)
     }
     
     /// 通过path注册路由
     ///
-    /// 注意:`builder`和`guards`必须至少提供一项, 否则注册失败
+    /// 注意:`builder`、`displayBuilder`和`interceptor`, 否则注册失败。如果提供了`displayBuilder`则必须使用`go`以及`goNamed`方法进行显示
     ///
     /// 如果已经存在路由, 则会替换旧路由信息。简单通过路由`path`判断两个路由是否相同
     ///
@@ -87,31 +96,41 @@ extension FJRouter {
     ///   - path: 要注册的路由path
     ///   - name: 路由名称
     ///   - builder: 构建路由的`controller`指向
-    ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    ///   - displayAction: 匹配成功之后的非手动显示逻辑。一般用于匹配成功之后,
+    ///   - displayBuilder: 构建+显示路由的`controller`指向。一般用于匹配成功之后,
     ///    非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
+    ///
+    ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
+    ///
     /// ```
-    /// displayAction: { sourceController, destController, state in
-    ///    sourceController.navigationController?.pushViewController(viewController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    sourceController.navigationController?.pushViewController(vc, animated: true)
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    matchController.modalPresentationStyle = .fullScreen
-    ///    sourceController.present(viewController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    vc.modalPresentationStyle = .fullScreen
+    ///    sourceController.present(vc, animated: true)
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    UIApplication.shared.keyWindow?.rootViewController = matchController
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    UIApplication.shared.keyWindow?.rootViewController = vc
+    ///    return vc
     /// }
     ///
-    /// displayAction: { sourceController, destController, state in
-    ///    matchController.modalPresentationStyle = .custom
-    ///    matchController.transitioningDelegate = xxx
-    ///    sourceController.present(matchController, animated: true)
+    /// displayBuilder: { sourceController, state in
+    ///    let vc = UIViewController()
+    ///    vc.modalPresentationStyle = .custom
+    ///    vc.transitioningDelegate = xxx
+    ///    sourceController.present(vc, animated: true)
+    ///    return vc
     /// }
     /// ```
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, interceptor: (any FJRouteInterceptor)? = nil, displayAction: FJRoute.DisplayAction? = nil) throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor, displayAction: displayAction)
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.PageBuilder?, displayBuilder: FJRoute.DisplayBuilder? = nil, interceptor: (any FJRouteInterceptor)? = nil) throws {
+        let route = try FJRoute(path: path, name: name, builder: builder, displayBuilder: displayBuilder, interceptor: interceptor)
         Task {
             await store.addRoute(route)
         }
@@ -250,7 +269,7 @@ extension FJRouter {
     
     /// 导航至对应路由路径控制器。
     ///
-    /// 会优先调用路由的`displayAction`方法; 若是`displayAction`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
     ///
     /// - Parameters:
     ///   - location: 路由路径
@@ -266,6 +285,9 @@ extension FJRouter {
     }
     
     /// 导航至对应路由路径控制器
+    ///
+    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -278,6 +300,9 @@ extension FJRouter {
     }
     
     /// 导航至对应路由名称控制器
+    ///
+    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -293,6 +318,9 @@ extension FJRouter {
     }
     
     /// 导航至对应路由名称控制器
+    ///
+    /// 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
