@@ -46,7 +46,7 @@ public struct FJRoute: Sendable {
     ///   - displayBuilder: 构建+显示路由的`controller`指向
     ///   - interceptor: 路由拦截器
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws {
+    public init(path: String, name: String? = nil, builder: Builder?, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws(FJRoute.CreateError) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
@@ -160,7 +160,7 @@ extension FJRoute {
 }
 
 extension FJRoute {
-    public enum CreateError: Error, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+    public enum CreateError: Error, Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
         case emptyPath
         case emptyName
         case noPageBuilder
@@ -172,7 +172,7 @@ extension FJRoute {
             case .emptyName:
                 return "FJRoute name cannot be empty"
             case .noPageBuilder:
-                return "FJRoute builder or guards must be provided"
+                return "FJRoute builder or interceptor must be provided"
             }
         }
         

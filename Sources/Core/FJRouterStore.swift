@@ -42,11 +42,30 @@ extension FJRouterStore {
     /// - Parameters:
     ///   - url: 准备查找的`url`
     ///   - extra: 携带的参数
+    ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
-    func match(url: URL, extra: Any?) async -> FJRouteMatchList {
+    func match(url: URL, extra: Any?, ignoreError: Bool) async throws(FJRouter.MatchError) -> FJRouteMatchList {
         let result = findMatch(url: adjustUrl(url), extra: extra)
         let final = await redirect(initialMatches: result)
-        return final
+        switch final.result {
+        case .success(let ms):
+            if ms.isEmpty && ignoreError {
+                throw .notFind
+            }
+            return final
+        case .error(let err):
+            if !ignoreError {
+                return final
+            }
+            switch err {
+            case .empty:
+                throw .notFind
+            case .redirectLimit(let desc):
+                throw .redirectLimit(desc: desc)
+            case .loopRedirect(let desc):
+                throw .loopRedirect(desc: desc)
+            }
+        }
     }
     
     /// 通过路由名称、路由参数、查询参数组装路由路径
@@ -62,10 +81,10 @@ extension FJRouterStore {
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     /// - Returns: 组装之后的路由路径
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) -> String? {
+    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let path = nameToPath[n] else {
-            return nil
+            throw .noExistName
         }
         let newParams = params.reduce([String: String]()) { partialResult, pairs in
             var f = partialResult
@@ -82,7 +101,7 @@ extension FJRouterStore {
             cop?.queryItems = queryItems
         }
         guard let final = cop?.string else {
-            return nil
+            throw .urlConvert
         }
         guard final.count > 1 && final.hasSuffix("/") else {
             return final
@@ -161,13 +180,8 @@ private extension FJRouterStore {
             let newRedirectHistory = try addRedirect(history: redirectHistory, newMatch: newMatch)
             return await tryRedirect(prevMatchList: newMatch, redirectHistory: newRedirectHistory)
         } catch {
-            if let err = error as? FJRouteMatchList.MatchError {
-                let errorMatch = FJRouteMatchList(error: err, url: prevMatchList.url, extra: nil)
-                return (errorMatch, [])
-            } else {
-                let errorMatch = FJRouteMatchList(error: .empty, url: prevMatchList.url, extra: nil)
-                return (errorMatch, [])
-            }
+            let errorMatch = FJRouteMatchList(error: error, url: prevMatchList.url, extra: nil)
+            return (errorMatch, [])
         }
     }
     
@@ -189,12 +203,12 @@ private extension FJRouterStore {
         return redirectLocation
     }
     
-    func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws -> [FJRouteMatchList] {
+    func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws(FJRouteMatchList.MatchError) -> [FJRouteMatchList] {
         var newRedirectHistory = history
         newRedirectHistory.append(newMatch)
         if history.count >= redirectLimit {
             let desc = newRedirectHistory.map({ $0.url.absoluteString }).joined(separator: " => ")
-            throw FJRouteMatchList.MatchError.exceedRedirectLimit(desc: desc)
+            throw FJRouteMatchList.MatchError.redirectLimit(desc: desc)
         }
         if history.contains(where: { $0.isSameOutExtra(with: newMatch) }) {
             let desc = newRedirectHistory.map({ $0.url.absoluteString }).joined(separator: " => ")

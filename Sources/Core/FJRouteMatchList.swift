@@ -123,7 +123,7 @@ extension FJRouteMatchList {
         }
         
         var isLimit: Bool {
-            guard case .error(let matchError) = self, case .exceedRedirectLimit = matchError else {
+            guard case .error(let matchError) = self, case .redirectLimit = matchError else {
                 return false
             }
             return true
@@ -134,7 +134,7 @@ extension FJRouteMatchList {
         /// 匹配为空
         case empty
         /// 重定向次数超出限制
-        case exceedRedirectLimit(desc: String)
+        case redirectLimit(desc: String)
         /// 循环重定向
         case loopRedirect(desc: String)
         
@@ -142,15 +142,15 @@ extension FJRouteMatchList {
             switch (lhs, rhs) {
             case (.empty, .empty):
                 return true
-            case let (.exceedRedirectLimit(desc: ld), .exceedRedirectLimit(desc: rd)):
+            case let (.redirectLimit(desc: ld), .redirectLimit(desc: rd)):
                 return ld == rd
             case let (.loopRedirect(desc: ld), .loopRedirect(desc: rd)):
                 return ld == rd
-            case (.empty, .exceedRedirectLimit), (.exceedRedirectLimit, .empty):
+            case (.empty, .redirectLimit), (.redirectLimit, .empty):
                 return false
             case (.empty, .loopRedirect), (.loopRedirect, .empty):
                 return false
-            case (.exceedRedirectLimit, .loopRedirect), (.loopRedirect, .exceedRedirectLimit):
+            case (.redirectLimit, .loopRedirect), (.loopRedirect, .redirectLimit):
                 return false
             }
         }
@@ -170,7 +170,7 @@ extension FJRouteMatchList {
         }
         
         var isLimit: Bool {
-            if case .exceedRedirectLimit = self {
+            if case .redirectLimit = self {
                 return true
             }
             return false
@@ -180,7 +180,7 @@ extension FJRouteMatchList {
             switch self {
             case .empty:
                 return "no routes"
-            case .exceedRedirectLimit(let desc):
+            case .redirectLimit(let desc):
                 return "too many redirects \(desc)"
             case .loopRedirect(let desc):
                 return "redirect loop detected \(desc)"

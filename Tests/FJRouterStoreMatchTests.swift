@@ -8,7 +8,7 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig()
         let p = "/details"
         let url = URL(string: p)!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         #expect(!result.isError)
         #expect(result.fullPath == p)
         #expect(result.url == url)
@@ -22,7 +22,7 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig()
         let p = "/detail"
         let url = URL(string: p)!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         #expect(result.isError)
         #expect(result.result == .error(.empty))
         #expect(result.fullPath == "")
@@ -36,7 +36,7 @@ struct FJRouterStoreMatchTests {
         })
         let p = "/show/123"
         let url = URL(string: p)!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         #expect(!result.isError)
         #expect(result.url == url)
         #expect(result.fullPath ==  "/show/:id")
@@ -52,7 +52,7 @@ struct FJRouterStoreMatchTests {
         })
         let p = "/show/123"
         let url = URL(string: p)!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         let rp = "/pages/:id"
         let rurl = "/pages/78"
         #expect(!result.isError)
@@ -68,7 +68,7 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig()
         let p = "/a/b/c/d"
         let url = URL(string: p)!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         let rp = "/details"
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
@@ -90,7 +90,7 @@ struct FJRouterStoreMatchTests {
             await config.addRoute(r)
         })
         let url = URL(string: "/w/x/y/z")!
-        let result = await config.match(url: url, extra: 123)
+        let result = try await config.match(url: url, extra: 123, ignoreError: false)
         let rp = "/a/b/c"
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
@@ -111,7 +111,7 @@ struct FJRouterStoreMatchTests {
             ])
             await config.addRoute(r)
         })
-        let result = await config.match(url: URL(string: "/w/x/y/z")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/w/x/y/z")!, extra: 123, ignoreError: false)
         let rp = "/a/b/f"
         #expect(result.isError)
         #expect(result.result == .error(.empty))
@@ -135,7 +135,7 @@ struct FJRouterStoreMatchTests {
             let r3 = try! FJRoute(path: "/login", builder: self._builder)
             await config.addRoute(r3)
         })
-        let result = await config.match(url: URL(string: "/user/settings/reset")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
         let rp = "/login"
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
@@ -160,7 +160,7 @@ struct FJRouterStoreMatchTests {
             let r3 = try! FJRoute(path: "/login", builder: self._builder)
             await config.addRoute(r3)
         })
-        let result = await config.match(url: URL(string: "/user/settings/reset")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
         let rp = "/logine"
         #expect(result.isError)
         #expect(result.url == URL(string: rp)!)
@@ -181,7 +181,7 @@ struct FJRouterStoreMatchTests {
             ])
             await config.addRoute(r2)
         })
-        let result = await config.match(url: URL(string: "/user/settings/reset")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
         #expect(result.isError)
         #expect(result.result.isLoop)
         #expect(result.url == URL(string: "/user/settings/reset"))
@@ -211,7 +211,7 @@ struct FJRouterStoreMatchTests {
             await config.addRoute(r5)
             await config.setRedirectLimit(50)
         })
-        let result = await config.match(url: URL(string: "/user/settings/reset")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
         #expect(result.isError)
         #expect(result.result.isLoop)
         #expect(result.url == URL(string: "/pkuser/pages/detail"))
@@ -241,7 +241,7 @@ struct FJRouterStoreMatchTests {
             await config.addRoute(r5)
             await config.setRedirectLimit(3)
         })
-        let result = await config.match(url: URL(string: "/user/settings/reset")!, extra: 123)
+        let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
         #expect(result.isError)
         #expect(result.result.isLimit)
         #expect(result.url == URL(string: "/pkuser/display"))
