@@ -7,6 +7,17 @@
 
 import UIKit
 
+/// 路由
+///
+///     注意:初始化的`builder`和`interceptor`参数必须至少提供一项, 否则初始化失败
+///
+///     参数:
+///     - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
+///     - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
+///     - builder: 构建路由的`controller`指向
+///     - displayBuilder: 构建+显示路由的`controller`指向
+///     - interceptor: 路由拦截器
+///     - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
 public struct FJRoute: Sendable {
     /// 路由的名称
     ///
