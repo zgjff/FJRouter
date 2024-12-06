@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal struct FJPathUtils: @unchecked Sendable {
+internal struct FJPathUtils: Sendable {
     internal static let `default` = FJPathUtils()
     private let parameterRegExp: NSRegularExpression
     private init() {

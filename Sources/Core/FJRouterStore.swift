@@ -193,7 +193,7 @@ private extension FJRouterStore {
             return nil
         }
         let state = FJRouterState(matches: matchList)
-        guard let redirectLocation = await interceptor.redirectRoute(state: state) else {
+        guard let redirectLocation = await interceptor.redirectRoute(state: state).redirectLocation else {
             return nil
         }
         let prevLocation = matchList.url.absoluteString

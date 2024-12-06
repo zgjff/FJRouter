@@ -32,7 +32,7 @@ struct FJRouterStoreMatchTests {
     
     @Test func testSuccessDoesNotRedirectNoChildHasRedirect() async throws {
         let config = await createConfig(action: { config in
-            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in nil })))
+            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in .none })))
         })
         let p = "/show/123"
         let url = URL(string: p)!
@@ -48,7 +48,7 @@ struct FJRouterStoreMatchTests {
     
     @Test func testSuccessRedirectNoChildHasRedirect() async throws {
         let config = await createConfig(action: { config in
-            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in "/pages/78" })))
+            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in .routeLoc("/pages/78") })))
         })
         let p = "/show/123"
         let url = URL(string: p)!
@@ -83,7 +83,7 @@ struct FJRouterStoreMatchTests {
             let r = try! FJRoute(path: "/w", builder: _builder, routes: [
                 try! FJRoute(path: "x", builder: _builder, routes: [
                     try! FJRoute(path: "y", builder: _builder, routes: [
-                        try! FJRoute(path: "z", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/a/b/c" }))
+                        try! FJRoute(path: "z", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/a/b/c") }))
                     ])
                 ])
             ])
@@ -105,7 +105,7 @@ struct FJRouterStoreMatchTests {
             let r = try! FJRoute(path: "/w", builder: _builder, routes: [
                 try! FJRoute(path: "x", builder: _builder, routes: [
                     try! FJRoute(path: "y", builder: _builder, routes: [
-                        try! FJRoute(path: "z", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/a/b/f" }))
+                        try! FJRoute(path: "z", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/a/b/f") }))
                     ])
                 ])
             ])
@@ -124,12 +124,12 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
                 FJRoute(path: "settings", builder: self._builder, routes: [
-                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r1)
             let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
-                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/login" }))
+                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/login") }))
             ])
             await config.addRoute(r2)
             let r3 = try! FJRoute(path: "/login", builder: self._builder)
@@ -149,12 +149,12 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
                 FJRoute(path: "settings", builder: self._builder, routes: [
-                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r1)
             let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
-                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/logine" }))
+                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/logine") }))
             ])
             await config.addRoute(r2)
             let r3 = try! FJRoute(path: "/login", builder: self._builder)
@@ -172,12 +172,12 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
                 FJRoute(path: "settings", builder: self._builder, routes: [
-                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r1)
             let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
-                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/user/settings/reset" }))
+                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/user/settings/reset") }))
             ])
             await config.addRoute(r2)
         })
@@ -191,21 +191,21 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
                 FJRoute(path: "settings", builder: self._builder, routes: [
-                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r1)
             let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
-                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/details" }))
+                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/details") }))
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/display" }))
+            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/display") }))
             await config.addRoute(r3)
-            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/pages/detail" }))
+            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/pages/detail") }))
             await config.addRoute(r4)
             let r5 = try! FJRoute(path: "/pkuser", builder: self._builder, routes: [
                 FJRoute(path: "pages", builder: self._builder, routes: [
-                    FJRoute(path: "detail", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "detail", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r5)
@@ -221,21 +221,21 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
                 FJRoute(path: "settings", builder: self._builder, routes: [
-                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "reset", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r1)
             let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
-                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/details" }))
+                FJRoute(path: "display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/details") }))
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/display" }))
+            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/display") }))
             await config.addRoute(r3)
-            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/pkuser/pages/detail" }))
+            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/pkuser/pages/detail") }))
             await config.addRoute(r4)
             let r5 = try! FJRoute(path: "/pkuser", builder: self._builder, routes: [
                 FJRoute(path: "pages", builder: self._builder, routes: [
-                    FJRoute(path: "detail", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/info/display" }))
+                    FJRoute(path: "detail", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/info/display") }))
                 ])
             ])
             await config.addRoute(r5)
@@ -262,7 +262,7 @@ extension FJRouterStoreMatchTests {
         let r2 = try! FJRoute(path: "/a", builder: _builder, routes: [
             try! FJRoute(path: "b", builder: _builder, routes: [
                 try! FJRoute(path: "c", builder: _builder, routes: [
-                    try! FJRoute(path: "/d", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in "/details" }))
+                    try! FJRoute(path: "/d", builder: _builder, interceptor: FJRouteCommonInterceptor(redirect: { _ in .routeLoc("/details") }))
                 ])
             ])
         ])
