@@ -14,8 +14,6 @@ extension FJRouter {
         case errorLocUrl
         /// 没有发现路由
         case notFind
-        /// 对应的路由没有builder
-        case noBuilder
         /// 重定向次数超出限制
         case redirectLimit(desc: String)
         /// 循环重定向
@@ -33,8 +31,6 @@ extension FJRouter.MatchError: Equatable {
         case (.errorLocUrl, .errorLocUrl):
             return true
         case (.notFind, .notFind):
-            return true
-        case (.noBuilder, .noBuilder):
             return true
         case let (.redirectLimit(ld), .redirectLimit(rd)):
             return ld == rd
@@ -57,8 +53,6 @@ extension FJRouter.MatchError: CustomStringConvertible, CustomDebugStringConvert
             return "Search loc url is correct URL"
         case .notFind:
             return "Does not find any route"
-        case .noBuilder:
-            return "Mathed Route has no builder"
         case .redirectLimit(desc: let desc):
             return desc
         case .loopRedirect(desc: let desc):

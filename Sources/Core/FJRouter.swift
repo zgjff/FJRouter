@@ -19,12 +19,16 @@ final public class FJRouter: Sendable {
 extension FJRouter {
     /// 注册路由
     ///
+    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
+    ///
     /// - Parameter route: 路由
     public func registerRoute(_ route: FJRoute) async {
         await store.addRoute(route)
     }
     
     /// 注册路由
+    ///
+    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
     ///
     /// - Parameter route: 路由
     public func registerRoute(_ route: FJRoute) {
@@ -36,6 +40,8 @@ extension FJRouter {
     /// 通过path注册路由
     ///
     /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
+    ///
+    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
     ///
     /// - Parameters:
     ///   - path: 要注册的路由path
@@ -51,6 +57,8 @@ extension FJRouter {
     /// 通过path注册路由
     ///
     /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
+    ///
+    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
     ///
     /// - Parameters:
     ///   - path: 要注册的路由path
@@ -146,7 +154,7 @@ extension FJRouter {
         if let destvc = await core.viewController(for: match) {
             return destvc
         }
-        throw .noBuilder
+        throw .notFind
     }
     
     /// 通过路由路径获取对应的控制器

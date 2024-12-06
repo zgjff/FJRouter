@@ -115,6 +115,10 @@ private extension FJRouterStore {
         for route in childRoutes {
             let fullPath = FJPathUtils.default.concatenatePaths(parentPath: parentFullPath, childPath: route.path)
             if let name = route.name {
+                if nameToPath.keys.contains(name) {
+                    let prefullpath = nameToPath[name]
+                    assert(prefullpath == fullPath, "不能添加相同的路由名称: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
+                }
                 nameToPath.updateValue(fullPath, forKey: name)
             }
             if !route.routes.isEmpty {
