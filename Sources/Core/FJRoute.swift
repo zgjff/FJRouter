@@ -57,7 +57,7 @@ public struct FJRoute: Sendable {
     ///   - displayBuilder: 构建+显示路由的`controller`指向
     ///   - interceptor: 路由拦截器
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws(FJRoute.CreateError) {
+    public init(path: String, name: String? = nil, builder: Builder?, interceptor: (any FJRouteInterceptor)? = nil, routes: [FJRoute] = []) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
