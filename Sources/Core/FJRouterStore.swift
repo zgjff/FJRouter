@@ -8,7 +8,7 @@
 import Foundation
 
 actor FJRouterStore {
-    private var routes: Set<FJRoute> = []
+    private var routes: [FJRoute] = []
     private var redirectLimit: UInt = 5
     private var nameToPath: [String: String] = [:]
 }
@@ -16,11 +16,9 @@ actor FJRouterStore {
 extension FJRouterStore {
     /// 添加新路由
     ///
-    /// 如果已经存在路由, 则会替换旧路由信息。简单通过路由`path`判断两个路由是否相同
-    ///
     /// - Parameter route: 要添加的路由
     func addRoute(_ route: FJRoute) {
-        routes.update(with: route)
+        routes.append(route)
         beginSaveRouteNamePath(parentFullPath: "", childRoutes: [route])
     }
     
