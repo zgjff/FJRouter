@@ -140,12 +140,12 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func go(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func go(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
         let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-        core.go(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
+        await core.go(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
     }
     
     /// 导航至对应路由路径控制器
@@ -158,7 +158,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func go(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func go(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await go(location: location, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
@@ -176,7 +176,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
             try await go(location: loc, extra: extra, from: sourceController, ignoreError: ignoreError)
@@ -203,7 +203,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await goNamed(name, params: params, queryParams: queryParams, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
@@ -217,12 +217,12 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func push(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func push(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
         let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-        core.push(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
+        await core.push(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
     }
     
     /// `push`到对应路由路径控制器
@@ -233,7 +233,7 @@ extension FJRouter {
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - extra: 携带的参数
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func push(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func push(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await push(location: location, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
@@ -249,7 +249,7 @@ extension FJRouter {
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     ///   - extra: 携带的参数
-    @MainActor public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
             try await push(location: loc, extra: extra, from: sourceController, ignoreError: ignoreError)
@@ -274,7 +274,7 @@ extension FJRouter {
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     ///   - extra: 携带的参数
-    @MainActor public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func pushNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await pushNamed(name, params: params, queryParams: queryParams, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
@@ -288,12 +288,12 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func present(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func present(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
         let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-        core.present(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
+        await core.present(matchList: match, sourceController: sourceController, ignoreError: ignoreError, animated: true)
     }
     
     /// present到对应路由路径控制器
@@ -304,7 +304,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func present(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func present(location: String, extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await present(location: location, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
@@ -320,7 +320,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
+    public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) async throws {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
             try await present(location: loc, extra: extra, from: sourceController, ignoreError: ignoreError)
@@ -345,7 +345,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - sourceController: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    @MainActor public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
+    public func presentNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from sourceController: UIViewController? = nil, ignoreError: Bool = false) throws {
         Task {
             try await presentNamed(name, params: params, queryParams: queryParams, extra: extra, from: sourceController, ignoreError: ignoreError)
         }
