@@ -62,7 +62,13 @@ public struct FJRouteCommonInterceptor: @unchecked Sendable, FJRouteInterceptor 
     public func redirectRoute(state: FJRouterState) async throws -> FJRoute.InterceptorDestination {
         do {
             let dest = try await redirect(state)
-            return dest
+            switch dest {
+            case .none:
+                return .none
+            case .routeLoc(let loc):
+                let floc = loc.trimmingCharacters(in: .whitespacesAndNewlines)
+                return floc.isEmpty ? .none : .routeLoc(floc)
+            }
         } catch {
             return .none
         }

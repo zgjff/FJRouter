@@ -88,31 +88,6 @@ extension FJRouter {
         try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
     }
     
-    /// 通过路由名称、路由参数、查询参数组装路由路径. 强烈建议在使用路由的时候使用此方法来组装路由路径。
-    ///
-    /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-    ///
-    /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    ///   - completion: 回调
-    public func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:], completion: @Sendable @escaping (_ result: Result<String, FJRouter.ConvertError>) -> ()) {
-        Task {
-            do {
-                let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-                completion(.success(loc))
-            } catch {
-                if let err = error as? FJRouter.ConvertError {
-                    completion(.failure(err))
-                } else {
-                    completion(.failure(.cancelled))
-                }
-            }
-        }
-    }
-    
     /// 设置允许重定向的次数
     /// - Parameter limit: 次数
     public func setRedirectLimit(_ limit: UInt) {
@@ -157,26 +132,6 @@ extension FJRouter {
         throw FJRouter.MatchError.noBuilder
     }
     
-    /// 通过路由路径获取对应的控制器
-    /// - Parameters:
-    ///   - location: 路由路径
-    ///   - extra: 携带的参数
-    ///   - completion: 回调获取的控制器
-    public func viewController(forLocation location: String, extra: (any Sendable)? = nil, completion: @Sendable @escaping (_ result: Result<UIViewController, FJRouter.MatchError>) -> ()) {
-        Task {
-            do {
-                let destvc = try await viewController(forLocation: location, extra: extra)
-                completion(.success(destvc))
-            } catch {
-                if let err = error as? FJRouter.MatchError {
-                    completion(.failure(err))
-                } else {
-                    completion(.failure(MatchError.cancelled))
-                }
-            }
-        }
-    }
-    
     /// 通过路由名称获取对应的控制器
     /// - Parameters:
     ///   - name: 路由名称
@@ -196,28 +151,6 @@ extension FJRouter {
                 throw err
             } else {
                 throw FJRouter.MatchError.cancelled
-            }
-        }
-    }
-    
-    /// 通过路由名称获取对应的控制器
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 查询参数
-    ///   - extra: 携带的参数
-    ///   - completion: 回调
-    public func viewController(forName name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, completion: @Sendable @escaping (_ result: Result<UIViewController, FJRouter.MatchError>) -> ()) {
-        Task {
-            do {
-                let destvc = try await viewController(forName: name, params: params, queryParams: queryParams)
-                completion(.success(destvc))
-            } catch {
-                if let err = error as? FJRouter.MatchError {
-                    completion(.failure(err))
-                } else {
-                    completion(.failure(.cancelled))
-                }
             }
         }
     }

@@ -14,7 +14,7 @@ extension FJRouter {
         case errorLocUrl
         /// 没有发现路由
         case notFind
-        /// 对应的路由没有builder: 出现在构建路由的时候没有builder参数, 只有interceptor参数, 且interceptor协议返回了none
+        /// 对应的路由没有builder: 出现在构建路由的时候没有`builder`参数, 只有`interceptor`参数, 且`interceptor`协议返回了`none`
         case noBuilder
         /// 重定向次数超出限制
         case redirectLimit(desc: String)
