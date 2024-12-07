@@ -9,7 +9,7 @@ import Foundation
 /// 路由拦截器协议
 public protocol FJRouteInterceptor: Sendable {
     /// 指向需要重定向的路由。
-    func redirectRoute(state: FJRouterState) async -> FJRoute.InterceptorDestination
+    func redirectRoute(state: FJRouterState) async throws -> FJRoute.InterceptorDestination
 }
 
 extension FJRoute {
@@ -50,16 +50,21 @@ extension FJRoute {
 
 /// 通用路由拦截器
 public struct FJRouteCommonInterceptor: @unchecked Sendable, FJRouteInterceptor {
-    private let redirect: (_ state: FJRouterState) async -> FJRoute.InterceptorDestination
+    private let redirect: (_ state: FJRouterState) async throws -> FJRoute.InterceptorDestination
     
     /// 初始化方法
     /// - Parameters:
     ///   - redirect: 指向需要重定向的路由
-    public init(redirect: @escaping (_ state: FJRouterState) async -> FJRoute.InterceptorDestination) {
+    public init(redirect: @escaping (_ state: FJRouterState) async throws -> FJRoute.InterceptorDestination) {
         self.redirect = redirect
     }
     
-    public func redirectRoute(state: FJRouterState) async -> FJRoute.InterceptorDestination {
-        await redirect(state)
+    public func redirectRoute(state: FJRouterState) async throws -> FJRoute.InterceptorDestination {
+        do {
+            let dest = try await redirect(state)
+            return dest
+        } catch {
+            return .none
+        }
     }
 }
