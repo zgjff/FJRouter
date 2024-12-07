@@ -26,17 +26,6 @@ extension FJRouter {
         await store.addRoute(route)
     }
     
-    /// 注册路由
-    ///
-    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
-    ///
-    /// - Parameter route: 路由
-    public func registerRoute(_ route: FJRoute) {
-        Task {
-            await registerRoute(route)
-        }
-    }
-    
     /// 通过path注册路由
     ///
     /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
@@ -52,24 +41,6 @@ extension FJRouter {
     public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, interceptor: (any FJRouteInterceptor)? = nil) async throws {
         let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor)
         await store.addRoute(route)
-    }
-    
-    /// 通过path注册路由
-    ///
-    /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
-    ///
-    /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
-    ///
-    /// - Parameters:
-    ///   - path: 要注册的路由path
-    ///   - name: 路由名称
-    ///   - builder: 构建路由的`controller`指向方式
-    ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, interceptor: (any FJRouteInterceptor)? = nil) throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor)
-        Task {
-            await store.addRoute(route)
-        }
     }
     
     /// 通过路由名称、路由参数、查询参数组装路由路径
@@ -90,23 +61,27 @@ extension FJRouter {
     
     /// 设置允许重定向的次数
     /// - Parameter limit: 次数
-    public func setRedirectLimit(_ limit: UInt) {
-        Task {
-            await store.setRedirectLimit(limit)
-        }
+    public func setRedirectLimit(_ limit: UInt) async {
+        await store.setRedirectLimit(limit)
     }
     
     /// 设置路由匹配失败时的页面
     /// - Parameter builder: 失败时的页面创建逻辑
-    public func setErrorBuilder(_ builder: @escaping (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)) {
-        core.errorBuilder = builder
+    public func setErrorBuilder(_ builder: @escaping (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)) async {
+        await withCheckedContinuation { continuation in
+            self.core.errorBuilder = builder
+            continuation.resume()
+        }
     }
     
     /// 设置获取当前控制器的最上层控制器
     ///
     /// 如果不使用框架提供的`apptopController`,可以提供自己实现的`apptopController`
-    public func setTopController(action: @escaping @MainActor (_ current: UIViewController?) -> UIViewController?) {
-        core.apptopController = action
+    public func setTopController(action: @escaping @MainActor (_ current: UIViewController?) -> UIViewController?) async {
+        await withCheckedContinuation { continuation in
+            self.core.apptopController = action
+            continuation.resume()
+        }
     }
 }
 
