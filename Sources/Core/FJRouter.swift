@@ -154,7 +154,7 @@ extension FJRouter {
         if let destvc = await core.viewController(for: match) {
             return destvc
         }
-        throw FJRouter.MatchError .notFind
+        throw FJRouter.MatchError.noBuilder
     }
     
     /// 通过路由路径获取对应的控制器
