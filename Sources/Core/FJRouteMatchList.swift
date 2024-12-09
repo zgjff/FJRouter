@@ -19,6 +19,21 @@ struct FJRouteMatchList: @unchecked Sendable {
     /// 与`url`匹配的完整路径
     let fullPath: String
     
+    /// url中携带的query参数
+    var queryParams: [String: String] {
+        guard let cp = URLComponents(string: url.absoluteString) else {
+            return [:]
+        }
+        let result = cp.queryItems?.reduce([String: String](), { partialResult, item in
+            var result = partialResult
+            if let v = item.value {
+                result.updateValue(v, forKey: item.name)
+            }
+            return result
+        })
+        return result ?? [:]
+    }
+    
     /// 是否错误
     var isError: Bool {
         switch result {

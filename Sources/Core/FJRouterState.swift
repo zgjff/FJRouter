@@ -20,6 +20,8 @@ public struct FJRouterState: @unchecked Sendable {
     public let fullPath: String
     /// 匹配到的参数
     public let pathParameters: [String: String]
+    /// 匹配到的参数
+    public let queryParameters: [String: String]
     /// 携带的额外内容
     public let extra: Any?
     public let route: FJRoute?
@@ -33,6 +35,7 @@ public struct FJRouterState: @unchecked Sendable {
         name = nil
         fullPath = matches.fullPath
         pathParameters = matches.pathParameters
+        queryParameters = matches.queryParams
         extra = matches.extra
         route = matches.lastMatch?.route
         if case let .error(err) = matches.result {
@@ -47,6 +50,7 @@ public struct FJRouterState: @unchecked Sendable {
         matchedLocation = match.matchedLocation
         fullPath = matches.fullPath
         pathParameters = matches.pathParameters
+        queryParameters = matches.queryParams
         name = match.route.name
         path = match.route.path
         extra = matches.extra

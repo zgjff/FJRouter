@@ -6,16 +6,17 @@ import UIKit
 struct FJRouterStoreMatchTests {
     @Test func testSuccessNoChildNoRedirect() async throws {
         let config = await createConfig()
-        let p = "/details"
+        let p = "/details?p=1"
         let url = URL(string: p)!
         let result = try await config.match(url: url, extra: 123, ignoreError: false)
         #expect(!result.isError)
-        #expect(result.fullPath == p)
+        #expect(result.fullPath == "/details")
         #expect(result.url == url)
         #expect(result.extra as? Int == 123)
         #expect(result.lastMatch != nil)
-        #expect(result.lastMatch!.matchedLocation == p)
-        #expect(result.lastMatch!.route.path == p)
+        #expect(result.lastMatch!.matchedLocation == "/details")
+        #expect(result.lastMatch!.route.path == "/details")
+        #expect(result.queryParams == ["p": "1"])
     }
     
     @Test func testErrorNoChildNoRedirect() async throws {
@@ -34,7 +35,7 @@ struct FJRouterStoreMatchTests {
         let config = await createConfig(action: { config in
             await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in .none })))
         })
-        let p = "/show/123"
+        let p = "/show/123?name=haha&age=18"
         let url = URL(string: p)!
         let result = try await config.match(url: url, extra: 123, ignoreError: false)
         #expect(!result.isError)
@@ -42,15 +43,16 @@ struct FJRouterStoreMatchTests {
         #expect(result.fullPath ==  "/show/:id")
         #expect(result.extra as? Int == 123)
         #expect(result.pathParameters == ["id": "123"])
-        #expect(result.lastMatch?.matchedLocation == p)
+        #expect(result.lastMatch?.matchedLocation == "/show/123")
         #expect(result.lastMatch?.route.path == "/show/:id")
+        #expect(result.queryParams == ["name": "haha", "age": "18"])
     }
     
     @Test func testSuccessRedirectNoChildHasRedirect() async throws {
         let config = await createConfig(action: { config in
             await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, interceptor: FJRouteCommonInterceptor(redirect: { _  in .routeLoc("/pages/78") })))
         })
-        let p = "/show/123"
+        let p = "/show/123?name=haha&age=18"
         let url = URL(string: p)!
         let result = try await config.match(url: url, extra: 123, ignoreError: false)
         let rp = "/pages/:id"
@@ -62,11 +64,12 @@ struct FJRouterStoreMatchTests {
         #expect(result.pathParameters == ["id": "78"])
         #expect(result.lastMatch?.matchedLocation == rurl)
         #expect(result.lastMatch?.route.path == rp)
+        #expect(result.queryParams.isEmpty)
     }
     
     @Test func testSuccessHasChildHasRedirect() async throws {
         let config = await createConfig()
-        let p = "/a/b/c/d"
+        let p = "/a/b/c/d?name=haha&age=18"
         let url = URL(string: p)!
         let result = try await config.match(url: url, extra: 123, ignoreError: false)
         let rp = "/details"
@@ -76,6 +79,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.extra == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
         #expect(result.lastMatch?.route.path == rp)
+        #expect(result.queryParams.isEmpty)
     }
     
     @Test func testSuccessHasChildsHasRedirect() async throws {
