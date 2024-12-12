@@ -45,7 +45,8 @@ public struct FJRoute: Sendable {
     /// 构建路由方式
     public let builder: FJRoute.Builder?
     
-    /// 显示匹配路由控制器的方式
+    /// 显示匹配路由控制器的方式。只适用与适用go、goNamed进行跳转的方式;
+    /// 使用push、pushNamed、present、presentNamed时,此参数无任何意义
     public let animator: Animator?
 
     /// 路由拦截器

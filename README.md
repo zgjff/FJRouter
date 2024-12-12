@@ -31,61 +31,17 @@ pod 'FJRouter'
  
 > 路径`/user/:id/book/:bookId`, 可以解析出参数分别需要id, bookId, 可以匹配`/user/../book/...`的url, eg: `/user/123/book/456` and etc.
 
-#### 路由`builder`: 用于构建路由具体的控制器行为。此类型是个构建对应控制器的枚举类型: 包含只创建的`default`和自动创建并处理显示的`display`
+#### 路由`builder`: 用于构建路由的指向控制器。此类型是个构建对应控制器的枚举类型: 包含只创建的`default`和自动创建并处理显示的`display`
 ```swift
-/// 构建路由的`controller`构建器
-    public enum Builder: Sendable {
-        /// 默认构建方式: 只创建并返回路由的指向`controller`
-        ///
-        /// 注意不需要在必包内部处理`controller`的显示逻辑
-        ///
-        /// ```swift
-        /// builder: .default({ state in
-        ///    let vc = UIViewController()
-        ///    return vc
-        /// })
-        /// ```
-        case `default`(_ action: @MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
-        
-        /// 构建+展示构建方式: 创建, 并且需要在内部处理跳转逻辑并返回路由的指向`controller`。
-        /// 要配合路由的`go`或`goNamed`方法进行显示, 不支持手动调用`push`和`present`
-        ///
-        /// 就算是调用路由的`push`和`present`方法也不会跳转
-        ///
-        /// 注意一定要在必包内部处理`controller`的显示逻辑: push、present、rootController、自定义转场等等
-        ///
-        /// ```
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    sourceController.navigationController?.pushViewController(vc, animated: true)
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    vc.modalPresentationStyle = .fullScreen
-        ///    sourceController.present(vc, animated: true)
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    UIApplication.shared.keyWindow?.rootViewController = vc
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    vc.modalPresentationStyle = .custom
-        ///    vc.transitioningDelegate = xxx
-        ///    sourceController.present(vc, animated: true)
-        ///    return vc
-        /// })
-        /// ```
-        case display(_ action: @MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
-    }
+FJRoute(path: "/", name: "root", builder: { sourceController, state in
+    UINavigationController(rootViewController: ViewController())
+})
 ```
 
+#### 路由`animator`: 用于显示路由指向控制器的转场动画。
+> 只适用与适用go、goNamed进行跳转的方式, 使用push、pushNamed、present、presentNamed时,此参数无任何意义。
+
+> 框架内部已经内置了多种实现. `FJRoute.XXXXAnimator`
 
 
 #### 路由拦截器`redirect`: 这是一个路由拦截器协议, 具体要求如下：
@@ -93,7 +49,7 @@ pod 'FJRouter'
 /// 指向需要重定向的路由。
 ///
 /// 可以携带参数.eg, 目标路由是`/family/:fid`, 则需要完整传入`fid`, 即`/family/123`
-func redirectRoute(state: FJRouterState) async -> String
+func redirectRoute(state: FJRouterState) async throws -> String?
 ```
 框架已经提供了一个通用的拦截器实现`FJRouteCommonRedirector`
 
@@ -148,7 +104,7 @@ FJRouter.shared.presentNamed("login")
 ```
 
 #### `go`到匹配路由页面: 框架内部处理跳转到匹配路由页面的方式
-> 会优先调用路由的`displayBuilder`方法; 若是`displayBuilder`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+> 会优先调用路由的`animator`参数; 若是`animator`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
 
 ```swift 
 FJRouter.shared.go(location: "/login")
