@@ -15,9 +15,18 @@ import UIKit
 ///     - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
 ///     - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
 ///     - builder: 构建路由的`controller`指向
+///     - animator: 显示匹配路由控制器的方式
 ///     - redirect: 路由重定向
 ///     - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
 public struct FJRoute: Sendable {
+    /// 构建路由控制器
+    public typealias Builder = (@MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
+    
+    /// 显示路由指向控制器的转场动画
+    ///
+    /// 框架内部提供了多种内置实现: FJRoute.XXXXAnimator
+    public typealias Animator = (@MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator)
+    
     /// 路由的名称
     ///
     /// 如果赋值, 必须提供唯一的字符串名称, 且不能为空
@@ -35,6 +44,9 @@ public struct FJRoute: Sendable {
     
     /// 构建路由方式
     public let builder: FJRoute.Builder?
+    
+    /// 显示匹配路由控制器的方式
+    public let animator: Animator?
 
     /// 路由拦截器
     public let redirect: (any FJRouteRedirector)?
@@ -53,9 +65,10 @@ public struct FJRoute: Sendable {
     ///   - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
     ///   - builder: 构建路由的`controller`指向
+    ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, redirect: (any FJRouteRedirector)? = nil, routes: [FJRoute] = []) throws {
+    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: (any FJRouteRedirector)? = nil, routes: [FJRoute] = []) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
@@ -70,6 +83,7 @@ public struct FJRoute: Sendable {
         self.path = p
         self.name = n
         self.builder = builder
+        self.animator = animator
         self.redirect = redirect
         self.routes = routes
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
@@ -111,60 +125,6 @@ extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
     
     public var debugDescription: String {
         description
-    }
-}
-
-extension FJRoute {
-    /// 构建路由的`controller`构建器
-    public enum Builder: Sendable {
-        /// 默认构建方式: 只创建并返回路由的指向`controller`
-        ///
-        /// 注意不需要在必包内部处理`controller`的显示逻辑
-        ///
-        /// ```swift
-        /// builder: .default({ state in
-        ///    let vc = UIViewController()
-        ///    return vc
-        /// })
-        /// ```
-        case `default`(_ action: @MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
-        
-        /// 构建+展示构建方式: 创建, 并且需要在内部处理跳转逻辑并返回路由的指向`controller`。
-        /// 要配合路由的`go`或`goNamed`方法进行显示, 不支持手动调用`push`和`present`
-        ///
-        /// 就算是调用路由的`push`和`present`方法也不会跳转
-        ///
-        /// 注意一定要在必包内部处理`controller`的显示逻辑: push、present、rootController、自定义转场等等
-        ///
-        /// ```
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    sourceController.navigationController?.pushViewController(vc, animated: true)
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    vc.modalPresentationStyle = .fullScreen
-        ///    sourceController.present(vc, animated: true)
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    UIApplication.shared.keyWindow?.rootViewController = vc
-        ///    return vc
-        /// })
-        ///
-        /// builder: .display({ sourceController, state in
-        ///    let vc = UIViewController()
-        ///    vc.modalPresentationStyle = .custom
-        ///    vc.transitioningDelegate = xxx
-        ///    sourceController.present(vc, animated: true)
-        ///    return vc
-        /// })
-        /// ```
-        case display(_ action: @MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
     }
 }
 

@@ -6,13 +6,13 @@
 //
 
 import Foundation
-/// 路由拦截器协议
+/// 路由重定向协议
 public protocol FJRouteRedirector: Sendable {
     /// 指向需要重定向的路由路径。返回`nil`, 则代表不需要重定向
     func redirectRoute(state: FJRouterState) async throws -> String?
 }
 
-/// 通用路由拦截器
+/// 通用路由重定向
 public struct FJRouteCommonRedirector: @unchecked Sendable, FJRouteRedirector {
     private let redirect: (_ state: FJRouterState) async throws -> String?
     

@@ -27,17 +27,8 @@ extension FJRouterCore {
             return nil
         }
         let state = FJRouterState(matches: matchList, match: match)
-        switch match.route.builder {
-        case .default(let action):
-            let vc = action(state)
-            return vc
-        case .display(let action):
-            let tvc = apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            let vc = action(tvc, state)
-            return vc
-        case .none:
-            return nil
-        }
+        let tvc = apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+        return match.route.builder?(tvc, state)
     }
     
     @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
@@ -56,17 +47,15 @@ extension FJRouterCore {
                 return
             }
             let state = FJRouterState(matches: matchList, match: match)
-            
-            switch match.route.builder {
-            case .default(let action):
-                let destController = action(state)
-                private_go(to: destController, from: sourceController, animated: flag, isError: false)
-            case .display(let action):
-                let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-                _ = action(fromController, state)
-            case .none:
+            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+            guard let tovc = state.route?.builder?(fromController, state) else {
                 return
             }
+            guard let animator = state.route?.animator?(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state)) else {
+                private_go(to: tovc, from: sourceController, animated: flag, isError: false)
+                return
+            }
+            animator.startAnimatedTransitioning(from: fromController, to: tovc, state: state)
         }
     }
     
@@ -91,14 +80,8 @@ extension FJRouterCore {
             }
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
             let state = FJRouterState(matches: matchList, match: match)
-            switch match.route.builder {
-            case .default(let action):
-                let destController = action(state)
-                fromController?.navigationController?.pushViewController(destController, animated: flag)
-            case .display(let action):
-                _ = action(fromController, state)
-            case .none:
-                return
+            if let tovc = state.route?.builder?(fromController, state) {
+                fromController?.navigationController?.pushViewController(tovc, animated: flag)
             }
         }
     }
@@ -128,15 +111,8 @@ extension FJRouterCore {
             }
             let state = FJRouterState(matches: matchList, match: match)
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            switch match.route.builder {
-            case .default(let action):
-                let destController = action(state)
-                destController.modalPresentationStyle = .fullScreen
-                fromController?.present(destController, animated: flag)
-            case .display(let action):
-                _ = action(fromController, state)
-            case .none:
-                return
+            if let tovc = state.route?.builder?(fromController, state) {
+                fromController?.present(tovc, animated: flag)
             }
         }
     }
