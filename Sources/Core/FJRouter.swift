@@ -28,7 +28,7 @@ extension FJRouter {
     
     /// 通过path注册路由
     ///
-    /// 注意:`builder`和`interceptor`必须至少提供一项, 否则注册失败。
+    /// 注意:`builder`和`redirect`必须至少提供一项, 否则注册失败。
     ///
     /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
     ///
@@ -37,9 +37,9 @@ extension FJRouter {
     ///   - name: 路由名称
     ///   - builder: 构建路由的`controller`方式
     ///     非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
-    ///   - interceptor: 路由拦截器: 注意协议中`redirectRoute`方法不能返回空
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, interceptor: (any FJRouteInterceptor)? = nil) async throws {
-        let route = try FJRoute(path: path, name: name, builder: builder, interceptor: interceptor)
+    ///   - redirect: 路由重定向
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, redirect: (any FJRouteRedirector)? = nil) async throws {
+        let route = try FJRoute(path: path, name: name, builder: builder, redirect: redirect)
         await store.addRoute(route)
     }
     

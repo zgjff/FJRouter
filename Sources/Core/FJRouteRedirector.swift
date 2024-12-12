@@ -1,5 +1,5 @@
 //
-//  FJRouteInterceptor.swift
+//  FJRouteRedirector.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/11/21.
@@ -7,13 +7,13 @@
 
 import Foundation
 /// 路由拦截器协议
-public protocol FJRouteInterceptor: Sendable {
+public protocol FJRouteRedirector: Sendable {
     /// 指向需要重定向的路由路径。返回`nil`, 则代表不需要重定向
     func redirectRoute(state: FJRouterState) async throws -> String?
 }
 
 /// 通用路由拦截器
-public struct FJRouteCommonInterceptor: @unchecked Sendable, FJRouteInterceptor {
+public struct FJRouteCommonRedirector: @unchecked Sendable, FJRouteRedirector {
     private let redirect: (_ state: FJRouterState) async throws -> String?
     
     /// 初始化方法

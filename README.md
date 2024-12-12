@@ -88,14 +88,14 @@ pod 'FJRouter'
 
 
 
-#### 路由拦截器`interceptor`: 这是一个路由拦截器协议, 具体要求如下：
+#### 路由拦截器`redirect`: 这是一个路由拦截器协议, 具体要求如下：
 ```swift
 /// 指向需要重定向的路由。
 ///
 /// 可以携带参数.eg, 目标路由是`/family/:fid`, 则需要完整传入`fid`, 即`/family/123`
 func redirectRoute(state: FJRouterState) async -> String
 ```
-框架已经提供了一个通用的拦截器实现`FJRouteCommonInterceptor`
+框架已经提供了一个通用的拦截器实现`FJRouteCommonRedirector`
 
 
 #### 关联的子路由`routes`: 可以见同一个模块下的路由, 放在一起注册。
