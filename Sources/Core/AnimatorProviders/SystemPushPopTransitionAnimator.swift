@@ -131,7 +131,7 @@ fileprivate final class SystemPushPopTransition: UIPercentDrivenInteractiveTrans
     private weak var transitionContext: UIViewControllerContextTransitioning?
     deinit {
         // TODO: - swift 系统支持时打开
-        // gestureRecognizer.removeTarget(self, action: #selector(gestureRecongnizeDidUpdate(_:)))
+//         gestureRecognizer.removeTarget(self, action: #selector(gestureRecongnizeDidUpdate(_:)))
     }
     
     override func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {

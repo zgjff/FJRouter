@@ -11,10 +11,18 @@ import UIKit
 extension FJRoute {
     /// 设置app window的rootViewController
     public struct AppRootControllerAnimator: FJRouteAnimator {
-        public init() {}
+        private let useNavigationController: UINavigationController?
+        public init(navigationController useNavigationController: UINavigationController? = nil) {
+            self.useNavigationController = useNavigationController
+        }
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            UIApplication.shared.versionkKeyWindow?.rootViewController = toVC
+            if let useNavigationController {
+                useNavigationController.setViewControllers([toVC], animated: false)
+                UIApplication.shared.versionkKeyWindow?.rootViewController = useNavigationController
+            } else {
+                UIApplication.shared.versionkKeyWindow?.rootViewController = toVC
+            }
         }
     }
 }
