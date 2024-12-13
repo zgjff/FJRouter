@@ -13,13 +13,13 @@ public protocol FJRouteRedirector: Sendable {
 }
 
 /// 通用路由重定向
-public struct FJRouteCommonRedirector: @unchecked Sendable, FJRouteRedirector {
-    private let redirect: (_ state: FJRouterState) async throws -> String?
+public struct FJRouteCommonRedirector: Sendable, FJRouteRedirector {
+    private let redirect: @Sendable (_ state: FJRouterState) async throws -> String?
     
     /// 初始化方法
     /// - Parameters:
     ///   - redirect: 指向需要重定向的路由
-    public init(redirect: @escaping (_ state: FJRouterState) async throws -> String?) {
+    public init(redirect: @Sendable @escaping (_ state: FJRouterState) async throws -> String?) {
         self.redirect = redirect
     }
     

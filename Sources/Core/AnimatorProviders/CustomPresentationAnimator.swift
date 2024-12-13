@@ -48,7 +48,7 @@ fileprivate final class FJCustomPresentationController: UIPresentationController
     ///   - presentedViewController: 跳转源控制器
     ///   - presentingViewController: 跳转目标控制器
     ///   - configContext: 设置context的block
-    init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: ((_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+    init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
         self.context = FJCustomPresentationContext()
         super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
         presentedViewController.modalPresentationStyle = .custom
@@ -65,7 +65,7 @@ fileprivate final class FJCustomPresentationController: UIPresentationController
 
 extension FJCustomPresentationController {
     /// 更新动画协调器
-    func updateContext(_ block: (_ ctx: FJCustomPresentationContext) -> ()) {
+    func updateContext(_ block: @Sendable (_ ctx: FJCustomPresentationContext) -> ()) {
         block(context)
     }
     
@@ -248,7 +248,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
 
 // MARK: - FJCustomAlertPresentationContext
 /// 弹窗驱动上下文
-@MainActor final public class FJCustomPresentationContext: @unchecked Sendable {
+@MainActor final public class FJCustomPresentationContext: Sendable {
     init() {
         `default` = FJCustomPresentationContext.Default()
         frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
@@ -364,7 +364,7 @@ extension FJCustomPresentationContext {
 
 extension FJCustomPresentationContext {
     /// 转场动画的过渡类型
-    public enum TransitionType {
+    public enum TransitionType: Sendable {
         case present(frames: TransitionContextFrames)
         case dismiss(frames: TransitionContextFrames)
     }
@@ -378,13 +378,12 @@ extension FJCustomPresentationContext {
     }
     
     /// 点击弹出界面的其余部分事件
-    public enum BelowCoverAction {
+    public enum BelowCoverAction: Sendable {
         /// 是否自动dismiss
         case autodismiss(_ auto: Bool)
         /// 自定义动作
-        case customize(action: () -> ())
+        case customize(action: @Sendable () -> ())
     }
-    
     
     /// 源控制器触发生命周期
     public struct TriggerPresentingControllerLifecycle: OptionSet, Sendable {
@@ -421,9 +420,9 @@ extension FJCustomPresentationContext {
 // MARK: - FJCustomAlertPresentationContext Default
 extension FJCustomPresentationContext {
     /// 提供GenericPresentationContext的一些基本默认设置
-    public struct Default: @unchecked Sendable {
+    public struct Default: Sendable {
         /// 转场动画时,高斯模糊view作为presentedViewController view的背景
-        public private(set) var blurBelowCoverView: @MainActor (CGRect) -> UIView = { f in
+        public private(set) var blurBelowCoverView: @MainActor @Sendable (CGRect) -> UIView = { @Sendable f in
             let v = UIVisualEffectView(frame: f)
             v.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             v.effect = nil
@@ -431,7 +430,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,高斯模糊view的动画效果
-        public private(set) var blurBelowCoverViewAnimator: @MainActor (UIBlurEffect.Style) -> (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { style in
+        public private(set) var blurBelowCoverViewAnimator: @MainActor @Sendable (UIBlurEffect.Style) -> (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable style in
             return { isPresenting in
                 return { view, coor in
                     guard let bv = view as? UIVisualEffectView else { return }
@@ -443,7 +442,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画时,暗灰色view作为presentedViewController view的背景
-        public private(set) var dimmingBelowCoverView: @MainActor (CGRect) -> UIView = { f in
+        public private(set) var dimmingBelowCoverView: @MainActor @Sendable (CGRect) -> UIView = { @Sendable f in
             let v = UIView(frame: f)
             v.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             v.backgroundColor = .black
@@ -452,7 +451,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,暗灰色view的动画效果
-        public private(set) var dimmingBelowCoverViewAnimator: @MainActor (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { isPresenting in
+        public private(set) var dimmingBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable isPresenting in
             return { view, coor in
                 if isPresenting {
                     view.alpha = 0
@@ -464,7 +463,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画时,clear view作为presentedViewController view的背景
-        public private(set) var clearBelowCoverView: @MainActor (CGRect) -> UIView = { f in
+        public private(set) var clearBelowCoverView: @MainActor @Sendable (CGRect) -> UIView = { @Sendable f in
             let v = UIView(frame: f)
             v.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             v.backgroundColor = .clear
@@ -472,13 +471,13 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,clear色view的动画效果
-        public private(set) var clearBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { isPresenting in
-            return { _, _ in}
+        public private(set) var clearBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable isPresenting in
+            return { _, _ in }
         }
         
         /// 上部圆角圆角带阴影的presentedViewController view修饰view
-        public private(set) var shadowTopRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { radius in
-            return { presentedViewControllerView, frame in
+        public private(set) var shadowTopRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+            return { @Sendable presentedViewControllerView, frame in
                 let presentationWrapperView = UIView(frame: frame)
                 presentationWrapperView.layer.shadowOpacity = 0.44
                 presentationWrapperView.layer.shadowRadius = 13
@@ -504,8 +503,8 @@ extension FJCustomPresentationContext {
         }
         
         /// 4个圆角带阴影的presentedViewController view修饰view
-        public private(set) var shadowAllRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { radius in
-            return { presentedViewControllerView, frame in
+        public private(set) var shadowAllRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+            return { @Sendable presentedViewControllerView, frame in
                 let presentationWrapperView = UIView(frame: frame)
                 presentationWrapperView.layer.shadowOpacity = 0.44
                 presentationWrapperView.layer.shadowRadius = 13
@@ -526,8 +525,8 @@ extension FJCustomPresentationContext {
         }
         
         /// 4个圆角不带阴影的presentedViewController view修饰view
-        public private(set) var allRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { radius in
-            return { presentedViewControllerView, frame in
+        public private(set) var allRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+            return { @Sendable presentedViewControllerView, frame in
                     let presentationRoundedCornerView = UIView(frame: frame)
                     presentationRoundedCornerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                     presentationRoundedCornerView.layer.cornerRadius = radius
@@ -542,8 +541,8 @@ extension FJCustomPresentationContext {
         }
         
         /// 上部圆角圆角不带阴影的presentedViewController view修饰view
-        public private(set) var topRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { radius in
-            return { presentedViewControllerView, frame in
+        public private(set) var topRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+            return { @Sendable presentedViewControllerView, frame in
                 let presentationRoundedCornerView = UIView(frame: frame)
                 presentationRoundedCornerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                 presentationRoundedCornerView.layer.cornerRadius = radius
@@ -556,7 +555,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 无效果的presentedViewController view修饰view
-        public private(set) var emptyWrappingView: @MainActor (UIView, CGRect) -> (UIView) = { presentedViewControllerView, frame in
+        public private(set) var emptyWrappingView: @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable presentedViewControllerView, frame in
             let presentationWrapperView = UIView(frame: frame)
             presentedViewControllerView.frame = presentationWrapperView.bounds
             presentationWrapperView.addSubview(presentedViewControllerView)
@@ -564,23 +563,21 @@ extension FJCustomPresentationContext {
         }
         
         /// 使presentedViewController的view居中显示的frame
-        public private(set) var centerFrameOfPresentedView: @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = {
-            bounds, size in
+        public private(set) var centerFrameOfPresentedView: @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable bounds, size in
             let x = (bounds.width - size.width) * 0.5
             let y = (bounds.height - size.height) * 0.5
             return CGRect(origin: CGPoint(x: x, y: y), size: size)
         }
         
         /// 使presentedViewController的view在底部显示的frame
-        public private(set) var bottomFrameOfPresentedView: @MainActor (CGRect, CGSize) -> (CGRect) = {
-            bounds, size in
+        public private(set) var bottomFrameOfPresentedView: @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable bounds, size in
             let x = bounds.midX - size.width * 0.5
             let y = bounds.maxY - size.height
             return CGRect(origin: CGPoint(x: x, y: y), size: size)
         }
         
         /// 居中弹出presentedViewController的动画效果
-        public private(set) var centerTransitionAnimator: @MainActor (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { fromView, toView, style, duration, ctx in
+        public private(set) var centerTransitionAnimator: @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable fromView, toView, style, duration, ctx in
             switch style {
             case .present(frames: let frames):
                 toView.frame = frames.toFinalFrame
@@ -614,7 +611,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 从底部弹出presentedViewController的动画效果
-        public private(set) var bottomTransitionAnimator: @MainActor (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { fromView, toView, style, duration, ctx in
+        public private(set) var bottomTransitionAnimator: @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable fromView, toView, style, duration, ctx in
             switch style {
             case .present(frames: let frames):
                 let f = frames.toFinalFrame
@@ -648,3 +645,4 @@ extension FJCustomPresentationContext {
         }
     }
 }
+

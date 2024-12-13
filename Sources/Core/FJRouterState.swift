@@ -7,7 +7,7 @@
 
 import Foundation
 /// 匹配路由的状态
-public struct FJRouterState: @unchecked Sendable {
+public struct FJRouterState: Sendable {
     /// 要匹配的原始url
     public let url: URL
     /// 匹配到的内容字符串
@@ -23,7 +23,7 @@ public struct FJRouterState: @unchecked Sendable {
     /// 匹配到的参数
     public let queryParameters: [String: String]
     /// 携带的额外内容
-    public let extra: Any?
+    public let extra: (any Sendable)?
     public let route: FJRoute?
     /// 错误信息
     let error: FJRouteMatchList.MatchError?

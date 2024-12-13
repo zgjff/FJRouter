@@ -15,7 +15,7 @@ struct FJRouteMatchList: @unchecked Sendable {
     /// 匹配到的参数
     let pathParameters: [String: String]
     /// 携带的额外内容
-    let extra: Any?
+    let extra: (any Sendable)?
     /// 与`url`匹配的完整路径
     let fullPath: String
     
@@ -53,7 +53,7 @@ struct FJRouteMatchList: @unchecked Sendable {
         }
     }
     
-    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: Any?) {
+    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: (any Sendable)?) {
         result = .success(success)
         self.url = url
         self.pathParameters = pathParameters
@@ -67,7 +67,7 @@ struct FJRouteMatchList: @unchecked Sendable {
         self.fullPath = fullPath
     }
     
-    init(error: MatchError, url: URL, extra: Any?) {
+    init(error: MatchError, url: URL, extra: (any Sendable)?) {
         result = .error(error)
         self.url = url
         self.extra = extra

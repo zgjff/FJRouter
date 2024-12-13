@@ -42,7 +42,7 @@ extension FJRouterStore {
     ///   - extra: 携带的参数
     ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
-    func match(url: URL, extra: Any?, ignoreError: Bool) async throws -> FJRouteMatchList {
+    func match(url: URL, extra: (any Sendable)?, ignoreError: Bool) async throws -> FJRouteMatchList {
         let result = findMatch(url: adjustUrl(url), extra: extra)
         let final = await redirect(initialMatches: result)
         switch final.result {
@@ -143,7 +143,7 @@ private extension FJRouterStore {
         return newUrl
     }
     
-    func findMatch(url: URL, extra: Any?) -> FJRouteMatchList {
+    func findMatch(url: URL, extra: (any Sendable)?) -> FJRouteMatchList {
         let (matches, pathParameters) = getLocRouteMatches(url: url)
         if matches.isEmpty {
             return FJRouteMatchList(error: .empty, url: url, extra: extra)
