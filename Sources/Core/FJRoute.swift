@@ -69,7 +69,7 @@ public struct FJRoute: Sendable {
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: (any FJRouteRedirector)? = nil, routes: [FJRoute] = []) throws {
+    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: (any FJRouteRedirector)? = nil, routes: @autoclosure () throws -> [FJRoute] = []) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
@@ -81,12 +81,19 @@ public struct FJRoute: Sendable {
         if builder == nil && redirect == nil {
             throw CreateError.noPageBuilder
         }
+        do {
+            self.routes = try routes()
+        } catch {
+            if let err = error as? CreateError {
+                throw err
+            }
+            self.routes = []
+        }
         self.path = p
         self.name = n
         self.builder = builder
         self.animator = animator
         self.redirect = redirect
-        self.routes = routes
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
     
@@ -106,6 +113,16 @@ public struct FJRoute: Sendable {
     
     internal func extractPathParameters(inString string: String, useRegExp regExp: NSRegularExpression?) -> [String: String] {
         return FJPathUtils.default.extractPathParameters(pathParameters, inString: string, useRegExp: regExp)
+    }
+}
+
+extension FJRoute {
+    /// 路由动画信息
+    public struct BuilderInfo: Sendable {
+        /// 要跳转到的源控制器
+        public let fromVC: UIViewController?
+        /// 匹配到的路由信息
+        public let matchState: FJRouterState
     }
 }
 
