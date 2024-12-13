@@ -251,7 +251,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.url == URL(string: "/pkuser/display"))
     }
     
-    fileprivate var _builder: FJRoute.Builder = { _, state in
+    fileprivate var _builder: FJRoute.Builder = { _ in
         return UIViewController()
     }
 }

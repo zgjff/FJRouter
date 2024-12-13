@@ -75,38 +75,38 @@ struct FJRouterViewControllerTests {
 extension FJRouterViewControllerTests {
     fileprivate func registerRoutes() async throws {
         do {
-            let route1 = try FJRoute(path: "/", name: "root", builder: { _, _ in ViewControllerRoot() })
+            let route1 = try FJRoute(path: "/", name: "root", builder: { _ in ViewControllerRoot() })
             await FJRouter.shared.registerRoute(route1)
         }
         
         do {
-            let route2 = try FJRoute(path: "/same", builder: { _, _ in ViewController1() })
+            let route2 = try FJRoute(path: "/same", builder: { _ in ViewController1() })
             await FJRouter.shared.registerRoute(route2)
-            let route3 = try FJRoute(path: "/same", name: "sameRouteForTest", builder: { _, _ in ViewController2() })
+            let route3 = try FJRoute(path: "/same", name: "sameRouteForTest", builder: { _ in ViewController2() })
             await FJRouter.shared.registerRoute(route3)
-            try await FJRouter.shared.registerRoute(path: "/same", builder: { _, _ in ViewController3() })
-            try await FJRouter.shared.registerRoute(path: "/same", name: "sameRouteForTest1", builder: { _, _ in ViewController4() })
+            try await FJRouter.shared.registerRoute(path: "/same", builder: { _ in ViewController3() })
+            try await FJRouter.shared.registerRoute(path: "/same", name: "sameRouteForTest1", builder: { _ in ViewController4() })
         }
         
         do {
-            let route = try FJRoute(path: "/book", builder: ({ _, _  in ViewControllerBook() }), routes: [
-                FJRoute(path: "feature1", builder: ({ _, _  in ViewControllerBook1() })),
-                FJRoute(path: "feature2", name: "feature2", builder: ({ _, _  in ViewControllerBook2() })),
-                FJRoute(path: "feature3", builder: ({ _, _  in ViewControllerBook3() })),
-                FJRoute(path: "feature3", name: "feature3", builder: ({ _, _  in ViewControllerBook4() })),
-                FJRoute(path: "feature3", name: "feature3-1", builder: ({ _, _  in ViewControllerBook5() })),
+            let route = try FJRoute(path: "/book", builder: ({ _  in ViewControllerBook() }), routes: [
+                FJRoute(path: "feature1", builder: ({ _  in ViewControllerBook1() })),
+                FJRoute(path: "feature2", name: "feature2", builder: ({ _  in ViewControllerBook2() })),
+                FJRoute(path: "feature3", builder: ({ _  in ViewControllerBook3() })),
+                FJRoute(path: "feature3", name: "feature3", builder: ({ _  in ViewControllerBook4() })),
+                FJRoute(path: "feature3", name: "feature3-1", builder: ({ _  in ViewControllerBook5() })),
             ])
             await FJRouter.shared.registerRoute(route)
         }
         
         do {
-            let route = try FJRoute(path: "/play/:id", builder: ({ _, _  in ViewControllerPlay() }), routes: [
-                FJRoute(path: "feature1", builder: ({ _, _  in ViewControllerPlay1() })),
-                FJRoute(path: "feature2", name: "bfeature2", builder: ({ _, _  in ViewControllerPlay2() })),
-                FJRoute(path: "feature3/:name", builder: ({ _, _  in ViewControllerPlay3() })),
-                FJRoute(path: "feature3", name: "bfeature3", builder: ({ _, _  in ViewControllerPlay4() })),
-                FJRoute(path: "feature3", name: "bfeature3-1", builder: ({ _, _  in ViewControllerPlay5() })),
-                FJRoute(path: "feature4/:name", name: "feature4", builder: ({ _, _  in ViewControllerPlay6() })),
+            let route = try FJRoute(path: "/play/:id", builder: ({ _  in ViewControllerPlay() }), routes: [
+                FJRoute(path: "feature1", builder: ({ _  in ViewControllerPlay1() })),
+                FJRoute(path: "feature2", name: "bfeature2", builder: ({ _  in ViewControllerPlay2() })),
+                FJRoute(path: "feature3/:name", builder: ({ _  in ViewControllerPlay3() })),
+                FJRoute(path: "feature3", name: "bfeature3", builder: ({ _  in ViewControllerPlay4() })),
+                FJRoute(path: "feature3", name: "bfeature3-1", builder: ({ _  in ViewControllerPlay5() })),
+                FJRoute(path: "feature4/:name", name: "feature4", builder: ({ _  in ViewControllerPlay6() })),
             ])
             await FJRouter.shared.registerRoute(route)
         }

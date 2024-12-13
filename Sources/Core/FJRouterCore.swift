@@ -28,7 +28,7 @@ extension FJRouterCore {
         }
         let state = FJRouterState(matches: matchList, match: match)
         let tvc = apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-        return match.route.builder?(tvc, state)
+        return match.route.builder?(FJRoute.BuilderInfo(fromVC: tvc, matchState: state))
     }
     
     @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
@@ -48,7 +48,7 @@ extension FJRouterCore {
             }
             let state = FJRouterState(matches: matchList, match: match)
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            guard let tovc = state.route?.builder?(fromController, state) else {
+            guard let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) else {
                 return
             }
             guard let animator = state.route?.animator?(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state)) else {
@@ -80,7 +80,7 @@ extension FJRouterCore {
             }
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
             let state = FJRouterState(matches: matchList, match: match)
-            if let tovc = state.route?.builder?(fromController, state) {
+            if let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) {
                 fromController?.navigationController?.pushViewController(tovc, animated: flag)
             }
         }
@@ -111,7 +111,7 @@ extension FJRouterCore {
             }
             let state = FJRouterState(matches: matchList, match: match)
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            if let tovc = state.route?.builder?(fromController, state) {
+            if let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) {
                 fromController?.present(tovc, animated: flag)
             }
         }

@@ -20,7 +20,7 @@ import UIKit
 ///     - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
 public struct FJRoute: Sendable {
     /// 构建路由控制器
-    public typealias Builder = (@MainActor @Sendable (_ sourceController: UIViewController?, _ state: FJRouterState) -> UIViewController)
+    public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController)
     
     /// 显示路由指向控制器的转场动画
     ///
