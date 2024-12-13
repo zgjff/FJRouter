@@ -11,14 +11,14 @@ import UIKit
 extension FJRoute {
     /// 自定义弹窗控制动画
     public struct CustomPresentationAnimator: FJRouteAnimator {
-        private let config: ((_ ctx: FJCustomPresentationContext) -> ())?
+        private let config: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())?
         private let useNavigationController: UINavigationController?
         
         /// 初始化
         /// - Parameters:
         ///   - useNavigationController: 使用导航栏包裹控制器. 注意navigationController必须是新初始化生成的
         ///   - config: 配置
-        public init(navigationController useNavigationController: UINavigationController? = nil, config: ((_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+        public init(navigationController useNavigationController: UINavigationController? = nil, config: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
             self.useNavigationController = useNavigationController
             self.config = config
         }

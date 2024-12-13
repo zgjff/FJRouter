@@ -27,6 +27,8 @@ extension FJRoute {
     ///
     public struct RefreshSamePreviousAnimator: FJRouteAnimator {
         private let refresh: @MainActor @Sendable (_ previousVC: UIViewController, _ state: FJRouterState) -> ()
+        /// 初始化
+        /// - Parameter refresh: 刷新动作
         public init(refresh: @MainActor @Sendable @escaping (_ previousVC: UIViewController, _ state: FJRouterState) -> ()) {
             self.refresh = refresh
         }
