@@ -12,7 +12,14 @@ extension FJRoute {
     /// 自定义弹窗控制动画
     public struct CustomPresentationAnimator: FJRouteAnimator {
         private let config: ((_ ctx: FJCustomPresentationContext) -> ())?
-        public init(config: ((_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+        private let useNavigationController: UINavigationController?
+        
+        /// 初始化
+        /// - Parameters:
+        ///   - useNavigationController: 使用导航栏包裹控制器. 注意navigationController必须是新初始化生成的
+        ///   - config: 配置
+        public init(navigationController useNavigationController: UINavigationController? = nil, config: ((_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+            self.useNavigationController = useNavigationController
             self.config = config
         }
         
@@ -20,8 +27,13 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            let pd = FJCustomPresentationController(show: toVC, from: fromVC, config: config)
-            fromVC.present(toVC, animated: true) {
+            var destVC = toVC
+            if let useNavigationController {
+                useNavigationController.setViewControllers([toVC], animated: false)
+                destVC = useNavigationController
+            }
+            let pd = FJCustomPresentationController(show: destVC, from: fromVC, config: config)
+            fromVC.present(destVC, animated: true) {
                 let _ = pd
             }
         }
