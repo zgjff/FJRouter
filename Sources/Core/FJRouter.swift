@@ -211,7 +211,7 @@ extension FJRouter {
     
     /// `push`到对应路由路径控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -227,7 +227,7 @@ extension FJRouter {
     
     /// `push`到对应路由路径控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
@@ -241,7 +241,7 @@ extension FJRouter {
     
     /// `push`至对应路由名称控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -266,7 +266,7 @@ extension FJRouter {
     
     /// `push`至对应路由名称控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`push`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -282,7 +282,7 @@ extension FJRouter {
     
     /// `present`到对应路由路径控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -298,7 +298,7 @@ extension FJRouter {
     
     /// present到对应路由路径控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -312,7 +312,7 @@ extension FJRouter {
     
     /// present至对应路由名称控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -337,7 +337,7 @@ extension FJRouter {
     
     /// present至对应路由名称控制器
     ///
-    /// 若路由的`builder`为`display`: 框架只会调用`block`内部显示逻辑, 不会`present`
+    /// 不会使用路由中的`animator`逻辑
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
