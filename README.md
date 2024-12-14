@@ -91,7 +91,7 @@ FJRouter.shared.setErrorBuilder { state in
 ```
 
 ### 跳转
-> 强烈建议跳转的时候使用以goNamed、pushNamed、presentNamed为前缀的方法进行跳转
+> 强烈建议跳转的时候使用以goNamed为前缀的方法进行跳转
 
 > 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等
 
@@ -99,8 +99,7 @@ FJRouter.shared.setErrorBuilder { state in
 
 ```swift 
 FJRouter.shared.goNamed("login")
-FJRouter.shared.pushNamed("login")
-FJRouter.shared.presentNamed("login")
+FJRouter.shared.go("/login")
 ```
 
 #### `go`到匹配路由页面: 框架内部处理跳转到匹配路由页面的方式
@@ -109,16 +108,4 @@ FJRouter.shared.presentNamed("login")
 ```swift 
 FJRouter.shared.go(location: "/login")
 FJRouter.shared.goNamed("user", params: ["id": "123"])
-```
-
-#### `push`到匹配路由页面
-```swift 
-FJRouter.shared.push(location: "/login")
-FJRouter.shared.pushNamed("user", params: ["id": "123"])
-```
-
-#### `present`到匹配路由页面
-```swift 
-FJRouter.shared.present(location: "/login")
-FJRouter.shared.presentNamed("user", params: ["id": "123"])
 ```

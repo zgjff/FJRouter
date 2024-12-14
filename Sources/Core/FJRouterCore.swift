@@ -59,64 +59,6 @@ extension FJRouterCore {
         }
     }
     
-    @MainActor func push(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
-        switch matchList.result {
-        case .error:
-            if ignoreError {
-                return
-            }
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            let state = FJRouterState(matches: matchList)
-            fromController?.navigationController?.pushViewController(errorBuilder(state), animated: flag)
-        case .success:
-            guard let match = matchList.lastMatch else {
-                if ignoreError {
-                    return
-                }
-                let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-                let state = FJRouterState(matches: matchList)
-                fromController?.navigationController?.pushViewController(errorBuilder(state), animated: flag)
-                return
-            }
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            let state = FJRouterState(matches: matchList, match: match)
-            if let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) {
-                fromController?.navigationController?.pushViewController(tovc, animated: flag)
-            }
-        }
-    }
-    
-    @MainActor func present(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
-        switch matchList.result {
-        case .error:
-            if ignoreError {
-                return
-            }
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            let state = FJRouterState(matches: matchList)
-            let errvc = errorBuilder(state)
-            errvc.modalPresentationStyle = .fullScreen
-            fromController?.present(errvc, animated: flag)
-        case .success:
-            guard let match = matchList.lastMatch else {
-                if ignoreError {
-                    return
-                }
-                let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-                let state = FJRouterState(matches: matchList)
-                let errvc = errorBuilder(state)
-                errvc.modalPresentationStyle = .fullScreen
-                fromController?.present(errvc, animated: flag)
-                return
-            }
-            let state = FJRouterState(matches: matchList, match: match)
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            if let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) {
-                fromController?.present(tovc, animated: flag)
-            }
-        }
-    }
-    
     @MainActor func goError(state: FJRouterState, sourceController: UIViewController?) {
         let errorController = errorBuilder(state)
         private_go(to: errorController, from: sourceController, animated: true, isError: true)
