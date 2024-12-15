@@ -109,3 +109,17 @@ FJRouter.shared.go("/login")
 FJRouter.shared.go(location: "/login")
 FJRouter.shared.goNamed("user", params: ["id": "123"])
 ```
+
+### 跳转方式
+#### 1: 系统push 
+注册路由的时候`animator`设置为`SystemPushAnimator`
+#### 2: 系统present 
+注册路由的时候`animator`设置为`SystemPresentAnimator`
+#### 3: 设置app window的`rootController`
+注册路由的时候`animator`设置为`AppRootControllerAnimator`
+#### 4: 使用自定义弹窗转场动画
+注册路由的时候`animator`设置为`CustomPresentationAnimator`
+#### 5: 系统push/pop动画风格的`present`转场动画, 支持侧滑dismiss
+注册路由的时候`animator`设置为`SystemPushPopTransitionAnimator`
+#### 5: 其它跳转动画
+准守并实现`FJRouteAnimator`路由动画协议, 然后在注册路由的时候设置`animator`
