@@ -24,7 +24,7 @@ extension FJRoute {
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
             if sideslipBack {
-                toVC.addScreenPanGestureDismiss()
+                toVC.fjroute_addScreenPanGestureDismiss()
             }
             var destVC = toVC
             if let useNavigationController {
@@ -52,13 +52,13 @@ extension UIViewController {
         }
     }
     
-    fileprivate func addScreenPanGestureDismiss() {
-        let spGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(onBeganEdgePanGestureBack(_:)))
+    fileprivate func fjroute_addScreenPanGestureDismiss() {
+        let spGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(fjroute_onBeganEdgePanGestureBack(_:)))
         spGesture.edges = .left
         view.addGestureRecognizer(spGesture)
     }
     
-    @IBAction fileprivate func onBeganEdgePanGestureBack(_ sender: UIScreenEdgePanGestureRecognizer) {
+    @IBAction fileprivate func fjroute_onBeganEdgePanGestureBack(_ sender: UIScreenEdgePanGestureRecognizer) {
         guard case .began = sender.state else {
             return
         }
