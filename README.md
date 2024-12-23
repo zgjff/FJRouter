@@ -33,13 +33,13 @@ pod 'FJRouter'
 
 #### 路由`builder`: 用于构建路由的指向控制器。此类型是个构建对应控制器的枚举类型: 包含只创建的`default`和自动创建并处理显示的`display`
 ```swift
-FJRoute(path: "/", name: "root", builder: { sourceController, state in
+FJRoute(path: "/", name: "root", builder: { _ in
     UINavigationController(rootViewController: ViewController())
 })
 ```
 
 #### 路由`animator`: 用于显示路由指向控制器的转场动画。
-> 只适用与适用go、goNamed进行跳转的方式, 使用push、pushNamed、present、presentNamed时,此参数无任何意义。
+> 只适用与适用go、goNamed进行跳转的方式, 通过获取viewController进行自控跳转时,此参数无任何意义。
 
 > 框架内部已经内置了多种实现. `FJRoute.XXXXAnimator`
 
@@ -112,14 +112,14 @@ FJRouter.shared.goNamed("user", params: ["id": "123"])
 
 ### 跳转方式
 #### 1: 系统push 
-注册路由的时候`animator`设置为`SystemPushAnimator`
+注册路由的时候`animator`设置为`FJRoute.SystemPushAnimator`
 #### 2: 系统present 
-注册路由的时候`animator`设置为`SystemPresentAnimator`
+注册路由的时候`animator`设置为`FJRoute.SystemPresentAnimator`
 #### 3: 设置app window的`rootController`
-注册路由的时候`animator`设置为`AppRootControllerAnimator`
+注册路由的时候`animator`设置为`FJRoute.AppRootControllerAnimator`
 #### 4: 使用自定义弹窗转场动画
-注册路由的时候`animator`设置为`CustomPresentationAnimator`
+注册路由的时候`animator`设置为`FJRoute.CustomPresentationAnimator`
 #### 5: 系统push/pop动画风格的`present`转场动画, 支持侧滑dismiss
-注册路由的时候`animator`设置为`SystemPushPopTransitionAnimator`
+注册路由的时候`animator`设置为`FJRoute.SystemPushPopTransitionAnimator`
 #### 5: 其它跳转动画
 准守并实现`FJRouteAnimator`路由动画协议, 然后在注册路由的时候设置`animator`
