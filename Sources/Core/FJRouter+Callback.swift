@@ -10,25 +10,25 @@ import Combine
 import UIKit
 
 extension UIViewController {
-    /// 发送路由回调
+    /// 触发路由回调
     ///
     /// 如果`name`为空, 或者路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameters:
     ///   - name: 名称
-    ///   - value: 对应的值
-    public func sendFJRouterCallBack(name: String, value: (any Sendable)?) throws {
+    ///   - value: 对应的值: 默认为()
+    public func dispatchFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
             throw FJRouter.SendCallbackError.emptyName
         }
-        try sendFJRouterCallBack(item: item)
+        try dispatchFJRouterCallBack(item: item)
     }
     
-    /// 发送路由回调
+    /// 触发路由回调
     ///
     /// 如果路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameter item: 内容
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
-    public func sendFJRouterCallBack(item: FJRouter.CallbackItem) throws {
+    public func dispatchFJRouterCallBack(item: FJRouter.CallbackItem) throws {
         if fjroute_callback_trigger == nil {
             throw FJRouter.SendCallbackError.noTrigger
         }

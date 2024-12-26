@@ -164,9 +164,9 @@ extension FJRouter {
     ///     }).store(in: &cancels)
     ///
     ///     触发:
-    ///     try? sendFJRouterCallBack(name: "haha", value: ())
+    ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
-    ///         try? self?.sendFJRouterCallBack(name: "completion", value: 123)
+    ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     /// - Parameters:
     ///   - location: 路由路径
@@ -232,9 +232,9 @@ extension FJRouter {
     ///     }).store(in: &cancels)
     ///
     ///     触发:
-    ///     try? sendFJRouterCallBack(name: "haha", value: ())
+    ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
-    ///         try? self?.sendFJRouterCallBack(name: "completion", value: 123)
+    ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     /// - Parameters:
     ///   - name: 路由名称
