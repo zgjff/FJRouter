@@ -248,7 +248,7 @@ extension FJRouter {
     public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return try await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            return await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
         } catch {
             let gerr: FJRouter.MatchError
             if let err = error as? FJRouter.ConvertError {

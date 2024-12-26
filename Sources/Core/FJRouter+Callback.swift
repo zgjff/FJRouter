@@ -16,12 +16,11 @@ extension UIViewController {
     /// - Parameters:
     ///   - name: 名称
     ///   - value: 对应的值
-    @discardableResult
     public func sendFJRouterCallBack(name: String, value: (any Sendable)?) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
             throw FJRouter.SendCallbackError.emptyName
         }
-        return try sendFJRouterCallBack(item: item)
+        try sendFJRouterCallBack(item: item)
     }
     
     /// 发送路由回调
@@ -29,7 +28,6 @@ extension UIViewController {
     /// 如果路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameter item: 内容
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
-    @discardableResult
     public func sendFJRouterCallBack(item: FJRouter.CallbackItem) throws {
         if fjroute_callback_trigger == nil {
             throw FJRouter.SendCallbackError.noTrigger
