@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-
+import Combine
 final class FJRouterCore: @unchecked Sendable {
     var errorBuilder: (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
     var apptopController: (@MainActor (_ current: UIViewController?) -> UIViewController?)
@@ -31,31 +31,34 @@ extension FJRouterCore {
         return match.route.builder?(FJRoute.BuilderInfo(fromVC: tvc, matchState: state))
     }
     
-    @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) {
+    @discardableResult
+    @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) -> UIViewController? {
         switch matchList.result {
         case .error:
             if ignoreError {
-                return
+                return nil
             }
             goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
+            return nil
         case .success:
             guard let match = matchList.lastMatch else {
                 if ignoreError {
-                    return
+                    return nil
                 }
                 goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
-                return
+                return nil
             }
             let state = FJRouterState(matches: matchList, match: match)
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
             guard let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) else {
-                return
+                return nil
             }
             guard let animator = state.route?.animator?(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state)) else {
                 private_go(to: tovc, from: sourceController, animated: flag, isError: false)
-                return
+                return tovc
             }
             animator.startAnimatedTransitioning(from: fromController, to: tovc, state: state)
+            return tovc
         }
     }
     
