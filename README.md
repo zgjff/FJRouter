@@ -4,7 +4,7 @@
 
 ### Swift Package Manager
 > 使用 **Swift PM** 的最简单的方式是找到 Project Setting -> Swift Packages 并将 FJRouter 添加在其中。
-> 搜索 `https://github.com/zgjff/FJRouter` 并
+> 搜索 `https://github.com/zgjff/FJRouter` 
 
 ### CocoaPods
 在你的 Podfile 文件中添加 FJRouter:
@@ -109,6 +109,43 @@ FJRouter.shared.go("/login")
 FJRouter.shared.go(location: "/login")
 FJRouter.shared.goNamed("user", params: ["id": "123"])
 ```
+
+### 路由回调
+> 1: 路由回调是使用`Combine`框架实现的
+
+> 2: 只支持跳转的使用使用`async`异步, 且返回值是`AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>`的方法
+
+监听:
+```swift
+go location
+let callback = await FJRouter.shared.go(location: "/second")
+callback.sink(receiveCompletion: { cop in
+    print("cop----全部", cop)
+}, receiveValue: { item in
+    print("value----全部", item)
+}).store(in: &cancels)
+
+callback.filter({ $0.name == "completion" })
+.sink(receiveCompletion: { cop in
+    print("cop----特殊:", cop)
+}, receiveValue: { item in
+    print("value----特殊:", item)
+}).store(in: &cancels)
+
+go goNamed
+let callback = await FJRouter.shared.goNamed("second")
+...
+```
+
+触发: 在需要回调的地方,直接调用框架的方法`sendFJRouterCallBack`
+```swift
+try? sendFJRouterCallBack(name: "haha", value: ())
+dismiss(animated: true, completion: { [weak self] in
+    try? self?.sendFJRouterCallBack(name: "completion", value: 123)
+})
+```
+
+
 
 ### 跳转方式
 #### 1: 系统push 
