@@ -140,7 +140,7 @@ extension FJRouter {
 
 // MARK: - go
 extension FJRouter {
-    /// 导航至对应路由路径控制器。
+    /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
     /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
@@ -173,12 +173,15 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    /// - Returns: 路由回调
+    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
     public func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
-            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
-            return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
+            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, way: .passthroughSubject)
+            if result.subject != nil {
+                return result.subject!.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
+            }
+            return Fail(error: FJRouter.MatchError.cancelled).eraseToAnyPublisher()
         } catch {
             let gerr: FJRouter.MatchError
             if let err = error as? FJRouter.ConvertError {
@@ -208,7 +211,7 @@ extension FJRouter {
         }
     }
     
-    /// 导航至对应路由名称控制器
+    /// 导航至对应路由名称控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
     /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
     ///
@@ -243,7 +246,7 @@ extension FJRouter {
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    /// - Returns: 路由回调
+    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
     public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
@@ -293,7 +296,7 @@ extension FJRouter {
 }
 
 extension FJRouter {
-    func go_trigger(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async throws -> CallbackTrigger {
+    func go_trigger(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, way: CallbackTrigger.Way) async throws -> CallbackTrigger {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
@@ -302,7 +305,7 @@ extension FJRouter {
             guard let vc = await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true) else {
                 throw FJRouter.MatchError.notFind
             }
-            let obj = await vc.fjroute_addCallbackTrigger()
+            let obj = await vc.fjroute_addCallbackTrigger(way: way)
             return obj
         } catch {
             if let err = error as? FJRouter.ConvertError {

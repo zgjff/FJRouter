@@ -57,18 +57,47 @@ extension FJRouter {
 
 extension FJRouter {
     internal final class CallbackTrigger: Sendable {
-        nonisolated(unsafe) let subject: PassthroughSubject<FJRouter.CallbackItem, Never>
+        /// 方式
+        enum Way: Sendable {
+            /// 使用`PassthroughSubject`
+            case passthroughSubject
+            /// 使用`AsyncStream`
+            case asyncStream
+        }
         
-        init() {
-            subject = PassthroughSubject()
+        fileprivate let way: Way
+        nonisolated(unsafe) private(set) var subject: PassthroughSubject<FJRouter.CallbackItem, Never>?
+        fileprivate nonisolated(unsafe) var steam: AsyncStream<FJRouter.CallbackItem>?
+        fileprivate nonisolated(unsafe) var continuation: AsyncStream<FJRouter.CallbackItem>.Continuation?
+        init(way: Way) {
+            self.way = way
+            switch way {
+            case .passthroughSubject:
+                subject = PassthroughSubject()
+            case .asyncStream:
+                (steam, continuation) = AsyncStream<FJRouter.CallbackItem>.makeStream()
+            }
         }
         
         fileprivate func send(_ item: FJRouter.CallbackItem) {
-            subject.send(item)
+            switch way {
+            case .passthroughSubject:
+                subject?.send(item)
+            case .asyncStream:
+                continuation?.yield(item)
+            }
         }
         
         deinit {
-            subject.send(completion: .finished)
+            switch way {
+            case .passthroughSubject:
+                subject?.send(completion: .finished)
+                subject = nil
+            case .asyncStream:
+                continuation?.finish()
+                continuation = nil
+                steam = nil
+            }
         }
     }
 }
@@ -125,8 +154,8 @@ extension FJRouter.SendCallbackError: CustomStringConvertible, CustomDebugString
 
 nonisolated(unsafe) private var fjroute_combine_callback_trigger_Key = 0
 extension UIViewController {
-    internal func fjroute_addCallbackTrigger() -> FJRouter.CallbackTrigger {
-        let obj = FJRouter.CallbackTrigger()
+    internal func fjroute_addCallbackTrigger(way: FJRouter.CallbackTrigger.Way) -> FJRouter.CallbackTrigger {
+        let obj = FJRouter.CallbackTrigger(way: way)
         objc_setAssociatedObject(self, &fjroute_combine_callback_trigger_Key, obj, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return obj
     }

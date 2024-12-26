@@ -137,7 +137,7 @@ let callback = await FJRouter.shared.goNamed("second")
 ...
 ```
 
-触发: 在需要回调的地方,直接调用框架的方法`sendFJRouterCallBack`
+触发: 在需要回调的地方,直接调用框架的方法`dispatchFJRouterCallBack`
 ```swift
 try? dispatchFJRouterCallBack(name: "haha", value: ())
 dismiss(animated: true, completion: { [weak self] in
