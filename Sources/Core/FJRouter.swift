@@ -177,11 +177,8 @@ extension FJRouter {
     @discardableResult
     public func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
-            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, way: .passthroughSubject)
-            if result.subject != nil {
-                return result.subject!.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
-            }
-            return Fail(error: FJRouter.MatchError.cancelled).eraseToAnyPublisher()
+            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: PassthroughSubjectCallback())
+            return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
         } catch {
             let gerr: FJRouter.MatchError
             if let err = error as? FJRouter.ConvertError {
@@ -296,7 +293,7 @@ extension FJRouter {
 }
 
 extension FJRouter {
-    func go_trigger(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, way: CallbackTrigger.Way) async throws -> CallbackTrigger {
+    func go_trigger<T>(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
@@ -305,8 +302,9 @@ extension FJRouter {
             guard let vc = await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true) else {
                 throw FJRouter.MatchError.notFind
             }
-            let obj = await vc.fjroute_addCallbackTrigger(way: way)
-            return obj
+            let cb = callback()
+            await vc.fjroute_addCallbackTrigger(callback: cb)
+            return cb
         } catch {
             if let err = error as? FJRouter.ConvertError {
                 throw FJRouter.MatchError.convertNameLoc(err)

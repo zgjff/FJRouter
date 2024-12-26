@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import UIKit
 
 extension UIViewController {
@@ -18,7 +17,7 @@ extension UIViewController {
     ///   - value: 对应的值: 默认为()
     public func dispatchFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
-            throw FJRouter.SendCallbackError.emptyName
+            throw FJRouter.DispatchCallbackError.emptyName
         }
         try dispatchFJRouterCallBack(item: item)
     }
@@ -30,132 +29,17 @@ extension UIViewController {
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
     public func dispatchFJRouterCallBack(item: FJRouter.CallbackItem) throws {
         if fjroute_callback_trigger == nil {
-            throw FJRouter.SendCallbackError.noTrigger
+            throw FJRouter.DispatchCallbackError.noTrigger
         }
-        fjroute_callback_trigger?.send(item)
-    }
-}
-
-extension FJRouter {
-    /// 路由回调`name-value`
-    public struct CallbackItem: Sendable {
-        /// 名称
-        public let name: String
-        /// 内容
-        public let value: (any Sendable)?
-
-        public init?(name: String, value: (any Sendable)?) {
-            let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            if n.isEmpty {
-                return nil
-            }
-            self.name = name
-            self.value = value
-        }
-    }
-}
-
-extension FJRouter {
-    internal final class CallbackTrigger: Sendable {
-        /// 方式
-        enum Way: Sendable {
-            /// 使用`PassthroughSubject`
-            case passthroughSubject
-            /// 使用`AsyncStream`
-            case asyncStream
-        }
-        
-        fileprivate let way: Way
-        nonisolated(unsafe) private(set) var subject: PassthroughSubject<FJRouter.CallbackItem, Never>?
-        fileprivate nonisolated(unsafe) var steam: AsyncStream<FJRouter.CallbackItem>?
-        fileprivate nonisolated(unsafe) var continuation: AsyncStream<FJRouter.CallbackItem>.Continuation?
-        init(way: Way) {
-            self.way = way
-            switch way {
-            case .passthroughSubject:
-                subject = PassthroughSubject()
-            case .asyncStream:
-                (steam, continuation) = AsyncStream<FJRouter.CallbackItem>.makeStream()
-            }
-        }
-        
-        fileprivate func send(_ item: FJRouter.CallbackItem) {
-            switch way {
-            case .passthroughSubject:
-                subject?.send(item)
-            case .asyncStream:
-                continuation?.yield(item)
-            }
-        }
-        
-        deinit {
-            switch way {
-            case .passthroughSubject:
-                subject?.send(completion: .finished)
-                subject = nil
-            case .asyncStream:
-                continuation?.finish()
-                continuation = nil
-                steam = nil
-            }
-        }
-    }
-}
-
-extension FJRouter {
-    /// 发送路由回调错误
-    public enum SendCallbackError: Error, Sendable {
-        /// 发送的`callback`的`name`为空
-        case emptyName
-        /// 没有路由回调触发器, 使用路由方法错误, 请使用带有`AnyPublisher`返回值的go方法
-        case noTrigger
-    }
-}
-
-extension FJRouter.SendCallbackError: Equatable {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        switch (lhs, rhs) {
-        case (.emptyName, .emptyName):
-            return true
-        case (.noTrigger, .noTrigger):
-            return true
-        case (.emptyName, .noTrigger), (.noTrigger, .emptyName):
-            return false
-        }
-    }
-}
-
-extension FJRouter.SendCallbackError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
-        switch self {
-        case .emptyName:
-            return "send name is empty"
-        case .noTrigger:
-            return "please use async go method with return AnyPublisher"
-        }
-    }
-    
-    public var debugDescription: String {
-        description
-    }
-    
-    public var localizedDescription: String {
-        description
-    }
-    
-    public var errorDescription: String? {
-        description
-    }
-    
-    public var failureReason: String? {
-        description
+        fjroute_callback_trigger?.dispatch(item)
     }
 }
 
 nonisolated(unsafe) private var fjroute_combine_callback_trigger_Key = 0
 extension UIViewController {
-    internal func fjroute_addCallbackTrigger(way: FJRouter.CallbackTrigger.Way) -> FJRouter.CallbackTrigger {
-        let obj = FJRouter.CallbackTrigger(way: way)
+    @discardableResult
+    internal func fjroute_addCallbackTrigger(callback: some FJRouterCallbackable) -> FJRouter.CallbackTrigger {
+        let obj = FJRouter.CallbackTrigger(callback: callback)
         objc_setAssociatedObject(self, &fjroute_combine_callback_trigger_Key, obj, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return obj
     }
