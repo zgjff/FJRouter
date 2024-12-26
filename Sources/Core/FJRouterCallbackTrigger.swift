@@ -1,13 +1,13 @@
 //
-//  File.swift
+//  FJRouterCallbackTrigger.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/12/26.
 //
 
 import Foundation
-import Combine
 
+/// 路由回调协议
 protocol FJRouterCallbackable: Sendable {
     /// 触发callback
     func dispatch(_ item: FJRouter.CallbackItem)
@@ -29,23 +29,6 @@ extension FJRouter {
         
         deinit {
             callback.finish()
-        }
-    }
-}
-
-extension FJRouter {
-    struct PassthroughSubjectCallback: FJRouterCallbackable {
-        nonisolated(unsafe) let subject: PassthroughSubject<FJRouter.CallbackItem, Never>
-        init() {
-            subject = PassthroughSubject()
-        }
-        
-        func dispatch(_ item: FJRouter.CallbackItem) {
-            subject.send(item)
-        }
-        
-        func finish() {
-            subject.send(completion: .finished)
         }
     }
 }
