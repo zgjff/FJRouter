@@ -43,11 +43,10 @@ extension FJRouteMatch {
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
         let pathLoc = FJPathUtils.default.patternToPath(pattern: route.path, pathParameters: encodedParams)
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: matchedLocation, childPath: pathLoc)
-        if newMatchedLocation.lowercased() == url.versionPath.lowercased() { // 匹配成功
+        if [newMatchedLocation.lowercased(), newMatchedLocation.dropFirst().lowercased()].contains(url.versionPath.lowercased()) { // 匹配成功
             let finalParameters = pathParameters.merging(currentPathParameter) { (_, new) in new }
             return ([FJRouteMatch(route: route, matchedLocation: newMatchedLocation)], finalParameters)
         }
-        
         // 匹配子路由
         let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.path)
         let childLocStartIndex = url.versionPath.index(url.versionPath.startIndex, offsetBy: newMatchedLocation.count + ((newMatchedLocation == "/") ? 0 : 1))
