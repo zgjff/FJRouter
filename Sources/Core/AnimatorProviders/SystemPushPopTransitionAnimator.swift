@@ -235,7 +235,7 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
             assert(false, "targetEdge must be one of UIRectEdgeTop, UIRectEdgeBottom, UIRectEdgeLeft, or UIRectEdgeRight.")
         }
         
-        let isfullScreen = isPresenting ? (fromVC.modalPresentationStyle == .fullScreen) : (toVC.modalPresentationStyle == .fullScreen)
+        let isfullScreen = (isPresenting ? fromVC : toVC).modalPresentationStyle == .fullScreen
         if isPresenting {
             if isfullScreen {
                 fromView.frame = startFrame
@@ -260,11 +260,19 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
                 toView.frame = endFrame
                 if isfullScreen {
                     fromView.frame = startFrame.offsetBy(dx: startFrame.width * -0.3, dy: 0)
+                } else {
+                    if let fsv = fromView.superview {
+                        fsv.frame = fsv.frame.offsetBy(dx: fsv.frame.width * -0.3, dy: 0)
+                    }
                 }
             } else {
                 fromView.frame = startFrame.offsetBy(dx: startFrame.width * offset.dx, dy: startFrame.height * offset.dy)
                 if isfullScreen {
                     toView.frame = endFrame
+                } else {
+                    if let tsv = toView.superview {
+                        tsv.frame = tsv.frame.offsetBy(dx: tsv.frame.width * 0.3, dy: 0)
+                    }
                 }
             }
         }
