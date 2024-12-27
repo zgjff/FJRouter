@@ -29,6 +29,7 @@ extension FJRoute {
                 useNavigationController.setViewControllers([toVC], animated: false)
                 destVC = useNavigationController
             }
+            destVC.transitioningDelegate = nil
             if fullScreen {
                 destVC.modalPresentationStyle = .fullScreen
             }

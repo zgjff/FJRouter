@@ -140,6 +140,54 @@ extension FJRouter {
 
 // MARK: - go
 extension FJRouter {
+    /// 导航至对应路由路径控制器
+    ///
+    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
+    ///
+    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
+    /// - Parameters:
+    ///   - location: 路由路径
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    public func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
+        Task {
+            try await go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
+        }
+    }
+    
+    /// 导航至对应路由名称控制器
+    ///
+    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
+    ///
+    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
+    /// - Parameters:
+    ///   - name: 路由名称
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
+        Task {
+            do {
+                let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
+                try await go_private(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            } catch {
+                if let err = error as? FJRouter.ConvertError {
+                    throw FJRouter.MatchError.convertNameLoc(err)
+                } else if let err = error as? FJRouter.MatchError {
+                    throw err
+                } else {
+                    throw FJRouter.MatchError.cancelled
+                }
+            }
+        }
+    }
+}
+
+// MARK: - callback go
+extension FJRouter {
     /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
     /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
@@ -189,22 +237,6 @@ extension FJRouter {
                 gerr = FJRouter.MatchError.cancelled
             }
             return Fail(error: gerr).eraseToAnyPublisher()
-        }
-    }
-    
-    /// 导航至对应路由路径控制器
-    ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
-    /// - Parameters:
-    ///   - location: 路由路径
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    public func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
-        Task {
-            try await go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
         }
     }
     
@@ -261,37 +293,9 @@ extension FJRouter {
             return Fail(error: gerr).eraseToAnyPublisher()
         }
     }
-    
-    /// 导航至对应路由名称控制器
-    ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    public func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
-        Task {
-            do {
-                let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-                try await go_private(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
-            } catch {
-                if let err = error as? FJRouter.ConvertError {
-                    throw FJRouter.MatchError.convertNameLoc(err)
-                } else if let err = error as? FJRouter.MatchError {
-                    throw err
-                } else {
-                    throw FJRouter.MatchError.cancelled
-                }
-            }
-        }
-    }
 }
 
+// MARK: - private
 extension FJRouter {
     func go_trigger<T>(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {

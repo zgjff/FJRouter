@@ -1,8 +1,8 @@
 //
-//  FJRouter+Callback.swift
+//  UIViewController+FJRouterCallback.swift
 //  FJRouter
 //
-//  Created by zgjff on 2024/12/26.
+//  Created by zgjff on 2024/12/27.
 //
 
 import Foundation
@@ -15,11 +15,11 @@ extension UIViewController {
     /// - Parameters:
     ///   - name: 名称
     ///   - value: 对应的值: 默认为()
-    public func dispatchFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
+    public func triggerFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
             throw FJRouter.DispatchCallbackError.emptyName
         }
-        try dispatchFJRouterCallBack(item: item)
+        try triggerFJRouterCallBack(item: item)
     }
     
     /// 触发路由回调
@@ -27,7 +27,7 @@ extension UIViewController {
     /// 如果路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameter item: 内容
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
-    public func dispatchFJRouterCallBack(item: FJRouter.CallbackItem) throws {
+    public func triggerFJRouterCallBack(item: FJRouter.CallbackItem) throws {
         if fjroute_callback_trigger == nil {
             throw FJRouter.DispatchCallbackError.noTrigger
         }

@@ -10,8 +10,8 @@ import Foundation
 extension FJRouter {
     /// 使用`AsyncStream`进行callback
     struct AsyncStreamCallback: FJRouterCallbackable {
-        nonisolated(unsafe) let stream: AsyncStream<FJRouter.CallbackItem>
-        nonisolated(unsafe) private let continuation: AsyncStream<FJRouter.CallbackItem>.Continuation
+        let stream: AsyncStream<FJRouter.CallbackItem>
+        private let continuation: AsyncStream<FJRouter.CallbackItem>.Continuation
         init() {
             (stream, continuation) = AsyncStream.makeStream(of: FJRouter.CallbackItem.self)
         }
