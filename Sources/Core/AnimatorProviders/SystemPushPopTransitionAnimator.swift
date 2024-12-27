@@ -220,7 +220,6 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
         let isPresenting = toVC.presentingViewController == fromVC
         let startFrame = transitionContext.initialFrame(for: fromVC)
         let endFrame = transitionContext.finalFrame(for: toVC)
-        
         var offset: CGVector
         switch targetEdge {
         case .top:
@@ -236,34 +235,46 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
             assert(false, "targetEdge must be one of UIRectEdgeTop, UIRectEdgeBottom, UIRectEdgeLeft, or UIRectEdgeRight.")
         }
         
+        let isfullScreen = isPresenting ? (fromVC.modalPresentationStyle == .fullScreen) : (toVC.modalPresentationStyle == .fullScreen)
         if isPresenting {
-            fromView.frame = startFrame
+            if isfullScreen {
+                fromView.frame = startFrame
+            }
             toView.frame = endFrame.offsetBy(dx: endFrame.width * offset.dx * -1, dy: endFrame.height * offset.dy * -1)
         } else {
             fromView.frame = startFrame
-            toView.frame = endFrame.offsetBy(dx: endFrame.width * -0.3, dy: 0)
+            if isfullScreen {
+                toView.frame = endFrame.offsetBy(dx: endFrame.width * -0.3, dy: 0)
+            }
         }
         
         if isPresenting {
             containerView.addSubview(toView)
         } else {
-            containerView.insertSubview(toView, belowSubview: fromView)
+            if isfullScreen {
+                containerView.insertSubview(toView, belowSubview: fromView)
+            }
         }
-        
         let animator = UIViewPropertyAnimator(duration: duration, curve: .easeInOut) {
             if isPresenting {
                 toView.frame = endFrame
-                fromView.frame = startFrame.offsetBy(dx: startFrame.width * -0.3, dy: 0)
+                if isfullScreen {
+                    fromView.frame = startFrame.offsetBy(dx: startFrame.width * -0.3, dy: 0)
+                }
             } else {
                 fromView.frame = startFrame.offsetBy(dx: startFrame.width * offset.dx, dy: startFrame.height * offset.dy)
-                toView.frame = endFrame
+                if isfullScreen {
+                    toView.frame = endFrame
+                }
             }
         }
         
         animator.addCompletion { _ in
             let wasCancelled = transitionContext.transitionWasCancelled
             if wasCancelled {
-                toView.removeFromSuperview()
+                if isfullScreen {
+                    toView.removeFromSuperview()
+                }
             }
             transitionContext.completeTransition(!wasCancelled)
         }
@@ -274,162 +285,5 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
     func animationEnded(_ transitionCompleted: Bool) {
         self.transitionCompleted?()
         self.animator = nil
-    }
-}
-
-private extension PushPopPresentAnimator {
-    func systemModalPresentationStyleAnimateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let fromVC = transitionContext.viewController(forKey: .from),
-            let toVC = transitionContext.viewController(forKey: .to) else { return }
-        let duration = transitionDuration(using: transitionContext)
-        let containerView = transitionContext.containerView
-        var fromView, toView: UIView
-        if transitionContext.responds(to: #selector(transitionContext.view(forKey:))) {
-            fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
-            toView = transitionContext.view(forKey: .to) ?? toVC.view!
-        } else {
-            fromView = fromVC.view
-            toView = toVC.view
-        }
-        
-        let isPresenting = toVC.presentingViewController == fromVC
-        
-        let startFrame = transitionContext.initialFrame(for: fromVC)
-        let endFrame = transitionContext.finalFrame(for: toVC)
-        var offset: CGVector
-        switch targetEdge {
-        case .top:
-            offset = CGVector(dx: 0, dy: 1)
-        case .bottom:
-            offset = CGVector(dx: 0, dy: -1)
-        case .left:
-            offset = CGVector(dx: 1, dy: 0)
-        case .right:
-            offset = CGVector(dx: -1, dy: 0)
-        default:
-            offset = CGVector()
-            assert(false, "targetEdge must be one of UIRectEdgeTop, UIRectEdgeBottom, UIRectEdgeLeft, or UIRectEdgeRight.")
-        }
-        
-        if isPresenting {
-            fromView.frame = startFrame
-            toView.frame = endFrame.offsetBy(dx: endFrame.width * offset.dx * -1, dy: endFrame.height * offset.dy * -1)
-        } else {
-            fromView.frame = startFrame
-            toView.frame = endFrame.offsetBy(dx: endFrame.width * -0.3, dy: 0)
-        }
-        
-        if isPresenting {
-            toView.layer.shadowColor = UIColor.black.withAlphaComponent(0.2).cgColor
-            toView.layer.shadowOffset = CGSize(width: -1, height: 1)
-            toView.layer.shadowRadius = 1
-            toView.layer.shadowOpacity = 1
-            toView.layer.shadowPath = UIBezierPath(rect: toView.bounds).cgPath
-            toView.clipsToBounds = false
-        } else {
-            fromView.layer.shadowColor = UIColor.black.withAlphaComponent(0.2).cgColor
-            fromView.layer.shadowOffset = CGSize(width: -1, height: 1)
-            fromView.layer.shadowRadius = 1
-            fromView.layer.shadowOpacity = 1
-            fromView.layer.shadowPath = UIBezierPath(rect: toView.bounds).cgPath
-            fromView.clipsToBounds = false
-        }
-        
-        if isPresenting {
-            containerView.addSubview(toView)
-        } else {
-            containerView.insertSubview(toView, belowSubview: fromView)
-        }
-        if !transitionContext.isInteractive {
-            UIView.animate(withDuration: duration, delay: 0, options: .curveEaseInOut) {
-                if isPresenting {
-                    toView.frame = endFrame
-                    fromView.frame = startFrame.offsetBy(dx: startFrame.width * -0.3, dy: 0)
-                } else {
-                    fromView.frame = startFrame.offsetBy(dx: startFrame.width * offset.dx, dy: startFrame.height * offset.dy)
-                    toView.frame = endFrame
-                }
-            } completion: { _ in
-                let wasCancelled = transitionContext.transitionWasCancelled
-                if wasCancelled {
-                    toView.removeFromSuperview()
-                }
-                transitionContext.completeTransition(!wasCancelled)
-            }
-            return
-        }
-        UIView.animate(withDuration: duration, animations: {
-            if isPresenting {
-                toView.frame = endFrame
-                fromView.frame = startFrame.offsetBy(dx: startFrame.width * -0.3, dy: 0)
-            } else {
-                fromView.frame = startFrame.offsetBy(dx: startFrame.width * offset.dx, dy: startFrame.height * offset.dy)
-                toView.frame = endFrame
-            }
-        }) { _ in
-            let wasCancelled = transitionContext.transitionWasCancelled
-            if wasCancelled {
-                toView.removeFromSuperview()
-            }
-            transitionContext.completeTransition(!wasCancelled)
-        }
-    }
-    
-    func customModalPresentationStyleAnimateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let fromVC = transitionContext.viewController(forKey: .from),
-            let toVC = transitionContext.viewController(forKey: .to) else { return }
-        let duration = transitionDuration(using: transitionContext)
-        let containerView = transitionContext.containerView
-        var fromView, toView: UIView
-        if transitionContext.responds(to: #selector(transitionContext.view(forKey:))) {
-            //TODO: 适配iOS13
-            fromView = transitionContext.view(forKey: .from) ?? fromVC.view!
-            toView = transitionContext.view(forKey: .to) ?? toVC.view!
-        } else {
-            fromView = fromVC.view
-            toView = toVC.view
-        }
-        
-        let isPresenting = toVC.presentingViewController == fromVC
-        
-        let startFrame = fromVC.presentationController?.frameOfPresentedViewInContainerView ?? transitionContext.initialFrame(for: fromVC)
-        let endFrame = toVC.presentationController?.frameOfPresentedViewInContainerView ?? transitionContext.finalFrame(for: toVC)
-        
-        var offset: CGVector
-        switch targetEdge {
-        case .top:
-            offset = CGVector(dx: 0, dy: 1)
-        case .bottom:
-            offset = CGVector(dx: 0, dy: -1)
-        case .left:
-            offset = CGVector(dx: 1, dy: 0)
-        case .right:
-            offset = CGVector(dx: -1, dy: 0)
-        default:
-            offset = CGVector()
-            assert(false, "targetEdge must be one of UIRectEdgeTop, UIRectEdgeBottom, UIRectEdgeLeft, or UIRectEdgeRight.")
-        }
-        
-        if isPresenting {
-            toView.frame = endFrame.offsetBy(dx: endFrame.width * offset.dx * -1, dy: endFrame.height * offset.dy * -1)
-        } else {
-            fromView.frame = startFrame
-        }
-        if isPresenting {
-            containerView.addSubview(toView)
-        }
-        UIView.animate(withDuration: duration, delay: 0, options: .curveEaseInOut) {
-            if isPresenting {
-                toView.frame = endFrame
-            } else {
-                fromView.frame = startFrame.offsetBy(dx: startFrame.width * offset.dx, dy: startFrame.height * offset.dy)
-            }
-        } completion: { _ in
-            let wasCancelled = transitionContext.transitionWasCancelled
-            if wasCancelled {
-                toView.removeFromSuperview()
-            }
-            transitionContext.completeTransition(!wasCancelled)
-        }
     }
 }
