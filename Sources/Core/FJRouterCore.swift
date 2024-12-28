@@ -12,10 +12,10 @@ final class FJRouterCore: @unchecked Sendable {
     var errorBuilder: (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
     var apptopController: (@MainActor (_ current: UIViewController?) -> UIViewController?)
     init() {
-        errorBuilder = { @Sendable state in
+        errorBuilder = { @MainActor @Sendable state in
             return FJRouterErrorController(state: state)
         }
-        apptopController = { current in
+        apptopController = { @MainActor @Sendable current in
             UIApplication.shared.topViewController(current)
         }
     }

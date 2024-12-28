@@ -17,12 +17,12 @@ extension FJRoute {
         }
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
+            var destVC = toVC
             if let useNavigationController {
                 useNavigationController.setViewControllers([toVC], animated: false)
-                UIApplication.shared.versionkKeyWindow?.rootViewController = useNavigationController
-            } else {
-                UIApplication.shared.versionkKeyWindow?.rootViewController = toVC
+                destVC = useNavigationController
             }
+            UIApplication.shared.versionkKeyWindow?.rootViewController = destVC
         }
     }
 }

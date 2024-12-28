@@ -20,18 +20,18 @@ extension FJRoute {
         private let useNavigationController: UINavigationController?
         /// 初始化方法
         /// - Parameter useNavigationController: 在进行`preesnt`和`rootController`时, 是否需要导航栏包裹控制器.
-        ///  注意navigationController必须是新初始化生成的; 在判断为`push`时, 此参数无效
+        ///  在判断为`push`时, 此参数无效; 注意navigationController必须是新初始化生成的
         public init(navigationController useNavigationController: UINavigationController? = nil) {
             self.useNavigationController = useNavigationController
         }
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            var destVC = toVC
-            if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
-                destVC = useNavigationController
-            }
             guard let fromVC else {
+                var destVC = toVC
+                if let useNavigationController {
+                    useNavigationController.setViewControllers([toVC], animated: false)
+                    destVC = useNavigationController
+                }
                 UIApplication.shared.versionkKeyWindow?.rootViewController = destVC
                 return
             }
@@ -39,6 +39,11 @@ extension FJRoute {
                 toVC.hidesBottomBarWhenPushed = true
                 fromVC.navigationController?.pushViewController(toVC, animated: true)
                 return
+            }
+            var destVC = toVC
+            if let useNavigationController {
+                useNavigationController.setViewControllers([toVC], animated: false)
+                destVC = useNavigationController
             }
             destVC.transitioningDelegate = nil
             fromVC.present(destVC, animated: true)
