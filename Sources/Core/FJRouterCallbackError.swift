@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 触发路由回调错误
-    public enum DispatchCallbackError: Error, Sendable {
+    public enum DispatchCallbackError: Error, @unchecked Sendable {
         /// 发送的`callback`的`name`为空
         case emptyName
         /// 没有路由回调触发器, 使用路由方法错误, 请使用带有`AnyPublisher`返回值的go方法

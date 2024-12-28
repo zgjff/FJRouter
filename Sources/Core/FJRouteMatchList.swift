@@ -106,7 +106,7 @@ extension FJRouteMatchList: CustomStringConvertible, CustomDebugStringConvertibl
 
 extension FJRouteMatchList {
     /// 匹配结果
-    enum MatchResult: Equatable, Sendable {
+    enum MatchResult: Equatable, @unchecked Sendable {
         /// 成功
         case success([FJRouteMatch])
         /// 失败

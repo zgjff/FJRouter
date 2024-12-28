@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 匹配错误
-    public enum MatchError: Error, Sendable {
+    public enum MatchError: Error, @unchecked Sendable {
         /// 错误的查找路径: 不是正确的`URL`
         case errorLocUrl
         /// 没有发现路由

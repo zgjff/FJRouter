@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 通过路由名称、路由参数、查询参数组装路由路径错误
-    public enum ConvertError: Error, Sendable, Equatable {
+    public enum ConvertError: Error, @unchecked Sendable, Equatable {
         /// 不存在当前名称的路由
         case noExistName
         /// `URL`转换成`string`错误, 具体请看`URLComponents`的`string`注释
