@@ -1,5 +1,5 @@
 //
-//  SystemPushPopTransitionAnimator.swift
+//  PresentSameAsPushAnimator.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/12/13.
@@ -9,8 +9,8 @@ import Foundation
 import UIKit
 
 extension FJRoute {
-    /// 系统push/pop动画风格的转场动画, 支持侧滑dismiss
-    public struct SystemPushPopTransitionAnimator: FJRouteAnimator {
+    /// 系统push/pop动画风格的present/dismiss转场动画, 支持侧滑dismiss
+    public struct PresentSameAsPushAnimator: FJRouteAnimator {
         private let useNavigationController: UINavigationController?
         private let sideslipBack: Bool
         /// 初始化

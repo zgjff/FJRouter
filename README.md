@@ -157,6 +157,6 @@ dismiss(animated: true, completion: { [weak self] in
 #### 4: 使用自定义弹窗转场动画
 注册路由的时候`animator`设置为`FJRoute.CustomPresentationAnimator`
 #### 5: 系统push/pop动画风格的`present`转场动画, 支持侧滑dismiss
-注册路由的时候`animator`设置为`FJRoute.SystemPushPopTransitionAnimator`
+注册路由的时候`animator`设置为`FJRoute.PresentSameAsPushAnimator`
 #### 5: 其它跳转动画
 准守并实现`FJRouteAnimator`路由动画协议, 然后在注册路由的时候设置`animator`
