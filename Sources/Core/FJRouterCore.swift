@@ -49,14 +49,18 @@ extension FJRouterCore {
                 return nil
             }
             let state = FJRouterState(matches: matchList, match: match)
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            guard let tovc = state.route?.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) else {
+            guard let route = state.route else {
+                if ignoreError {
+                    return nil
+                }
+                goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
                 return nil
             }
-            guard let animator = state.route?.animator?(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state)) else {
-                private_go(to: tovc, from: sourceController, animated: flag, isError: false)
-                return tovc
+            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+            guard let tovc = route.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) else {
+                return nil
             }
+            let animator = route.animator(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state))
             animator.startAnimatedTransitioning(from: fromController, to: tovc, state: state)
             return tovc
         }

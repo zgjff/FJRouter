@@ -36,9 +36,9 @@ extension FJRouter {
     ///   - path: 要注册的路由path
     ///   - name: 路由名称
     ///   - builder: 构建路由的`controller`方式
-    ///     非自己调用`push`,`present`等自主操作行为。用于`go(location: String......)`方法
+    ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, animator: FJRoute.Animator? = nil, redirect: (any FJRouteRedirector)? = nil) async throws {
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, animator: @escaping FJRoute.Animator = { @MainActor _ in FJRoute.AutomaticAnimator() }, redirect: (any FJRouteRedirector)? = nil) async throws {
         let route = try FJRoute(path: path, name: name, builder: builder, animator: animator, redirect: redirect)
         await store.addRoute(route)
     }
@@ -142,9 +142,6 @@ extension FJRouter {
 extension FJRouter {
     /// 导航至对应路由路径控制器
     ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -158,9 +155,6 @@ extension FJRouter {
     
     /// 导航至对应路由名称控制器
     ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -189,10 +183,6 @@ extension FJRouter {
 // MARK: - callback go
 extension FJRouter {
     /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
-    ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
     ///
     /// 回调使用方法:
     ///
@@ -241,10 +231,6 @@ extension FJRouter {
     }
     
     /// 导航至对应路由名称控制器: 此方法支持通过`Combine`框架进行路由回调
-    ///
-    /// 若路由的`animator`为`nil`: 框架内部会先尝试`push`, 然后尝试`present`
-    ///
-    /// 若路由的`animator`不为`nil`: 框架只会调用对应的实现方法
     ///
     /// 回调使用方法:
     ///

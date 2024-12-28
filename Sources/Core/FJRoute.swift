@@ -46,7 +46,7 @@ public struct FJRoute: Sendable {
     public let builder: FJRoute.Builder?
     
     /// 显示匹配路由控制器的方式。只适用与适用go、goNamed进行跳转的方式
-    public let animator: Animator?
+    public let animator: Animator
 
     /// 路由拦截器
     public let redirect: (any FJRouteRedirector)?
@@ -68,7 +68,7 @@ public struct FJRoute: Sendable {
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: (any FJRouteRedirector)? = nil, routes: @autoclosure () throws -> [FJRoute] = []) throws {
+    public init(path: String, name: String? = nil, builder: Builder?, animator: @escaping Animator = { @MainActor _ in AutomaticAnimator() }, redirect: (any FJRouteRedirector)? = nil, routes: @autoclosure () throws -> [FJRoute] = []) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
