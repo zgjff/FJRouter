@@ -31,10 +31,12 @@ pod 'FJRouter'
  
 > 路径`/user/:id/book/:bookId`, 可以解析出参数分别需要id, bookId, 可以匹配`/user/../book/...`的url, eg: `/user/123/book/456` and etc.
 
-#### 路由`builder`: 用于构建路由的指向控制器。此类型是个构建对应控制器的枚举类型: 包含只创建的`default`和自动创建并处理显示的`display`
+#### 路由`builder`: 用于构建路由的指向控制器。
 ```swift
-FJRoute(path: "/", name: "root", builder: { _ in
-    UINavigationController(rootViewController: ViewController())
+FJRoute(path: "/", name: "root", builder: { @MainActor @Sendable _ in 
+    ViewController() 
+}, animator: { @MainActor @Sendable _ in 
+    FJRoute.AppRootControllerAnimator(navigationController: UINavigationController()) 
 })
 ```
 
@@ -58,9 +60,9 @@ func redirectRoute(state: FJRouterState) async throws -> String?
 > 注意: 强烈建议子路由的`path`不要以`/`为开头
 ```swift
 let route = try! FJRoute(path: "settings", builder: ..., routes: [
-    try! FJRoute(path: "user", builder: ...),
-    try! FJRoute(path: "pwd", builder: ...),
-    try! FJRoute(path: "info/:id", builder: ...),
+    FJRoute(path: "user", builder: ...),
+    FJRoute(path: "pwd", builder: ...),
+    FJRoute(path: "info/:id", builder: ...),
 ])
 ```
 
@@ -158,5 +160,13 @@ dismiss(animated: true, completion: { [weak self] in
 注册路由的时候`animator`设置为`FJRoute.CustomPresentationAnimator`
 #### 5: 系统push/pop动画风格的present/dismiss转场动画, 支持侧滑dismiss
 注册路由的时候`animator`设置为`FJRoute.PresentSameAsPushAnimator`
-#### 5: 其它跳转动画
+#### 6: 根据情况自动选择动画方式
+> 如果有`fromVC`且有导航栏, 则进行系统`push`
+
+> 如果有`fromVC`且没有导航栏, 则进行系统`present`
+
+> 如果没有`fromVC`,判定`window`没有`rootController`, 则设置app的`rootController`
+
+注册路由的时候`animator`设置为`FJRoute.AutomaticAnimator`
+#### 7: 其它跳转动画
 准守并实现`FJRouteAnimator`路由动画协议, 然后在注册路由的时候设置`animator`

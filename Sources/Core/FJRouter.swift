@@ -38,7 +38,7 @@ extension FJRouter {
     ///   - builder: 构建路由的`controller`方式
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
-    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, animator: @escaping FJRoute.Animator = { @MainActor _ in FJRoute.AutomaticAnimator() }, redirect: (any FJRouteRedirector)? = nil) async throws {
+    public func registerRoute(path: String, name: String? = nil, builder: FJRoute.Builder?, animator: FJRoute.Animator?, redirect: (any FJRouteRedirector)? = nil) async throws {
         let route = try FJRoute(path: path, name: name, builder: builder, animator: animator, redirect: redirect)
         await store.addRoute(route)
     }
