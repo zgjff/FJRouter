@@ -9,7 +9,10 @@ import Foundation
 import UIKit
 
 extension FJRoute {
-    /// 使用系统push动画进行显示
+    /// 使用系统push进行显示
+    ///
+    ///
+    /// 若要使用自定义转场动画, 请在`toVC`内部自行设置`navigationController?.delegate = xxx`
     public struct SystemPushAnimator: FJRouteAnimator {
         private let hidesBottomBarWhenPushed: Bool
         public init(hidesBottomBarWhenPushed: Bool = true) {

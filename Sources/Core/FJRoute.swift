@@ -91,7 +91,7 @@ public struct FJRoute: Sendable {
         self.path = p
         self.name = n
         self.builder = builder
-        self.animator = animator ?? { @MainActor _ in AutomaticAnimator() }
+        self.animator = animator ?? { @MainActor @Sendable _ in AutomaticAnimator() }
         self.redirect = redirect
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
