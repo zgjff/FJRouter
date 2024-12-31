@@ -590,14 +590,14 @@ extension FJCustomPresentationContext {
                 toView.frame = frames.toFinalFrame
                 toView.transform = toView.transform.scaledBy(x: 0.5, y: 0.5)
                 if #available(iOS 17.0, *) {
-                    UIView.animate(springDuration: duration, bounce: 0.5, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                    UIView.animate(springDuration: duration, bounce: 0.4, initialSpringVelocity: 15, options: .curveEaseInOut) {
                         toView.transform = CGAffineTransform.identity
                     } completion: { _ in
                         let wasCancelled = ctx.transitionWasCancelled
                         ctx.completeTransition(!wasCancelled)
                     }
                 } else {
-                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 15, options: .curveEaseInOut) {
                         toView.transform = CGAffineTransform.identity
                     } completion: { _ in
                         let wasCancelled = ctx.transitionWasCancelled
@@ -624,14 +624,14 @@ extension FJCustomPresentationContext {
                 let f = frames.toFinalFrame
                 toView.frame = f.offsetBy(dx: 0, dy: f.height)
                 if #available(iOS 17.0, *) {
-                    UIView.animate(springDuration: duration, bounce: 0.33, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                    UIView.animate(springDuration: duration, bounce: 0.23, initialSpringVelocity: 10, options: .curveEaseInOut) {
                         toView.frame = frames.toFinalFrame
                     } completion: { _ in
                         let wasCancelled = ctx.transitionWasCancelled
                         ctx.completeTransition(!wasCancelled)
                     }
                 } else {
-                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.77, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.80, initialSpringVelocity: 10, options: .curveEaseInOut) {
                         toView.frame = frames.toFinalFrame
                     } completion: { _ in
                         let wasCancelled = ctx.transitionWasCancelled
