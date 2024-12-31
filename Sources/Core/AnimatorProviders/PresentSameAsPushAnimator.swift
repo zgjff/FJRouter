@@ -234,8 +234,20 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
             offset = CGVector()
             assert(false, "targetEdge must be one of UIRectEdgeTop, UIRectEdgeBottom, UIRectEdgeLeft, or UIRectEdgeRight.")
         }
-        
-        let isfullScreen = (isPresenting ? fromVC : toVC).modalPresentationStyle == .fullScreen
+        let isfullScreen: Bool
+        if isPresenting {
+            if fromVC.presentingViewController == nil {
+                isfullScreen = true
+            } else {
+                isfullScreen = fromVC.modalPresentationStyle == .fullScreen
+            }
+        } else {
+            if toVC.presentingViewController == nil {
+                isfullScreen = true
+            } else {
+                isfullScreen = toVC.modalPresentationStyle == .fullScreen
+            }
+        }
         if isPresenting {
             if isfullScreen {
                 fromView.frame = startFrame
@@ -277,14 +289,14 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
             }
         }
         
-        animator.addCompletion { _ in
-            let wasCancelled = transitionContext.transitionWasCancelled
-            if wasCancelled {
+        animator.addCompletion { position in
+            let completed = position == .end
+            if !completed {
                 if isfullScreen {
                     toView.removeFromSuperview()
                 }
             }
-            transitionContext.completeTransition(!wasCancelled)
+            transitionContext.completeTransition(completed)
         }
         self.animator = animator
         return animator
