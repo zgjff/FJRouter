@@ -15,6 +15,9 @@ extension FJRoute {
         private let useNavigationController: UINavigationController?
         
         /// 初始化
+        ///
+        /// ⚠️: 一定要在控制器内部设置`preferredContentSize`,
+        ///
         /// - Parameters:
         ///   - useNavigationController: 使用导航栏包裹控制器. 注意navigationController必须是新初始化生成的
         ///   - config: 配置
@@ -173,6 +176,10 @@ extension FJCustomPresentationController {
     
     override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
         if let vc = container as? UIViewController, vc == presentedViewController {
+            let s = vc.preferredContentSize
+            if s == .zero {
+                return vc.view.bounds.size
+            }
             return vc.preferredContentSize
         }
         return super.size(forChildContentContainer: container, withParentContainerSize: parentSize)
