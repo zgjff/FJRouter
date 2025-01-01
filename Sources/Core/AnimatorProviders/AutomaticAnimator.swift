@@ -27,26 +27,17 @@ extension FJRoute {
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
             guard let fromVC else {
-                var destVC = toVC
-                if let useNavigationController {
-                    useNavigationController.setViewControllers([toVC], animated: false)
-                    destVC = useNavigationController
-                }
-                UIApplication.shared.versionkKeyWindow?.rootViewController = destVC
+                let ar = AppRootControllerAnimator(navigationController: useNavigationController)
+                ar.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
                 return
             }
             if fromVC.navigationController != nil {
-                toVC.hidesBottomBarWhenPushed = true
-                fromVC.navigationController?.pushViewController(toVC, animated: true)
+                let pp = SystemPushAnimator(hidesBottomBarWhenPushed: true)
+                pp.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
                 return
             }
-            var destVC = toVC
-            if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
-                destVC = useNavigationController
-            }
-            destVC.transitioningDelegate = nil
-            fromVC.present(destVC, animated: true)
+            let sp = SystemPresentAnimator(navigationController: useNavigationController)
+            return sp.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
         }
     }
 }

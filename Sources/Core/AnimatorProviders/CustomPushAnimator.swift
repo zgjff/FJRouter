@@ -177,7 +177,9 @@ extension FJRoute.Private_CustomPushAnimator.NavigationDelegateBrigde {
             willShow.send(completion: .finished)
             didShow.send(completion: .finished)
         }
-        init(supportedInterfaceOrientations: @escaping (UINavigationController) -> UIInterfaceOrientationMask, interfaceOrientationForPresentation: @escaping (UINavigationController) -> UIInterfaceOrientation) {
+        init(
+            supportedInterfaceOrientations: @escaping (UINavigationController) -> UIInterfaceOrientationMask, interfaceOrientationForPresentation: @escaping (UINavigationController) -> UIInterfaceOrientation
+        ) {
             willShow = PassthroughSubject()
             didShow = PassthroughSubject()
             super.init()
