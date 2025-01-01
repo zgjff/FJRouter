@@ -24,7 +24,7 @@ extension FJRoute {
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
             if sideslipBack {
-                toVC.fjroute_addScreenPanGestureDismiss()
+                toVC.fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss()
             }
             var destVC = toVC
             if let useNavigationController {
@@ -32,33 +32,33 @@ extension FJRoute {
                 destVC = useNavigationController
             }
             destVC.modalPresentationStyle = .fullScreen
-            destVC.transitioningDelegate = toVC.fjroute_pushPopStylePresentDelegate
+            destVC.transitioningDelegate = toVC.fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegate
             fromVC?.present(destVC, animated: true)
         }
     }
 }
 
-@MainActor private var fjroute_pushPopStylePresentDelegateKey = 0
+@MainActor private var fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegateKey = 0
 extension UIViewController {
-    fileprivate var fjroute_pushPopStylePresentDelegate: SystemPushPopTransitionDelegate {
+    fileprivate var fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegate: SystemPushPopTransitionDelegate {
         get {
-            if let associated = objc_getAssociatedObject(self, &fjroute_pushPopStylePresentDelegateKey) as? SystemPushPopTransitionDelegate { return associated }
+            if let associated = objc_getAssociatedObject(self, &fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegateKey) as? SystemPushPopTransitionDelegate { return associated }
             let associated = SystemPushPopTransitionDelegate()
-            objc_setAssociatedObject(self, &fjroute_pushPopStylePresentDelegateKey, associated, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegateKey, associated, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             return associated
         }
         set {
-            objc_setAssociatedObject(self, &fjroute_pushPopStylePresentDelegateKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegateKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     
-    fileprivate func fjroute_addScreenPanGestureDismiss() {
-        let spGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(fjroute_onBeganEdgePanGestureBack(_:)))
+    fileprivate func fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss() {
+        let spGesture = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(fjroute_pNc4BJVZea8ep_ZV9Cgy2_onBeganEdgePanGestureBack(_:)))
         spGesture.edges = .left
         view.addGestureRecognizer(spGesture)
     }
     
-    @IBAction fileprivate func fjroute_onBeganEdgePanGestureBack(_ sender: UIScreenEdgePanGestureRecognizer) {
+    @IBAction fileprivate func fjroute_pNc4BJVZea8ep_ZV9Cgy2_onBeganEdgePanGestureBack(_ sender: UIScreenEdgePanGestureRecognizer) {
         guard case .began = sender.state else {
             return
         }
@@ -79,7 +79,7 @@ extension UIViewController {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-@MainActor fileprivate class SystemPushPopTransitionDelegate: NSObject, UIViewControllerTransitioningDelegate {
+@MainActor fileprivate final class SystemPushPopTransitionDelegate: NSObject, UIViewControllerTransitioningDelegate {
     public var gestureRecognizer: UIScreenEdgePanGestureRecognizer?
     public var targetEdge: UIRectEdge = .right
     

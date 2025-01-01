@@ -14,14 +14,14 @@ extension FJRoute {
     ///
     /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
     public struct SystemPushAnimator: FJRouteAnimator {
-        private let private_CustomPushAnimator: Private_CustomPushAnimator
+        private let private_customPushAnimator: Private_CustomPushAnimator
 
         /// 初始化
         ///
         /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
         /// - Parameter hidesBottomBarWhenPushed: hidesBottomBarWhenPushed: 设置push时`hidesBottomBarWhenPushed`
         public init(hidesBottomBarWhenPushed: Bool = true) {
-            private_CustomPushAnimator = Private_CustomPushAnimator(
+            private_customPushAnimator = Private_CustomPushAnimator(
                 animator: nil,
                 interactive: nil,
                 hidesBottomBarWhenPushed: hidesBottomBarWhenPushed
@@ -29,7 +29,7 @@ extension FJRoute {
         }
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            private_CustomPushAnimator.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
+            private_customPushAnimator.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
         }
     }
 }
