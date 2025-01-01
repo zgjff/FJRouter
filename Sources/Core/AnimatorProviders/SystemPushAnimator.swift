@@ -7,21 +7,29 @@
 
 import Foundation
 import UIKit
+import Combine
 
 extension FJRoute {
     /// 使用系统push进行显示
     ///
-    ///
-    /// 若要使用自定义转场动画, 请在`toVC`内部自行设置`navigationController?.delegate = xxx`
+    /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
     public struct SystemPushAnimator: FJRouteAnimator {
-        private let hidesBottomBarWhenPushed: Bool
+        private let private_CustomPushAnimator: Private_CustomPushAnimator
+
+        /// 初始化
+        ///
+        /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
+        /// - Parameter hidesBottomBarWhenPushed: hidesBottomBarWhenPushed: 设置push时`hidesBottomBarWhenPushed`
         public init(hidesBottomBarWhenPushed: Bool = true) {
-            self.hidesBottomBarWhenPushed = hidesBottomBarWhenPushed
+            private_CustomPushAnimator = Private_CustomPushAnimator(
+                animator: nil,
+                interactive: nil,
+                hidesBottomBarWhenPushed: hidesBottomBarWhenPushed
+            )
         }
         
         public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            toVC.hidesBottomBarWhenPushed = hidesBottomBarWhenPushed
-            fromVC?.navigationController?.pushViewController(toVC, animated: true)
+            private_CustomPushAnimator.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
         }
     }
 }
