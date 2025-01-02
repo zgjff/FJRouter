@@ -11,5 +11,5 @@ Pod::Spec.new do |s|
 
    s.source_files = 'Sources/*.swift', 'Sources/**/*.{swift}'
    s.platform     = :ios, "13.0"
-   s.swift_version = '5.1'
+   s.swift_version = '5.9'
   end
