@@ -15,10 +15,17 @@ extension FJRoute {
     /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
     public struct CustomPushAnimator: FJRouteAnimator {
         /// 转场动画
-        public typealias Animator = @MainActor @Sendable (_ operation: UINavigationController.Operation) -> any UIViewControllerAnimatedTransitioning
+        public typealias Animator = @MainActor @Sendable (_ info: AnimatorInfo) -> any UIViewControllerAnimatedTransitioning
         /// 交互
         public typealias Interactive = @MainActor @Sendable (_ animator: any UIViewControllerAnimatedTransitioning) -> any UIViewControllerInteractiveTransitioning
 
+        /// push转场动画信息
+        public struct AnimatorInfo: Sendable {
+            public let operation: UINavigationController.Operation
+            public let fromVC: UIViewController
+            public let toVC: UIViewController
+        }
+        
         private let private_customPushAnimator: Private_CustomPushAnimator
         
         /// 初始化
@@ -85,7 +92,6 @@ extension FJRoute.Private_CustomPushAnimator {
         deinit {
             cancels = []
             delegate = nil
-            print("NavigationDelegate-------deinit")
         }
         init(
             primary: UINavigationControllerDelegate?,
@@ -257,7 +263,7 @@ extension FJRoute.Private_CustomPushAnimator.NavigationDelegateBrigde {
         }
         
         func navigationController(_ navigationController: UINavigationController, animationControllerFor operation: UINavigationController.Operation, from fromVC: UIViewController, to toVC: UIViewController) -> (any UIViewControllerAnimatedTransitioning)? {
-            animator(operation)
+            animator(FJRoute.CustomPushAnimator.AnimatorInfo(operation: operation, fromVC: fromVC, toVC: toVC))
         }
     }
 }

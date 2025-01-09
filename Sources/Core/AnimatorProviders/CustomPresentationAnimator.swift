@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 extension FJRoute {
-    /// 自定义弹窗控制动画
+    /// 自定义`custom`的`present`转场动画
     public struct CustomPresentationAnimator: FJRouteAnimator {
         private let config: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())?
         private let useNavigationController: UINavigationController?
