@@ -6,12 +6,16 @@ import UIKit
 import Combine
 
 extension FJRouter {
+    /// 路由跳转管理中心
+    public static let jump = FJRouter.Jump()
+}
+
+extension FJRouter {
     /// 路由管理中心
     final public class Jump: Sendable {
-        public static let shared = Jump()
         fileprivate let store: FJRouterStore
         fileprivate let core: FJRouterCore
-        private init() {
+        fileprivate init() {
             store = FJRouterStore()
             core = FJRouterCore()
         }

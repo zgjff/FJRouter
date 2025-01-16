@@ -108,7 +108,7 @@ extension FJRouterViewControllerTests {
                 FJRoute(path: "feature3", name: "bfeature3-1", builder: ({ _  in ViewControllerPlay5() })),
                 FJRoute(path: "feature4/:name", name: "feature4", builder: ({ _  in ViewControllerPlay6() })),
             ])
-            await FJRouter.Jump.shared.registerRoute(route)
+            await FJRouter.jump.registerRoute(route)
         }
     }
 }
