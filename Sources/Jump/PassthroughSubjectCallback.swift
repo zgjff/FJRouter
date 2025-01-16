@@ -7,7 +7,7 @@
 
 import Foundation
 import Combine
-extension FJRouter {
+extension FJRouter.Jump {
     /// 使用`PassthroughSubject`进行callback
     struct PassthroughSubjectCallback: FJRouterCallbackable {
         nonisolated(unsafe) let subject: PassthroughSubject<FJRouter.CallbackItem, Never>

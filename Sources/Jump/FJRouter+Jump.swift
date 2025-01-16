@@ -4,19 +4,22 @@
 import Foundation
 import UIKit
 import Combine
-/// 路由管理中心
-final public class FJRouter: Sendable {
-    public static let shared = FJRouter()
-    fileprivate let store: FJRouterStore
-    fileprivate let core: FJRouterCore
-    private init() {
-        store = FJRouterStore()
-        core = FJRouterCore()
+
+extension FJRouter {
+    /// 路由管理中心
+    final public class Jump: Sendable {
+        public static let shared = Jump()
+        fileprivate let store: FJRouterStore
+        fileprivate let core: FJRouterCore
+        private init() {
+            store = FJRouterStore()
+            core = FJRouterCore()
+        }
     }
 }
 
 // MARK: - set
-extension FJRouter {
+extension FJRouter.Jump {
     /// 注册路由
     ///
     /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
@@ -93,7 +96,7 @@ extension FJRouter {
 }
 
 // MARK: - get
-extension FJRouter {
+extension FJRouter.Jump {
     /// 通过路由路径获取对应的控制器
     ///
     /// 1: 如果匹配路由成功, 且路由的`builder`不为nil, 则返回`builder`内部创建的控制器
@@ -139,7 +142,7 @@ extension FJRouter {
 }
 
 // MARK: - go
-extension FJRouter {
+extension FJRouter.Jump {
     /// 导航至对应路由路径控制器
     ///
     /// - Parameters:
@@ -181,7 +184,7 @@ extension FJRouter {
 }
 
 // MARK: - callback go
-extension FJRouter {
+extension FJRouter.Jump {
     /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
     /// 回调使用方法:
@@ -282,7 +285,7 @@ extension FJRouter {
 }
 
 // MARK: - private
-extension FJRouter {
+extension FJRouter.Jump {
     func go_trigger<T>(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl

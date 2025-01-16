@@ -15,7 +15,6 @@ actor FJRouterStore {
 
 extension FJRouterStore {
     /// 添加新路由
-    ///
     /// - Parameter route: 要添加的路由
     func addRoute(_ route: FJRoute) {
         routes.append(route)
