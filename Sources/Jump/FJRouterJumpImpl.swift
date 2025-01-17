@@ -57,21 +57,21 @@ extension FJRouter.JumpImpl {
 
 // MARK: - get
 extension FJRouter.JumpImpl {
-    func viewController(forLocation location: String, extra: (any Sendable)? = nil) async throws -> UIViewController {
-        guard let url = URL(string: location) else {
+    func viewController(location params: FJRouterJumpParams.FindControllerByLocation) async throws -> UIViewController {
+        guard let url = URL(string: params.path) else {
             throw FJRouter.MatchError.errorLocUrl
         }
-        let match = try await store.match(url: url, extra: extra, ignoreError: true)
+        let match = try await store.match(url: url, extra: params.extra, ignoreError: true)
         if let destvc = await core.viewController(for: match) {
             return destvc
         }
         throw FJRouter.MatchError.noBuilder
     }
     
-    func viewController(forName name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil) async throws -> UIViewController {
+    func viewController(named params: FJRouterJumpParams.FindControllerByNamed) async throws -> UIViewController {
         do {
-            let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            let destvc = try await viewController(forLocation: loc, extra: extra)
+            let loc = try await convertLocationBy(name: params.name, params: params.params, queryParams: params.queryParams)
+            let destvc = try await viewController(location: .init(path: loc, extra: params.extra))
             return destvc
         } catch {
             if let err = error as? FJRouter.ConvertError {
@@ -87,17 +87,19 @@ extension FJRouter.JumpImpl {
 
 // MARK: - go
 extension FJRouter.JumpImpl {
-    func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
+    func go(_ location: FJRouterJumpParams.GoLocation) throws {
         Task {
-            try await go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
+            try await go_private(location: location)
         }
     }
     
-    func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) throws {
+    func goNamed(_ params: FJRouterJumpParams.GoNamed) throws {
         Task {
             do {
-                let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-                try await go_private(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+                let loc = try await params.convertToLocation { name, params, queryParams in
+                    try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
+                }
+                try await go_private(location: loc)
             } catch {
                 if let err = error as? FJRouter.ConvertError {
                     throw FJRouter.MatchError.convertNameLoc(err)
@@ -114,9 +116,9 @@ extension FJRouter.JumpImpl {
 // MARK: - callback go
 extension FJRouter.JumpImpl {
     @discardableResult
-    func go(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func go(_ location: FJRouterJumpParams.GoLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
-            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
+            let result = try await go_trigger(location: location, callback: FJRouter.JumpPassthroughSubjectCallback())
             return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
         } catch {
             let gerr: FJRouter.MatchError
@@ -132,10 +134,12 @@ extension FJRouter.JumpImpl {
     }
     
     @discardableResult
-    func goNamed(_ name: String, params: [String: String] = [:], queryParams: [String: String] = [:], extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func goNamed(_ params: FJRouterJumpParams.GoNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
-            let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            let loc = try await params.convertToLocation { name, params, queryParams in
+                try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
+            }
+            return await go(loc)
         } catch {
             let gerr: FJRouter.MatchError
             if let err = error as? FJRouter.ConvertError {
@@ -152,13 +156,13 @@ extension FJRouter.JumpImpl {
 
 // MARK: - private
 extension FJRouter.JumpImpl {
-    func go_trigger<T>(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
-        guard let url = URL(string: location) else {
+    func go_trigger<T>(location: FJRouterJumpParams.GoLocation, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
+        guard let url = URL(string: location.path) else {
             throw FJRouter.MatchError.errorLocUrl
         }
         do {
-            let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-            guard let vc = await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true) else {
+            let match = try await store.match(url: url, extra: location.extra, ignoreError: location.ignoreError)
+            guard let vc = await core.go(matchList: match, sourceController: location.fromVC, ignoreError: location.ignoreError, animated: true) else {
                 throw FJRouter.MatchError.notFind
             }
             let cb = callback()
@@ -175,13 +179,13 @@ extension FJRouter.JumpImpl {
         }
     }
     
-    func go_private(location: String, extra: (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = false) async throws {
-        guard let url = URL(string: location) else {
+    func go_private(location: FJRouterJumpParams.GoLocation) async throws {
+        guard let url = URL(string: location.path) else {
             throw FJRouter.MatchError.errorLocUrl
         }
         do {
-            let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-            await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true)
+            let match = try await store.match(url: url, extra: location.extra, ignoreError: location.ignoreError)
+            await core.go(matchList: match, sourceController: location.fromVC, ignoreError: location.ignoreError, animated: true)
         } catch {
             if let err = error as? FJRouter.ConvertError {
                 throw FJRouter.MatchError.convertNameLoc(err)

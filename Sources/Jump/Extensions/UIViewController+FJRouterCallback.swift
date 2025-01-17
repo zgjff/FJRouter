@@ -17,7 +17,7 @@ extension UIViewController {
     ///   - value: 对应的值: 默认为()
     public func emitFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
-            throw FJRouter.DispatchCallbackError.emptyName
+            throw FJRouter.EmitCallbackError.emptyName
         }
         try emitFJRouterCallBack(item: item)
     }
@@ -29,7 +29,7 @@ extension UIViewController {
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
     public func emitFJRouterCallBack(item: FJRouter.CallbackItem) throws {
         if fjroute_callback_emitter == nil {
-            throw FJRouter.DispatchCallbackError.noTrigger
+            throw FJRouter.EmitCallbackError.noTrigger
         }
         fjroute_callback_emitter?.dispatch(item)
     }

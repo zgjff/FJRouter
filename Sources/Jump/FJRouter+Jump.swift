@@ -50,51 +50,41 @@ public protocol FJRouterJumpable {
     func convertLocationBy(name: String, params: [String: String], queryParams: [String: String]) async throws -> String
     
     /// 通过路由路径获取对应的控制器
-    ///
-    /// 1: 如果匹配路由成功, 且路由的`builder`不为nil, 则返回`builder`内部创建的控制器
-    ///
-    /// 2: 如果匹配路由成功, 且路由的`builder`为nil, 则返回`nil`
     /// - Parameters:
-    ///   - location: 路由路径
-    ///   - extra: 携带的参数
-    /// - Returns: 控制器
-    func viewController(forLocation location: String, extra: (any Sendable)?) async throws -> UIViewController
+    ///   - location: 路由路径查询参数
+    func viewController(location params: FJRouterJumpParams.FindControllerByLocation) async throws -> UIViewController
     
     /// 通过路由名称获取对应的控制器
     /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 查询参数
-    ///   - extra: 携带的参数
+    ///   - name: 路由名称查询参数
     /// - Returns: 控制器
-    func viewController(forName name: String, params: [String: String], queryParams: [String: String], extra: (any Sendable)?) async throws -> UIViewController
+    func viewController(named params: FJRouterJumpParams.FindControllerByNamed) async throws -> UIViewController
     
     /// 导航至对应路由路径控制器
     ///
+    ///     try FJRouter.jump().go(.init(path: "/first"))
+    ///
     /// - Parameters:
-    ///   - location: 路由路径
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    func go(location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
+    ///   - location: 通过路由路径进行跳转参数
+    func go(_ location: FJRouterJumpParams.GoLocation) throws
     
     /// 导航至对应路由名称控制器
     ///
+    ///     try FJRouter.jump().goNamed(.init(name: "first"))
+    ///
     /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    func goNamed(_ name: String, params: [String: String], queryParams: [String: String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
+    ///   - params: 通过路由名称进行跳转参数
+    func goNamed(_ params: FJRouterJumpParams.GoNamed) throws
     
     /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
+    /// - Parameters:
+    ///   - location: 通过路由路径进行跳转参数
+    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     ///
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.shared.go(location: "/second")
+    ///     let callback = await FJRouter.jump().go(.init(path: "/first"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -113,21 +103,18 @@ public protocol FJRouterJumpable {
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
-    /// - Parameters:
-    ///   - location: 路由路径
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    func go(location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func go(_ location: FJRouterJumpParams.GoLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
     
     /// 导航至对应路由名称控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
+    ///   - Parameter params: 通过路由名称进行跳转参数
+    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
+    ///
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.shared.goNamed("second")
+    ///     let callback = await FJRouter.jump().goNamed(.init(name: "first"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -146,14 +133,6 @@ public protocol FJRouterJumpable {
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    ///   - extra: 携带的参数
-    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    func goNamed(_ name: String, params: [String: String], queryParams: [String: String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func goNamed(_ params: FJRouterJumpParams.GoNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
 }

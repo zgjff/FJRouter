@@ -9,65 +9,65 @@ struct FJRouterViewControllerTests {
     }
     
     @Test func testSearchSignleRoute() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/", extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/"))
         #expect(vc1 is ViewControllerRoot)
-        let vc2 = try await FJRouter.jump().viewController(forName: "root", params: [:], queryParams: [:], extra: nil)
+        let vc2 = try await FJRouter.jump().viewController(named: .init(name: "root"))
         #expect(vc2 is ViewControllerRoot)
     }
     
     @Test func testSearchSameRoutes() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/same", extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/same"))
         #expect(vc1 is ViewController1)
-        let vc2 = try await FJRouter.jump().viewController(forName: "sameRouteForTest", params: [:], queryParams: [:], extra: nil)
+        let vc2 = try await FJRouter.jump().viewController(named: .init(name: "sameRouteForTest"))
         #expect(vc2 is ViewController1)
-        let vc3 = try await FJRouter.jump().viewController(forName: "sameRouteForTest1", params: [:], queryParams: [:], extra: nil)
+        let vc3 = try await FJRouter.jump().viewController(named: .init(name: "sameRouteForTest1"))
         #expect(vc3 is ViewController1)
     }
     
     @Test func testSearchDeepSignleRoute() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/book/feature1",extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/book/feature1"))
         #expect(vc1 is ViewControllerBook1)
-        let vc2 = try await FJRouter.jump().viewController(forLocation: "/book/feature2", extra: nil)
+        let vc2 = try await FJRouter.jump().viewController(location: .init(path: "/book/feature2"))
         #expect(vc2 is ViewControllerBook2)
-        let vc3 = try await FJRouter.jump().viewController(forName: "feature2", params: [:], queryParams: [:], extra: nil)
+        let vc3 = try await FJRouter.jump().viewController(named: .init(name: "feature2"))
         #expect(vc3 is ViewControllerBook2)
     }
     
     @Test func testSearchParamsRoute() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/play/123", extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/play/123"))
         #expect(vc1 is ViewControllerPlay)
     }
     
     @Test func testSearchDeepParamsRoute() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/play/123/feature1", extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/play/123/feature1"))
         #expect(vc1 is ViewControllerPlay1)
-        let vc2 = try await FJRouter.jump().viewController(forLocation: "/play/123/feature4/haha", extra: nil)
+        let vc2 = try await FJRouter.jump().viewController(location: .init(path: "/play/123/feature4/haha"))
         #expect(vc2 is ViewControllerPlay6)
-        let vc3 = try await FJRouter.jump().viewController(forName: "feature4", params: ["id": "123", "name": "haha"], queryParams: [:], extra: nil)
+        let vc3 = try await FJRouter.jump().viewController(named: .init(name: "feature4", params: ["id": "123", "name": "haha"]))
         #expect(vc3 is ViewControllerPlay6)
     }
     
     @Test func testSearchDeepParamsSameRoute() async throws {
-        let vc1 = try await FJRouter.jump().viewController(forLocation: "/play/123/feature3/haha", extra: nil)
+        let vc1 = try await FJRouter.jump().viewController(location: .init(path: "/play/123/feature3/haha"))
         #expect(vc1 is ViewControllerPlay3)
-        let vc2 = try await FJRouter.jump().viewController(forName: "bfeature3", params: ["id": "123"], queryParams: [:], extra: nil)
+        let vc2 = try await FJRouter.jump().viewController(named: .init(name: "bfeature3", params: ["id": "123"]))
         #expect(vc2 is ViewControllerPlay4)
-        let vc3 = try await FJRouter.jump().viewController(forName: "bfeature3-1", params: ["id": "123"], queryParams: [:], extra: nil)
+        let vc3 = try await FJRouter.jump().viewController(named: .init(name: "bfeature3-1", params: ["id": "123"]))
         #expect(vc3 is ViewControllerPlay4)
     }
     
     @Test func testSearchErrorLocUrlError() async throws {
         await #expect(throws: FJRouter.MatchError.errorLocUrl) {
-            try await FJRouter.jump().viewController(forLocation: "", extra: nil)
+            try await FJRouter.jump().viewController(location: .init(path: ""))
         }
     }
     
     @Test func testSearchNotFindError() async throws {
         await #expect(throws: FJRouter.MatchError.notFind) {
-            try await FJRouter.jump().viewController(forLocation: "/sadfsadf", extra: nil)
+            try await FJRouter.jump().viewController(location: .init(path: "/sadfsadf"))
         }
         await #expect(throws: FJRouter.MatchError.notFind) {
-            try await FJRouter.jump().viewController(forLocation: "/play/123/feature4", extra: nil)
+            try await FJRouter.jump().viewController(location: .init(path: "/play/123/feature4"))
         }
     }
 }

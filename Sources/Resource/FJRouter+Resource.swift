@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 资源
-    public static let resource = FJRouter.Resource()
+//    public static let resource = FJRouter.Resource()
 }
 
 extension FJRouter {
