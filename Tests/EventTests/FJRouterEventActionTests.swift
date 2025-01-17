@@ -41,6 +41,10 @@ struct FJRouterEventActionTests {
         #expect(action.matchRegExpHasPrefix("/settings/detail/abc") != nil)
         #expect(action.matchRegExpHasPrefix("settings/detail") != nil)
         #expect(action.matchRegExpHasPrefix("settings/detail/abc") != nil)
+        #expect(action.matchRegExpHasPrefix("/settings/detail/") != nil)
+        #expect(action.matchRegExpHasPrefix("settings/detail") != nil)
+        #expect(action.matchRegExpHasPrefix("settings/detail/") != nil)
+        #expect(action.matchRegExpHasPrefix("/settings/detail/") != nil)
         
         #expect(action.matchRegExpHasPrefix("/") == nil)
         #expect(action.matchRegExpHasPrefix("settings") == nil)
@@ -60,13 +64,9 @@ struct FJRouterEventActionTests {
     @Test func testDifferentAction() throws {
         let a1 = try FJRouterEventAction(path: "/a")
         let a2 = try FJRouterEventAction(path: "a")
-        #expect(a1 == a2)
         let a3 = try FJRouterEventAction(path: "a/")
-        #expect(a1 == a3)
-        #expect(a2 == a3)
         let a4 = try FJRouterEventAction(path: "/a/")
-        #expect(a1 == a4)
-        #expect(a2 == a4)
-        #expect(a3 == a4)
+        let actions: Set<FJRouterEventAction> = [a1, a2, a3, a4]
+        #expect(actions.count == 1)
     }
 }

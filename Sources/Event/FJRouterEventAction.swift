@@ -40,8 +40,22 @@ public struct FJRouterEventAction: Sendable {
 
 extension FJRouterEventAction: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(path)
-        hasher.combine(name)
+        if path.isEmpty {
+            hasher.combine(path)
+            return
+        }
+        if path == "/" {
+            hasher.combine(path)
+            return
+        }
+        var p = path
+        if p.hasPrefix("/") {
+            p = String(p.dropFirst())
+        }
+        if p.hasSuffix("/") {
+            p = String(p.dropLast())
+        }
+        hasher.combine(p)
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {

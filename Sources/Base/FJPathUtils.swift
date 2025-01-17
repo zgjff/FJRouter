@@ -95,30 +95,23 @@ extension FJPathUtils {
         guard let regExp else {
             return [:]
         }
+        let checkStrings = [string, "/\(string)", "\(string)/", "/\(string)/"]
         var matchResults: [String] = []
-        regExp.enumerateMatches(in: string, options: [], range: NSRange(location: 0, length: string.count)) { result, flags, _ in
-            guard let result else {
-                return
-            }
-            let results = stride(from: 0, to: result.numberOfRanges, by: 1)
-                .map({ result.range(at: $0) })
-                .dropFirst()
-                .compactMap({ Range($0, in: string) })
-                .compactMap { String(describing: string[$0]) }
-            matchResults += results
-        }
-        if matchResults.isEmpty {
-            let nstring = string + "/"
-            regExp.enumerateMatches(in: nstring, options: [], range: NSRange(location: 0, length: nstring.count)) { result, flags, _ in
+        
+        for cs in checkStrings {
+            regExp.enumerateMatches(in: cs, options: [], range: NSRange(location: 0, length: cs.count)) { result, flags, _ in
                 guard let result else {
                     return
                 }
                 let results = stride(from: 0, to: result.numberOfRanges, by: 1)
                     .map({ result.range(at: $0) })
                     .dropFirst()
-                    .compactMap({ Range($0, in: nstring) })
-                    .compactMap { String(describing: nstring[$0]) }
+                    .compactMap({ Range($0, in: cs) })
+                    .compactMap { String(describing: cs[$0]) }
                 matchResults += results
+            }
+            if !matchResults.isEmpty {
+                return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
             }
         }
         return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
