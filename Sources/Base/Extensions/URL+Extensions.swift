@@ -15,4 +15,20 @@ extension URL {
             return path
         }
     }
+    
+    func adjust() -> URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: true) else {
+            return self
+        }
+        let cp = components.path
+        if cp.isEmpty {
+            components.path = "/"
+        } else if cp.count > 1 && cp.hasSuffix("/") {
+            let startIndex = cp.startIndex
+            let endIndex = cp.index(cp.endIndex, offsetBy: -1)
+            components.path = String(describing: cp[startIndex..<endIndex])
+        }
+        let newUrl = components.url ?? self
+        return newUrl
+    }
 }

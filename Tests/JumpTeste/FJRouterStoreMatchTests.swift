@@ -257,8 +257,8 @@ struct FJRouterStoreMatchTests {
 }
 
 extension FJRouterStoreMatchTests {
-    fileprivate func createConfig(action: ((_ config: FJRouterStore) async -> ())? = nil) async -> FJRouterStore {
-        let config = FJRouterStore()
+    fileprivate func createConfig(action: ((_ config: FJRouter.JumpStore) async -> ())? = nil) async -> FJRouter.JumpStore {
+        let config = FJRouter.JumpStore()
         let r1 = try! FJRoute(path: "/", builder: _builder, routes: [
             try! FJRoute(path: "home", builder: _builder)
         ])

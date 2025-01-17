@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FJRouteMatchList: @unchecked Sendable {
+internal struct FJRouteMatchList: @unchecked Sendable {
     /// 匹配结果
     let result: MatchResult
     /// 匹配的原始url
@@ -106,7 +106,7 @@ extension FJRouteMatchList: CustomStringConvertible, CustomDebugStringConvertibl
 
 extension FJRouteMatchList {
     /// 匹配结果
-    enum MatchResult: Equatable, @unchecked Sendable {
+    internal enum MatchResult: Equatable, @unchecked Sendable {
         /// 成功
         case success([FJRouteMatch])
         /// 失败

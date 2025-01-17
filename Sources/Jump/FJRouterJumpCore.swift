@@ -1,5 +1,5 @@
 //
-//  FJRouterCore.swift
+//  FJRouterJumpCore.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/11/21.
@@ -8,20 +8,23 @@
 import Foundation
 import UIKit
 import Combine
-final class FJRouterCore: @unchecked Sendable {
-    var errorBuilder: (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
-    var apptopController: (@MainActor (_ current: UIViewController?) -> UIViewController?)
-    init() {
-        errorBuilder = { @MainActor @Sendable state in
-            return FJRouterErrorController(state: state)
-        }
-        apptopController = { @MainActor @Sendable current in
-            UIApplication.shared.topViewController(current)
+
+extension FJRouter {
+    internal final class JumpCore: @unchecked Sendable {
+        var errorBuilder: (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)
+        var apptopController: (@MainActor (_ current: UIViewController?) -> UIViewController?)
+        init() {
+            errorBuilder = { @MainActor @Sendable state in
+                return FJRouterErrorController(state: state)
+            }
+            apptopController = { @MainActor @Sendable current in
+                UIApplication.shared.topViewController(current)
+            }
         }
     }
 }
 
-extension FJRouterCore {
+extension FJRouter.JumpCore {
     @MainActor func viewController(for matchList: FJRouteMatchList) -> UIViewController? {
         guard let match = matchList.lastMatch else {
             return nil

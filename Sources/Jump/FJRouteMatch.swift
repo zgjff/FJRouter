@@ -8,7 +8,7 @@
 import Foundation
 
 /// 路由匹配信息
-struct FJRouteMatch: Sendable {
+internal struct FJRouteMatch: Sendable {
     /// 匹配到的路由
     let route: FJRoute
     /// 匹配到的内容字符串

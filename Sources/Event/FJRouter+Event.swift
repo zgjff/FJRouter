@@ -6,17 +6,25 @@
 //
 
 import Foundation
+import Combine
 
 extension FJRouter {
     /// 事件总线
-    public static let event = FJRouter.Event()
+    public static func event() -> any FJRouterEventable {
+        FJRouter.EventImpl.shared
+    }
 }
 
-extension FJRouter {
-    /// 事件总线
-    final public class Event: Sendable {
-        
-        fileprivate init() {
-        }
-    }
+/// 事件总线协议
+public protocol FJRouterEventable {
+    /// 监听
+    func onReceive(action: FJRouterEventAction) async -> AnyPublisher<Void, Never>
+    
+    /// 监听
+    func onReceive(path: String, name: String?) async -> AnyPublisher<Void, Never>
+    
+    /// 触发
+    func emit(location: String, extra: (any Sendable)?)
+    
+    func emit(name: String, extra: (any Sendable)?)
 }

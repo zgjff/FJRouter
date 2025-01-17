@@ -1,5 +1,5 @@
 //
-//  FJRouterStore.swift
+//  FJRouterJumpStore.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/11/21.
@@ -7,13 +7,15 @@
 
 import Foundation
 
-actor FJRouterStore {
-    private var routes: [FJRoute] = []
-    private var redirectLimit: UInt = 5
-    private var nameToPath: [String: String] = [:]
+extension FJRouter {
+    internal actor JumpStore {
+        private var routes: [FJRoute] = []
+        private var redirectLimit: UInt = 5
+        private var nameToPath: [String: String] = [:]
+    }
 }
 
-extension FJRouterStore {
+extension FJRouter.JumpStore {
     /// 添加新路由
     /// - Parameter route: 要添加的路由
     func addRoute(_ route: FJRoute) {
@@ -31,7 +33,7 @@ extension FJRouterStore {
     /// - Parameter url: 路由url
     /// - Returns: 结果
     func canOpen(url: URL) -> Bool {
-        let matchList = findMatch(url: adjustUrl(url), extra: nil)
+        let matchList = findMatch(url: url.adjust(), extra: nil)
         return !matchList.isError
     }
     
@@ -42,7 +44,7 @@ extension FJRouterStore {
     ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
     func match(url: URL, extra: (any Sendable)?, ignoreError: Bool) async throws -> FJRouteMatchList {
-        let result = findMatch(url: adjustUrl(url), extra: extra)
+        let result = findMatch(url: url.adjust(), extra: extra)
         let final = await redirect(initialMatches: result)
         switch final.result {
         case .success(let ms):
@@ -109,7 +111,7 @@ extension FJRouterStore {
     }
 }
 
-private extension FJRouterStore {
+private extension FJRouter.JumpStore {
     func beginSaveRouteNamePath(parentFullPath: String, childRoutes: [FJRoute]) {
         for route in childRoutes {
             let fullPath = FJPathUtils.default.concatenatePaths(parentPath: parentFullPath, childPath: route.path)
@@ -124,22 +126,6 @@ private extension FJRouterStore {
                 beginSaveRouteNamePath(parentFullPath: fullPath, childRoutes: route.routes)
             }
         }
-    }
-    
-    func adjustUrl(_ url: URL) -> URL {
-        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            return url
-        }
-        let cp = components.path
-        if cp.isEmpty {
-            components.path = "/"
-        } else if cp.count > 1 && cp.hasSuffix("/") {
-            let startIndex = cp.startIndex
-            let endIndex = cp.index(cp.endIndex, offsetBy: -1)
-            components.path = String(describing: cp[startIndex..<endIndex])
-        }
-        let newUrl = components.url ?? url
-        return newUrl
     }
     
     func findMatch(url: URL, extra: (any Sendable)?) -> FJRouteMatchList {

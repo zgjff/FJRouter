@@ -74,6 +74,6 @@ extension FJRouterState {
     ///   - queryParams: 路由查询参数
     /// - Returns: 组装之后的路由路径
     public func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) async throws -> String {
-        try await FJRouter.jump.convertLocationBy(name: name, params: params, queryParams: queryParams)
+        try await FJRouter.jump().convertLocationBy(name: name, params: params, queryParams: queryParams)
     }
 }

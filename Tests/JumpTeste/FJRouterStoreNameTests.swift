@@ -92,8 +92,8 @@ struct FJRouterStoreNameTests {
 }
 
 extension FJRouterStoreNameTests {
-    fileprivate func createStore(action: (_ store: FJRouterStore) async -> ()) async -> FJRouterStore {
-        let store = FJRouterStore()
+    fileprivate func createStore(action: (_ store: FJRouter.JumpStore) async -> ()) async -> FJRouter.JumpStore {
+        let store = FJRouter.JumpStore()
         await action(store)
         return store
     }
