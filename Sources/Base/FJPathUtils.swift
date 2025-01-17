@@ -53,6 +53,40 @@ extension FJPathUtils {
         return (exp, parameters)
     }
     
+    internal func matchRegExpHasPrefix(_ loc: String, regExp: NSRegularExpression?) -> NSRegularExpression? {
+        guard let regExp else {
+            return nil
+        }
+        if regExp.firstMatch(in: loc, range: NSRange(location: 0, length: loc.count)) != nil {
+            return regExp
+        }
+        let ploc = "/\(loc)"
+        if regExp.firstMatch(in: ploc, range: NSRange(location: 0, length: ploc.count)) != nil {
+            return regExp
+        }
+        let lloc = "\(loc)/"
+        if regExp.firstMatch(in: lloc, range: NSRange(location: 0, length: lloc.count)) != nil {
+            return regExp
+        }
+        let aloc = "/\(loc)/"
+        if regExp.firstMatch(in: aloc, range: NSRange(location: 0, length: aloc.count)) != nil {
+            return regExp
+        }
+        if loc.hasPrefix("/") {
+            let dfloc = String(loc.dropFirst())
+            if regExp.firstMatch(in: dfloc, range: NSRange(location: 0, length: dfloc.count)) != nil {
+                return regExp
+            }
+        }
+        if loc.hasSuffix("/") {
+            let dlloc = String(loc.dropLast())
+            if regExp.firstMatch(in: dlloc, range: NSRange(location: 0, length: dlloc.count)) != nil {
+                return regExp
+            }
+        }
+        return nil
+    }
+    
     /// 利用正则从字符串中提取参数并按照参数名进行映射
     internal func extractPathParameters(_ parameters: [String], inString string: String, useRegExp regExp: NSRegularExpression?) -> [String: String] {
         if parameters.isEmpty {
@@ -72,6 +106,20 @@ extension FJPathUtils {
                 .compactMap({ Range($0, in: string) })
                 .compactMap { String(describing: string[$0]) }
             matchResults += results
+        }
+        if matchResults.isEmpty {
+            let nstring = string + "/"
+            regExp.enumerateMatches(in: nstring, options: [], range: NSRange(location: 0, length: nstring.count)) { result, flags, _ in
+                guard let result else {
+                    return
+                }
+                let results = stride(from: 0, to: result.numberOfRanges, by: 1)
+                    .map({ result.range(at: $0) })
+                    .dropFirst()
+                    .compactMap({ Range($0, in: nstring) })
+                    .compactMap { String(describing: nstring[$0]) }
+                matchResults += results
+            }
         }
         return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
     }
@@ -111,6 +159,10 @@ extension FJPathUtils {
     internal func concatenatePaths(parentPath: String, childPath: String) -> String {
         var result = parentPath.split(separator: "/")
         result += childPath.split(separator: "/")
-        return "/" + result.filter { !$0.isEmpty }.joined(separator: "/")
+        let joinPath = "/" + result.filter { !$0.isEmpty }.joined(separator: "/")
+        guard childPath.hasSuffix("/") && !joinPath.hasSuffix("/") && joinPath != "/" else {
+            return joinPath
+        }
+        return joinPath + "/"
     }
 }

@@ -97,17 +97,7 @@ public struct FJRoute: Sendable {
     }
     
     internal func matchRegExpHasPrefix(_ loc: String) -> NSRegularExpression? {
-        guard let regExp else {
-            return nil
-        }
-        if regExp.firstMatch(in: loc, range: NSRange(location: 0, length: loc.count)) != nil {
-            return regExp
-        }
-        let ploc = "/\(loc)"
-        if regExp.firstMatch(in: ploc, range: NSRange(location: 0, length: ploc.count)) != nil {
-            return regExp
-        }
-        return nil
+        return FJPathUtils.default.matchRegExpHasPrefix(loc, regExp: regExp)
     }
     
     internal func extractPathParameters(inString string: String, useRegExp regExp: NSRegularExpression?) -> [String: String] {
@@ -131,7 +121,29 @@ extension FJRoute: Hashable {
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.path == rhs.path
+        if let lreg = lhs.regExp, let rreg = rhs.regExp {
+            if lreg.pattern == rreg.pattern {
+                return true
+            }
+        }
+        if lhs.path == rhs.path {
+            return true
+        }
+        var lp = lhs.path
+        if lp.hasPrefix("/") {
+            lp = String(lp.dropFirst())
+        }
+        if lp.hasSuffix("/") {
+            lp = String(lp.dropLast())
+        }
+        var rp = rhs.path
+        if rp.hasPrefix("/") {
+            rp = String(rp.dropFirst())
+        }
+        if rp.hasSuffix("/") {
+            rp = String(rp.dropLast())
+        }
+        return lp == rp
     }
 }
 

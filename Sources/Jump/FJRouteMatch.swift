@@ -43,9 +43,68 @@ extension FJRouteMatch {
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
         let pathLoc = FJPathUtils.default.patternToPath(pattern: route.path, pathParameters: encodedParams)
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: matchedLocation, childPath: pathLoc)
-        if [newMatchedLocation.lowercased(), newMatchedLocation.dropFirst().lowercased()].contains(url.versionPath.lowercased()) { // 匹配成功
+        var matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        var finalMatchLocation = newMatchedLocation
+        if !matchSuccess {
+            if route.routes.isEmpty && newMatchedLocation.lowercased() == (url.versionPath.lowercased() + "/") {
+                matchSuccess = true
+            }
+        }
+        if !matchSuccess {
+            if !newMatchedLocation.hasPrefix("/") {
+                if route.routes.isEmpty && (newMatchedLocation.lowercased() + "/") == url.versionPath.lowercased() {
+                    matchSuccess = true
+                }
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.hasPrefix("/") && !url.versionPath.hasPrefix("/") {
+                if newMatchedLocation.lowercased() == ("/" + url.versionPath.lowercased()) {
+                    matchSuccess = true
+                }
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.hasSuffix("/") {
+                let dnp = newMatchedLocation.dropFirst()
+                if dnp.lowercased() == url.versionPath.lowercased() {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            if route.routes.isEmpty && newMatchedLocation.hasPrefix("/") {
+                let dnp = newMatchedLocation.dropFirst()
+                if dnp.lowercased() == ((url.versionPath.lowercased() + "/")) {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.hasPrefix("/") {
+                let dnp = newMatchedLocation.dropFirst() + "/"
+                if dnp.lowercased() == url.versionPath.lowercased() {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            let np = newMatchedLocation + "/"
+            if route.routes.isEmpty && (np.lowercased() == url.versionPath.lowercased()) {
+                matchSuccess = true
+                finalMatchLocation = np
+            }
+        }
+        
+        if matchSuccess { // 匹配成功
             let finalParameters = pathParameters.merging(currentPathParameter) { (_, new) in new }
-            return ([FJRouteMatch(route: route, matchedLocation: newMatchedLocation)], finalParameters)
+            return ([FJRouteMatch(route: route, matchedLocation: finalMatchLocation)], finalParameters)
+        }
+        if route.routes.isEmpty {
+            return ([], [:])
         }
         // 匹配子路由
         let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.path)

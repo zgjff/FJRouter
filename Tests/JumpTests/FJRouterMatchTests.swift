@@ -6,7 +6,7 @@ import UIKit
 struct FJRouterMatchTests {
     @Test func matchWithoutParameter() async throws {
         let route = try! FJRoute(path: "/settings/detail", builder: _builder)
-        let (matches1, pathParameters1) = FJRouteMatch.match(route: route, byUrl: URL(string: "/settings/detail")!)
+        let (matches1, pathParameters1) = FJRouteMatch.match(route: route, byUrl: URL(string: "settings/detail")!)
         #expect(matches1.count == 1)
         #expect(matches1[0].route == route)
         #expect(matches1[0].matchedLocation == "/settings/detail")
@@ -81,7 +81,7 @@ struct FJRouterMatchTests {
             ])
         ])
         let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b")!)
-        #expect(matches1.isEmpty)
+        #expect(!matches1.isEmpty)
         
         let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "a/b")!)
         #expect(matches2.isEmpty)

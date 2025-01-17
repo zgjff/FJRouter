@@ -24,7 +24,7 @@ extension FJRouter.EventListener {
     }
     
     func receive(value: FJRouter.EventMatchState) {
-        
+        subject.send(())
     }
 }
 

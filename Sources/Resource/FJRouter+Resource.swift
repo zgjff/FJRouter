@@ -8,24 +8,13 @@
 import Foundation
 
 extension FJRouter {
-    /// 资源
-//    public static let resource = FJRouter.Resource()
-}
-
-extension FJRouter {
-    /// 资源
-    final public class Resource: Sendable {
-        
-        fileprivate init() {
-            
-        }
+    /// 资源中心
+    public static func resource() -> any FJRouterResourceable {
+        FJRouter.ResourceImpl.shared
     }
 }
 
-extension FJRouter.Resource {
-    public func pick() {
-        
-    }
+/// 路由资源协议
+public protocol FJRouterResourceable {
     
 }
-

@@ -15,26 +15,22 @@ public struct FJRouterEventAction: Sendable {
     /// 路由`path`的对应正则表达式
     private let regExp: NSRegularExpression?
     
-    public init(path: String, name: String?) {
+    public init(path: String, name: String? = nil) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        if p.isEmpty {
+            throw CreateError.emptyPath
+        }
         let n = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let n, n.isEmpty {
+            throw CreateError.emptyName
+        }
         self.path = p
         self.name = n
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
     
     internal func matchRegExpHasPrefix(_ loc: String) -> NSRegularExpression? {
-        guard let regExp else {
-            return nil
-        }
-        if regExp.firstMatch(in: loc, range: NSRange(location: 0, length: loc.count)) != nil {
-            return regExp
-        }
-        let ploc = "/\(loc)"
-        if regExp.firstMatch(in: ploc, range: NSRange(location: 0, length: ploc.count)) != nil {
-            return regExp
-        }
-        return nil
+        return FJPathUtils.default.matchRegExpHasPrefix(loc, regExp: regExp)
     }
     
     internal func extractPathParameters(inString string: String, useRegExp regExp: NSRegularExpression?) -> [String: String] {
@@ -49,8 +45,29 @@ extension FJRouterEventAction: Hashable {
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
-        return lhs.path == rhs.path
-        && lhs.name == rhs.name
+        if let lreg = lhs.regExp, let rreg = rhs.regExp {
+            if lreg.pattern == rreg.pattern {
+                return true
+            }
+        }
+        if lhs.path == rhs.path {
+            return true
+        }
+        var lp = lhs.path
+        if lp.hasPrefix("/") {
+            lp = String(lp.dropFirst())
+        }
+        if lp.hasSuffix("/") {
+            lp = String(lp.dropLast())
+        }
+        var rp = rhs.path
+        if rp.hasPrefix("/") {
+            rp = String(rp.dropFirst())
+        }
+        if rp.hasSuffix("/") {
+            rp = String(rp.dropLast())
+        }
+        return lp == rp
     }
 }
 
@@ -61,5 +78,33 @@ extension FJRouterEventAction: CustomStringConvertible, CustomDebugStringConvert
     
     public var debugDescription: String {
         description
+    }
+}
+
+extension FJRouterEventAction {
+    public enum CreateError: Error, Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+        case emptyPath
+        case emptyName
+        
+        public var description: String {
+            switch self {
+            case .emptyPath:
+                return "FJRoute path cannot be empty"
+            case .emptyName:
+                return "FJRoute name cannot be empty"
+            }
+        }
+        
+        public var debugDescription: String {
+            description
+        }
+        
+        public var errorDescription: String? {
+            description
+        }
+        
+        public var localizedDescription: String {
+            description
+        }
     }
 }

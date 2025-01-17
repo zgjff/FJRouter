@@ -14,6 +14,7 @@ extension FJRouter {
 }
 
 extension FJRouter.EventStore {
+    @discardableResult
     func saveOrCreateListener(action: FJRouterEventAction) -> FJRouter.EventListener {
         if let obj = listeners.first(where: { $0.action == action }) {
             return obj
@@ -25,10 +26,14 @@ extension FJRouter.EventStore {
     
     func match(url: URL, extra: (any Sendable)?) -> FJRouter.EventMatch? {
         for listener in listeners {
-            let result = FJRouter.EventMatch.match(action: listener.action, byUrl: url)
+            let _ = FJRouter.EventMatch.match(action: listener.action, byUrl: url)
 //            return result?.match
         }
         return nil
+    }
+    
+    func numbers() -> Int {
+        listeners.count
     }
 }
 

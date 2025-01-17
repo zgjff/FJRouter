@@ -21,7 +21,7 @@ public protocol FJRouterEventable {
     func onReceive(action: FJRouterEventAction) async -> AnyPublisher<Void, Never>
     
     /// 监听
-    func onReceive(path: String, name: String?) async -> AnyPublisher<Void, Never>
+    func onReceive(path: String) async throws -> AnyPublisher<Void, Never>
     
     /// 触发
     func emit(location: String, extra: (any Sendable)?)

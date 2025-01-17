@@ -27,8 +27,9 @@ extension FJRouter.EventImpl: FJRouterEventable {
     }
     
     /// 监听
-    func onReceive(path: String, name: String?) async -> AnyPublisher<Void, Never> {
-        return await onReceive(action: .init(path: path, name: name))
+    func onReceive(path: String) async throws -> AnyPublisher<Void, Never> {
+        let action = try FJRouterEventAction(path: path, name: nil)
+        return await onReceive(action: action)
     }
     
     /// 触发

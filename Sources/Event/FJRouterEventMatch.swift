@@ -27,8 +27,64 @@ extension FJRouter.EventMatch {
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
         let pathLoc = FJPathUtils.default.patternToPath(pattern: action.path, pathParameters: encodedParams)
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: pathLoc)
-        if [newMatchedLocation.lowercased(), newMatchedLocation.dropFirst().lowercased()].contains(url.versionPath.lowercased()) { // 匹配成功
-            return (.init(action: action, matchedLocation: newMatchedLocation), currentPathParameter)
+        
+        var matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        var finalMatchLocation = newMatchedLocation
+        if !matchSuccess {
+            if newMatchedLocation.hasSuffix("/") {
+                let dnp = newMatchedLocation.dropFirst()
+                if dnp.lowercased() == url.versionPath.lowercased() {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            if !newMatchedLocation.hasPrefix("/") {
+                if (newMatchedLocation.lowercased() + "/") == url.versionPath.lowercased() {
+                    matchSuccess = true
+                }
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.hasPrefix("/") {
+                let dnp = newMatchedLocation.dropFirst()
+                if dnp.lowercased() == ((url.versionPath.lowercased() + "/")) {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.hasPrefix("/") {
+                let dnp = newMatchedLocation.dropFirst() + "/"
+                if dnp.lowercased() == url.versionPath.lowercased() {
+                    matchSuccess = true
+                    finalMatchLocation = String(dnp)
+                }
+            }
+        }
+        if !matchSuccess {
+            let np = newMatchedLocation + "/"
+            if np.lowercased() == url.versionPath.lowercased() {
+                matchSuccess = true
+                finalMatchLocation = np
+            }
+        }
+        if !matchSuccess {
+            if newMatchedLocation.lowercased() == ((url.versionPath.lowercased() + "/")) { // 匹配成功
+                matchSuccess = true
+            }
+        }
+        if !matchSuccess {
+            if !newMatchedLocation.hasPrefix("/") {
+                if (newMatchedLocation.lowercased() + "/") == url.versionPath.lowercased() {
+                    matchSuccess = true
+                }
+            }
+        }
+        if matchSuccess { // 匹配成功
+            return (.init(action: action, matchedLocation: finalMatchLocation), currentPathParameter)
         }
         return nil
     }
@@ -41,5 +97,16 @@ extension FJRouter.EventMatch: CustomStringConvertible, CustomDebugStringConvert
     
     var debugDescription: String {
         description
+    }
+}
+
+extension FJRouter.EventMatch: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(action)
+        hasher.combine(matchedLocation)
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.action == rhs.action && lhs.matchedLocation == rhs.matchedLocation
     }
 }
