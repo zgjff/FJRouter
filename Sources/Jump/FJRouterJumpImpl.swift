@@ -87,13 +87,13 @@ extension FJRouter.JumpImpl {
 
 // MARK: - go
 extension FJRouter.JumpImpl {
-    func go(_ location: FJRouterJumpParams.GoLocation) throws {
+    func go(_ location: FJRouterJumpParams.GoByLocation) throws {
         Task {
             try await go_private(location: location)
         }
     }
     
-    func goNamed(_ params: FJRouterJumpParams.GoNamed) throws {
+    func goNamed(_ params: FJRouterJumpParams.GoByNamed) throws {
         Task {
             do {
                 let loc = try await params.convertToLocation { name, params, queryParams in
@@ -116,7 +116,7 @@ extension FJRouter.JumpImpl {
 // MARK: - callback go
 extension FJRouter.JumpImpl {
     @discardableResult
-    func go(_ location: FJRouterJumpParams.GoLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func go(_ location: FJRouterJumpParams.GoByLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
             let result = try await go_trigger(location: location, callback: FJRouter.JumpPassthroughSubjectCallback())
             return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
@@ -134,7 +134,7 @@ extension FJRouter.JumpImpl {
     }
     
     @discardableResult
-    func goNamed(_ params: FJRouterJumpParams.GoNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func goNamed(_ params: FJRouterJumpParams.GoByNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
             let loc = try await params.convertToLocation { name, params, queryParams in
                 try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
@@ -156,7 +156,7 @@ extension FJRouter.JumpImpl {
 
 // MARK: - private
 extension FJRouter.JumpImpl {
-    func go_trigger<T>(location: FJRouterJumpParams.GoLocation, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
+    func go_trigger<T>(location: FJRouterJumpParams.GoByLocation, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location.path) else {
             throw FJRouter.MatchError.errorLocUrl
         }
@@ -179,7 +179,7 @@ extension FJRouter.JumpImpl {
         }
     }
     
-    func go_private(location: FJRouterJumpParams.GoLocation) async throws {
+    func go_private(location: FJRouterJumpParams.GoByLocation) async throws {
         guard let url = URL(string: location.path) else {
             throw FJRouter.MatchError.errorLocUrl
         }

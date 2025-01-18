@@ -20,24 +20,46 @@ extension FJRouter {
 }
 
 extension FJRouter.EventImpl: FJRouterEventable {
-    /// 监听
-    func onReceive(action: FJRouterEventAction) async -> AnyPublisher<Void, Never> {
+    func onReceive(path: String) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
+        try await onReceive(path: path, name: nil)
+    }
+    
+    func onReceive(path: String, name: String?) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
+        let action = try FJRouterEventAction(path: path, name: nil)
         let listener = await store.saveOrCreateListener(action: action)
         return listener.publisher()
     }
     
-    /// 监听
-    func onReceive(path: String) async throws -> AnyPublisher<Void, Never> {
-        let action = try FJRouterEventAction(path: path, name: nil)
-        return await onReceive(action: action)
+    func emit(_ location: String) {
+        emit(location, extra: nil)
     }
     
-    /// 触发
-    func emit(location: String, extra: (any Sendable)? = nil) {
+    func emit(_ location: String, extra: (any Sendable)? = nil) {
+        guard let url = URL(string: location) else {
+            return
+        }
+        emit(url: url, extra: extra)
+    }
+    
+    func emit(byName name: String) {
         
     }
     
-    func emit(name: String, extra: (any Sendable)? = nil) {
+    func emit(byName name: String, extra: (any Sendable)? = nil) {
         
+    }
+}
+
+private extension FJRouter.EventImpl {
+    func emit(url: URL, extra: (any Sendable)? = nil) {
+        Task { [weak self] in
+            guard let self else {
+                return
+            }
+            guard let (listener, info) = await self.store.match(url: url, extra: extra) else {
+                return
+            }
+            listener.receive(value: info)
+        }
     }
 }

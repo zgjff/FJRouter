@@ -8,15 +8,16 @@
 import Foundation
 import UIKit
 
-// MARK: - 跳转
+/// 跳转参数: 方便协议方法的默认参数
 public enum FJRouterJumpParams {
-    /// 通过路由路径进行跳转参数
-    public struct GoLocation: Sendable {
+    /// 通过路由路径进行跳转参数: 方便协议方法的默认参数
+    public struct GoByLocation: Sendable {
         internal let path: String
         internal let extra: (any Sendable)?
         internal let fromVC: UIViewController?
         internal let ignoreError: Bool
-        /// 初始化
+        
+        /// 初始化: 方便协议方法的默认参数
         /// - Parameters:
         ///   - path: 路由路径
         ///   - extra: 携带的参数
@@ -30,8 +31,8 @@ public enum FJRouterJumpParams {
         }
     }
     
-    /// 通过路由名称进行跳转参数
-    public struct GoNamed: Sendable {
+    /// 通过路由名称进行跳转参数: 方便协议方法的默认参数
+    public struct GoByNamed: Sendable {
         internal let name: String
         internal let params: [String: String]
         internal let queryParams: [String: String]
@@ -39,7 +40,7 @@ public enum FJRouterJumpParams {
         internal let fromVC: UIViewController?
         internal let ignoreError: Bool
         
-        /// 初始化
+        /// 初始化: 方便协议方法的默认参数
         /// - Parameters:
         ///   - name: 路由名称
         ///   - params: 路由参数
@@ -56,7 +57,7 @@ public enum FJRouterJumpParams {
             self.ignoreError = ignoreError
         }
         
-        internal func convertToLocation(action: (_ name: String, _ params: [String : String], _ queryParams: [String : String]) async throws -> String) async rethrows -> GoLocation {
+        internal func convertToLocation(action: (_ name: String, _ params: [String : String], _ queryParams: [String : String]) async throws -> String) async rethrows -> GoByLocation {
             let loc = try await action(name, params, queryParams)
             return .init(path: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
         }

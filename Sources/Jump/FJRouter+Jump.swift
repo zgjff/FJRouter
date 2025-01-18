@@ -66,7 +66,7 @@ public protocol FJRouterJumpable {
     ///
     /// - Parameters:
     ///   - location: 通过路由路径进行跳转参数
-    func go(_ location: FJRouterJumpParams.GoLocation) throws
+    func go(_ location: FJRouterJumpParams.GoByLocation) throws
     
     /// 导航至对应路由名称控制器
     ///
@@ -74,7 +74,7 @@ public protocol FJRouterJumpable {
     ///
     /// - Parameters:
     ///   - params: 通过路由名称进行跳转参数
-    func goNamed(_ params: FJRouterJumpParams.GoNamed) throws
+    func goNamed(_ params: FJRouterJumpParams.GoByNamed) throws
     
     /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:
@@ -104,7 +104,7 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func go(_ location: FJRouterJumpParams.GoLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func go(_ location: FJRouterJumpParams.GoByLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
     
     /// 导航至对应路由名称控制器: 此方法支持通过`Combine`框架进行路由回调
     ///
@@ -134,5 +134,5 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func goNamed(_ params: FJRouterJumpParams.GoNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func goNamed(_ params: FJRouterJumpParams.GoByNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
 }

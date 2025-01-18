@@ -20,10 +20,11 @@ public struct FJRouterState: Sendable {
     public let fullPath: String
     /// 匹配到的参数
     public let pathParameters: [String: String]
-    /// 匹配到的参数
+    /// 匹配到的url query参数
     public let queryParameters: [String: String]
     /// 携带的额外内容
     public let extra: (any Sendable)?
+    /// 具体的路由
     public let route: FJRoute?
     /// 错误信息
     let error: FJRouteMatchList.MatchError?

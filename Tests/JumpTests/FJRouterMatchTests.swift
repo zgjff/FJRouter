@@ -103,17 +103,17 @@ struct FJRouterMatchTests {
                 ])
             ])
         ])
-//        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c/d")!)
-//        #expect(matches1.count == 0)
+        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c/d")!)
+        #expect(matches1.count == 0)
         
         let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "a/b/c/d")!)
         #expect(matches2.count == 4)
-//
-//        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
-//        #expect(matches3.count == 0)
-//        
-//        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
-//        #expect(matches4.count == 0)
+
+        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
+        #expect(matches3.count == 0)
+        
+        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
+        #expect(matches4.count == 0)
     }
     
     @Test func matchParameterWithURlDecode() {

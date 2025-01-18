@@ -21,17 +21,7 @@ internal struct FJRouteMatchList: @unchecked Sendable {
     
     /// url中携带的query参数
     var queryParams: [String: String] {
-        guard let cp = URLComponents(string: url.absoluteString) else {
-            return [:]
-        }
-        let result = cp.queryItems?.reduce([String: String](), { partialResult, item in
-            var result = partialResult
-            if let v = item.value {
-                result.updateValue(v, forKey: item.name)
-            }
-            return result
-        })
-        return result ?? [:]
+        url.queryParams
     }
     
     /// 是否错误

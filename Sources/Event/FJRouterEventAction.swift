@@ -9,10 +9,20 @@ import Foundation
 
 
 public struct FJRouterEventAction: Sendable {
+    /// 事件名称
     public let name: String?
+    
+    /// 事件url匹配路径
+    ///
+    /// 该路径还支持路径参数. eg:
+    ///
+    ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
     public let path: String
+    
+    /// 事件path解析出来的参数名称数组
     public let pathParameters: [String]
-    /// 路由`path`的对应正则表达式
+    
+    /// 对应正则表达式
     private let regExp: NSRegularExpression?
     
     public init(path: String, name: String? = nil) throws {
@@ -44,6 +54,7 @@ extension FJRouterEventAction: Hashable {
             hasher.combine(lp)
             return
         }
+        hasher.combine(path)
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -74,9 +85,9 @@ extension FJRouterEventAction {
         public var description: String {
             switch self {
             case .emptyPath:
-                return "FJRoute path cannot be empty"
+                return "EventAction path cannot be empty"
             case .emptyName:
-                return "FJRoute name cannot be empty"
+                return "EventAction name cannot be empty"
             }
         }
         

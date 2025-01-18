@@ -32,12 +32,13 @@ public struct FJRoute: Sendable {
     /// 如果赋值, 必须提供唯一的字符串名称, 且不能为空
     public let name: String?
     
-    /// 路由路径
+    /// 路由匹配路径
     ///
     /// 注意: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///
     /// 该路径还支持路径参数. eg:
-    /// 路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
+    ///
+    ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
     ///
     /// 路由参数将被解析并储存在`JJRouterState`中, 用于`builder`和`redirect`
     public let path: String
@@ -51,7 +52,7 @@ public struct FJRoute: Sendable {
     /// 路由拦截器
     public let redirect: (any FJRouteRedirector)?
     
-    /// 路由`path`中的参数名称
+    /// 路由`path`中解析出来的参数名称数组
     public let pathParameters: [String]
     
     /// 路由`path`的对应正则表达式
