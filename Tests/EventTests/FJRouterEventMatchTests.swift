@@ -23,9 +23,7 @@ struct FJRouterEventMatchTests {
         let p3 = "/sendSuccess"
         let u3 = URL(string: p3)!
         let pairs3 = FJRouter.EventMatch.match(action: a2, byUrl: u3)
-        #expect(pairs3 != nil)
-        #expect(pairs3?.match.matchedLocation == p3)
-        #expect(pairs3?.pathParameters.isEmpty == true)
+        #expect(pairs3 == nil)
     }
     
     @Test func testSuccessParamters() throws {
@@ -40,23 +38,17 @@ struct FJRouterEventMatchTests {
         let p1 = "/users/123"
         let u1 = URL(string: p1)!
         let pairs1 = FJRouter.EventMatch.match(action: a, byUrl: u1)
-        #expect(pairs1 != nil)
-        #expect(pairs1?.match.matchedLocation == "/users/123/")
-        #expect(pairs1?.pathParameters == ["userId" : "123"])
+        #expect(pairs1 == nil)
         
         let p2 = "users/123/"
         let u2 = URL(string: p2)!
         let pairs2 = FJRouter.EventMatch.match(action: a, byUrl: u2)
-        #expect(pairs2 != nil)
-        #expect(pairs2?.match.matchedLocation == "users/123/")
-        #expect(pairs2?.pathParameters == ["userId" : "123"])
+        #expect(pairs2 == nil)
         
         let p3 = "users/123"
         let u3 = URL(string: p3)!
         let pairs3 = FJRouter.EventMatch.match(action: a, byUrl: u3)
-        #expect(pairs3 != nil)
-        #expect(pairs3?.match.matchedLocation == "users/123/")
-        #expect(pairs3?.pathParameters == ["userId" : "123"])
+        #expect(pairs3 == nil)
         
         let p4 = "/users/123/yrr"
         let u4 = URL(string: p4)!

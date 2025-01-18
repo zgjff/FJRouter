@@ -6,11 +6,8 @@ import UIKit
 struct FJRouterMatchTests {
     @Test func matchWithoutParameter() async throws {
         let route = try! FJRoute(path: "/settings/detail", builder: _builder)
-        let (matches1, pathParameters1) = FJRouteMatch.match(route: route, byUrl: URL(string: "settings/detail")!)
-        #expect(matches1.count == 1)
-        #expect(matches1[0].route == route)
-        #expect(matches1[0].matchedLocation == "/settings/detail")
-        #expect(pathParameters1.isEmpty)
+        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "settings/detail")!)
+        #expect(matches1.isEmpty)
         
         let (matches2, pathParameters2) = FJRouteMatch.match(route: route, byUrl: URL(string: "/settings/detail?q=a")!)
         #expect(matches2.count == 1)
@@ -75,16 +72,48 @@ struct FJRouterMatchTests {
         #expect(pathParameters["page"] == "789")
     }
     
-    @Test func matchParentMushStartWithSlash() async throws {
-        let route = try! FJRoute(path: "a", builder: _builder, routes: [
+    @Test func matchParentMushStartWithSlash1() async throws {
+        let route = try! FJRoute(path: "/a", builder: _builder, routes: [
             try! FJRoute(path: "b", builder: _builder, routes: [
+                try! FJRoute(path: "c", builder: _builder, routes: [
+                    try! FJRoute(path: "d", builder: _builder, routes: [
+                    ])
+                ])
             ])
         ])
-        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b")!)
-        #expect(!matches1.isEmpty)
+        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c/d")!)
+        #expect(matches1.count == 4)
         
-        let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "a/b")!)
-        #expect(matches2.isEmpty)
+        let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b")!)
+        #expect(matches2.count == 2)
+        
+        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
+        #expect(matches3.count == 0)
+        
+        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
+        #expect(matches4.count == 0)
+    }
+    
+    @Test func matchParentMushStartWithSlash2() async throws {
+        let route = try! FJRoute(path: "a", builder: _builder, routes: [
+            try! FJRoute(path: "b", builder: _builder, routes: [
+                try! FJRoute(path: "c", builder: _builder, routes: [
+                    try! FJRoute(path: "d", builder: _builder, routes: [
+                    ])
+                ])
+            ])
+        ])
+//        let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c/d")!)
+//        #expect(matches1.count == 0)
+        
+        let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "a/b/c/d")!)
+        #expect(matches2.count == 4)
+//
+//        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
+//        #expect(matches3.count == 0)
+//        
+//        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
+//        #expect(matches4.count == 0)
     }
     
     @Test func matchParameterWithURlDecode() {

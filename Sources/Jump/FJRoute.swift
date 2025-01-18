@@ -117,22 +117,11 @@ extension FJRoute {
 
 extension FJRoute: Hashable {
     public func hash(into hasher: inout Hasher) {
-        if path.isEmpty {
-            hasher.combine(path)
+        if let lp = regExp?.pattern {
+            hasher.combine(lp)
             return
         }
-        if path == "/" {
-            hasher.combine(path)
-            return
-        }
-        var p = path
-        if p.hasPrefix("/") {
-            p = String(p.dropFirst())
-        }
-        if p.hasSuffix("/") {
-            p = String(p.dropLast())
-        }
-        hasher.combine(p)
+        hasher.combine(path)
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -141,24 +130,7 @@ extension FJRoute: Hashable {
                 return true
             }
         }
-        if lhs.path == rhs.path {
-            return true
-        }
-        var lp = lhs.path
-        if lp.hasPrefix("/") {
-            lp = String(lp.dropFirst())
-        }
-        if lp.hasSuffix("/") {
-            lp = String(lp.dropLast())
-        }
-        var rp = rhs.path
-        if rp.hasPrefix("/") {
-            rp = String(rp.dropFirst())
-        }
-        if rp.hasSuffix("/") {
-            rp = String(rp.dropLast())
-        }
-        return lp == rp
+        return lhs.path == rhs.path
     }
 }
 

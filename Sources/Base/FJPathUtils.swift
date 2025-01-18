@@ -64,26 +64,6 @@ extension FJPathUtils {
         if regExp.firstMatch(in: ploc, range: NSRange(location: 0, length: ploc.count)) != nil {
             return regExp
         }
-        let lloc = "\(loc)/"
-        if regExp.firstMatch(in: lloc, range: NSRange(location: 0, length: lloc.count)) != nil {
-            return regExp
-        }
-        let aloc = "/\(loc)/"
-        if regExp.firstMatch(in: aloc, range: NSRange(location: 0, length: aloc.count)) != nil {
-            return regExp
-        }
-        if loc.hasPrefix("/") {
-            let dfloc = String(loc.dropFirst())
-            if regExp.firstMatch(in: dfloc, range: NSRange(location: 0, length: dfloc.count)) != nil {
-                return regExp
-            }
-        }
-        if loc.hasSuffix("/") {
-            let dlloc = String(loc.dropLast())
-            if regExp.firstMatch(in: dlloc, range: NSRange(location: 0, length: dlloc.count)) != nil {
-                return regExp
-            }
-        }
         return nil
     }
     
@@ -95,7 +75,7 @@ extension FJPathUtils {
         guard let regExp else {
             return [:]
         }
-        let checkStrings = [string, "/\(string)", "\(string)/", "/\(string)/"]
+        let checkStrings = [string]
         var matchResults: [String] = []
         
         for cs in checkStrings {
@@ -152,10 +132,21 @@ extension FJPathUtils {
     internal func concatenatePaths(parentPath: String, childPath: String) -> String {
         var result = parentPath.split(separator: "/")
         result += childPath.split(separator: "/")
-        let joinPath = "/" + result.filter { !$0.isEmpty }.joined(separator: "/")
-        guard childPath.hasSuffix("/") && !joinPath.hasSuffix("/") && joinPath != "/" else {
+        var joinPath = result.filter { !$0.isEmpty }.joined(separator: "/")
+        if joinPath.isEmpty {
+            return "/"
+        }
+        if joinPath == "/" {
             return joinPath
         }
-        return joinPath + "/"
+        let hasPrefixSlash = parentPath.hasPrefix("/") || childPath.hasPrefix("/")
+        let hasSuffixSlash = ((parentPath != "/") || (parentPath != "/")) && (parentPath.hasSuffix("/") || childPath.hasSuffix("/"))
+        if hasPrefixSlash && !joinPath.hasPrefix("/") {
+            joinPath = "/" + joinPath
+        }
+        if hasSuffixSlash && !joinPath.hasSuffix("/") {
+            joinPath = joinPath + "/"
+        }
+        return joinPath
     }
 }

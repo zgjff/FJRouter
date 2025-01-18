@@ -28,61 +28,8 @@ extension FJRouter.EventMatch {
         let pathLoc = FJPathUtils.default.patternToPath(pattern: action.path, pathParameters: encodedParams)
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: pathLoc)
         
-        var matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
-        var finalMatchLocation = newMatchedLocation
-        if !matchSuccess {
-            if newMatchedLocation.hasSuffix("/") {
-                let dnp = newMatchedLocation.dropFirst()
-                if dnp.lowercased() == url.versionPath.lowercased() {
-                    matchSuccess = true
-                    finalMatchLocation = String(dnp)
-                }
-            }
-        }
-        if !matchSuccess {
-            if !newMatchedLocation.hasPrefix("/") {
-                if (newMatchedLocation.lowercased() + "/") == url.versionPath.lowercased() {
-                    matchSuccess = true
-                }
-            }
-        }
-        if !matchSuccess {
-            if newMatchedLocation.hasPrefix("/") {
-                let dnp = newMatchedLocation.dropFirst()
-                if dnp.lowercased() == ((url.versionPath.lowercased() + "/")) {
-                    matchSuccess = true
-                    finalMatchLocation = String(dnp)
-                }
-            }
-        }
-        if !matchSuccess {
-            if newMatchedLocation.hasPrefix("/") {
-                let dnp = newMatchedLocation.dropFirst() + "/"
-                if dnp.lowercased() == url.versionPath.lowercased() {
-                    matchSuccess = true
-                    finalMatchLocation = String(dnp)
-                }
-            }
-        }
-        if !matchSuccess {
-            let np = newMatchedLocation + "/"
-            if np.lowercased() == url.versionPath.lowercased() {
-                matchSuccess = true
-                finalMatchLocation = np
-            }
-        }
-        if !matchSuccess {
-            if newMatchedLocation.lowercased() == ((url.versionPath.lowercased() + "/")) { // 匹配成功
-                matchSuccess = true
-            }
-        }
-        if !matchSuccess {
-            if !newMatchedLocation.hasPrefix("/") {
-                if (newMatchedLocation.lowercased() + "/") == url.versionPath.lowercased() {
-                    matchSuccess = true
-                }
-            }
-        }
+        let matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        let finalMatchLocation = newMatchedLocation
         if matchSuccess { // 匹配成功
             return (.init(action: action, matchedLocation: finalMatchLocation), currentPathParameter)
         }

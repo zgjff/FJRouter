@@ -67,6 +67,6 @@ struct FJRouterEventActionTests {
         let a3 = try FJRouterEventAction(path: "a/")
         let a4 = try FJRouterEventAction(path: "/a/")
         let actions: Set<FJRouterEventAction> = [a1, a2, a3, a4]
-        #expect(actions.count == 1)
+        #expect(actions.count == 4)
     }
 }

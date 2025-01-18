@@ -14,11 +14,11 @@ struct FJRouterEventStoreMatchTests {
         await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a"))
         await #expect(store.numbers() == 5)
         await store.saveOrCreateListener(action: try FJRouterEventAction(path: "a"))
-        await #expect(store.numbers() == 5)
+        await #expect(store.numbers() == 6)
         await store.saveOrCreateListener(action: try FJRouterEventAction(path: "a/"))
-        await #expect(store.numbers() == 5)
+        await #expect(store.numbers() == 7)
         await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a/"))
-        await #expect(store.numbers() == 5)
+        await #expect(store.numbers() == 8)
     }
 }
 
