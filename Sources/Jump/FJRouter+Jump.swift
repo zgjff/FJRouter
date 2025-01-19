@@ -9,6 +9,13 @@ extension FJRouter {
     }
 }
 
+/// 路由跳转协议
+///
+/// 建议使用goNamed, viewController(name...)方法进行相关操作。
+///
+/// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
+///
+/// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
 public protocol FJRouterJumpable {
     /// 注册路由
     ///
@@ -35,50 +42,45 @@ public protocol FJRouterJumpable {
     /// 如果不使用框架提供的`apptopController`,可以提供自己实现的`apptopController`
     func setTopController(action: @escaping @MainActor (_ current: UIViewController?) -> UIViewController?) async
     
-    /// 通过路由名称、路由参数、查询参数组装路由路径
-    ///
-    /// 建议在使用路由的时候使用此方法来组装路由路径。
-    ///
-    /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-    ///
-    /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
+    /// 通过路由路径获取对应的控制器
+    /// - Parameters:
+    ///   - location: 路由路径
+    ///   - extra: 携带的参数
+    /// - Returns: 对应路由控制器
+    func viewController(byLocation location: String, extra: (any Sendable)?) async throws -> UIViewController
+    
+    /// 通过路由名称获取对应的控制器
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
-    /// - Returns: 组装之后的路由路径
-    func convertLocationBy(name: String, params: [String: String], queryParams: [String: String]) async throws -> String
+    ///   - extra: 携带的参数
+    /// - Returns: 对应路由控制器
+    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?) async throws -> UIViewController
     
-    /// 通过路由路径获取对应的控制器
+    /// 通过路由路径导航至对应控制器
     /// - Parameters:
-    ///   - location: 路由路径查询参数
-    func viewController(location params: FJRouterJumpParams.FindControllerByLocation) async throws -> UIViewController
+    ///   - location: 路由路径
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
     
-    /// 通过路由名称获取对应的控制器
-    /// - Parameters:
-    ///   - name: 路由名称查询参数
-    /// - Returns: 控制器
-    func viewController(named params: FJRouterJumpParams.FindControllerByNamed) async throws -> UIViewController
+    /// 通过路由名称导航至对应控制器
+    ///   - name: 路由名称
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
     
-    /// 导航至对应路由路径控制器
-    ///
-    ///     try FJRouter.jump().go(.init(path: "/first"))
-    ///
+    /// 通过路由路径导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:
-    ///   - location: 通过路由路径进行跳转参数
-    func go(_ location: FJRouterJumpParams.GoByLocation) throws
-    
-    /// 导航至对应路由名称控制器
-    ///
-    ///     try FJRouter.jump().goNamed(.init(name: "first"))
-    ///
-    /// - Parameters:
-    ///   - params: 通过路由名称进行跳转参数
-    func goNamed(_ params: FJRouterJumpParams.GoByNamed) throws
-    
-    /// 导航至对应路由路径控制器: 此方法支持通过`Combine`框架进行路由回调
-    /// - Parameters:
-    ///   - location: 通过路由路径进行跳转参数
+    ///   - location: 路由路径
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     ///
     /// 回调使用方法:
@@ -104,11 +106,16 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func go(_ location: FJRouterJumpParams.GoByLocation) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
     
-    /// 导航至对应路由名称控制器: 此方法支持通过`Combine`框架进行路由回调
-    ///
-    ///   - Parameter params: 通过路由名称进行跳转参数
+    /// 通过路由名称导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
+    /// - Parameters:
+    ///   - name: 路由名称
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     ///
     /// 回调使用方法:
@@ -134,5 +141,5 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func goNamed(_ params: FJRouterJumpParams.GoByNamed) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>
 }

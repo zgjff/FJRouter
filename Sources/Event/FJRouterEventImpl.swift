@@ -20,29 +20,17 @@ extension FJRouter {
 }
 
 extension FJRouter.EventImpl: FJRouterEventable {
-    func onReceive(path: String) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
-        try await onReceive(path: path, name: nil)
-    }
-    
     func onReceive(path: String, name: String?) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
         let action = try FJRouterEventAction(path: path, name: nil)
         let listener = await store.saveOrCreateListener(action: action)
         return listener.publisher()
     }
-    
-    func emit(_ location: String) {
-        emit(location, extra: nil)
-    }
-    
+
     func emit(_ location: String, extra: (any Sendable)? = nil) {
         guard let url = URL(string: location) else {
             return
         }
         emit(url: url, extra: extra)
-    }
-    
-    func emit(byName name: String) {
-        
     }
     
     func emit(byName name: String, extra: (any Sendable)? = nil) {
