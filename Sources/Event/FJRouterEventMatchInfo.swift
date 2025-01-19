@@ -15,7 +15,7 @@ extension FJRouter {
         /// 匹配到的内容字符串
         public let matchedLocation: String
         /// 匹配到的事件
-        internal let action: FJRouterEventAction
+        public let action: FJRouterEventAction
         /// 匹配到的参数
         public let pathParameters: [String: String]
         /// 匹配到的url query参数

@@ -20,16 +20,18 @@ extension FJRouter.EventStore {
         guard let obj = listeners.first(where: { $0.action == action }) else {
             let listener = FJRouter.EventListener(action: action)
             listeners.insert(listener)
+            beginSaveActionNamePath(action: action)
             return listener
         }
         guard let name = action.name else {
             return obj
         }
-        guard let oldName = obj.action.name else {
+        guard obj.action.name != nil else {
+            beginSaveActionNamePath(action: action)
             obj.updateActionName(name)
             return obj
         }
-        assert(oldName != name, "不能监控path相同, 但是name却不相同的事件")
+        beginSaveActionNamePath(action: action)
         return obj
     }
     
@@ -50,8 +52,17 @@ extension FJRouter.EventStore {
 
 private extension FJRouter.EventStore {
     func beginSaveActionNamePath(action: FJRouterEventAction) {
-        
+        guard let name = action.name else {
+            return
+        }
+        let fullPath = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: action.path)
+        if nameToPath.keys.contains(name) {
+            let prefullpath = nameToPath[name]
+            assert(prefullpath == fullPath, "不能添加相同的事件名称: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
+        }
+        nameToPath.updateValue(fullPath, forKey: name)
     }
+    
     func findMatch(url: URL, extra: (any Sendable)?, action: FJRouterEventAction) -> FJRouter.EventMatchInfo? {
         guard let pairs = FJRouter.EventMatch.match(action: action, byUrl: url) else {
             return nil
