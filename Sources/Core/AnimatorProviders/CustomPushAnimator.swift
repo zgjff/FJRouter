@@ -17,7 +17,7 @@ extension FJRoute {
         /// 转场动画
         public typealias Animator = @MainActor @Sendable (_ info: AnimatorInfo) -> any UIViewControllerAnimatedTransitioning
         /// 交互
-        public typealias Interactive = @MainActor @Sendable (_ animator: any UIViewControllerAnimatedTransitioning) -> any UIViewControllerInteractiveTransitioning
+        public typealias Interactive = @MainActor @Sendable (_ animator: any UIViewControllerAnimatedTransitioning) -> (any UIViewControllerInteractiveTransitioning)?
 
         /// push转场动画信息
         public struct AnimatorInfo: Sendable {

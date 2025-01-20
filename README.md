@@ -3,7 +3,7 @@
 ## 安装
 
 ### Swift Package Manager
-> 使用 **Swift PM** 的最简单的方式是找到 Project Setting -> Swift Packages 并将 FJRouter 添加在其中。
+> 使用 **Swift PM** 的最简单的方式是找到 Project Setting -> Swift Packages 并将 FJRouter 添加。
 > 搜索 `https://github.com/zgjff/FJRouter` 
 
 ### CocoaPods
@@ -42,6 +42,8 @@ FJRoute(path: "/", name: "root", builder: { @MainActor @Sendable _ in
 
 #### 路由`animator`: 用于显示路由指向控制器的转场动画。
 > 只适用与适用go、goNamed进行跳转的方式, 通过获取viewController进行自控跳转时,此参数无任何意义。
+
+> 注册路由时, `animator`参数如果是nil, 回在内部赋值为`FJRoute.AutomaticAnimator`动画
 
 > 框架内部已经内置了多种实现. `FJRoute.XXXXAnimator`
 
@@ -88,7 +90,7 @@ FJRouter.shared.setRedirectLimit(50)
 #### 设置路由匹配失败时的显示页面, 框架内部默认使用的错误页面UI较简陋, 可以通过此方法调整设置
 ```swift
 FJRouter.shared.setErrorBuilder { state in
-    return UIViewController()
+    return CustomErrorViewController()
 }
 ```
 
@@ -105,7 +107,7 @@ FJRouter.shared.go("/login")
 ```
 
 #### `go`到匹配路由页面: 框架内部处理跳转到匹配路由页面的方式
-> 会优先调用路由的`animator`参数; 若是`animator`为`nil`, 框架内部会先尝试`push`, 然后尝试`present`
+> 根据路由的`animator`参数返回的`FJRouteAnimator`协议的实现
 
 ```swift 
 FJRouter.shared.go(location: "/login")

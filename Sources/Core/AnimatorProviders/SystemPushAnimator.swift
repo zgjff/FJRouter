@@ -7,7 +7,6 @@
 
 import Foundation
 import UIKit
-import Combine
 
 extension FJRoute {
     /// 使用系统push进行显示

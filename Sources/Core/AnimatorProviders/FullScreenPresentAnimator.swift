@@ -25,7 +25,8 @@ extension FJRoute {
             ///
             /// source: 调用present(_:animated:completion:)方法的视图控制器
             ///
-            /// fromVC与source可能相同, 也可能不同。比如:
+            /// fromVC与source可能相同, 也可能不同。不同的情况, 一般出现在source具有parent, 比如:
+            ///
             /// 1: 在不带导航控制器的A内调用present(_:animated:completion:), 此时fromVC与source相同, 都是A
             ///
             /// 2: 带导航控制器的B内调用present(_:animated:completion:), 此时fromVC与source不同,
