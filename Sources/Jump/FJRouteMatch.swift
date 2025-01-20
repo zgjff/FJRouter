@@ -8,7 +8,7 @@
 import Foundation
 
 /// 路由匹配信息
-struct FJRouteMatch: Sendable {
+internal struct FJRouteMatch: Sendable {
     /// 匹配到的路由
     let route: FJRoute
     /// 匹配到的内容字符串
@@ -43,9 +43,14 @@ extension FJRouteMatch {
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
         let pathLoc = FJPathUtils.default.patternToPath(pattern: route.path, pathParameters: encodedParams)
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: matchedLocation, childPath: pathLoc)
-        if [newMatchedLocation.lowercased(), newMatchedLocation.dropFirst().lowercased()].contains(url.versionPath.lowercased()) { // 匹配成功
+        let matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        let finalMatchLocation = newMatchedLocation
+        if matchSuccess { // 匹配成功
             let finalParameters = pathParameters.merging(currentPathParameter) { (_, new) in new }
-            return ([FJRouteMatch(route: route, matchedLocation: newMatchedLocation)], finalParameters)
+            return ([FJRouteMatch(route: route, matchedLocation: finalMatchLocation)], finalParameters)
+        }
+        if route.routes.isEmpty {
+            return ([], [:])
         }
         // 匹配子路由
         let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.path)

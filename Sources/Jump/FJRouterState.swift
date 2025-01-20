@@ -20,10 +20,11 @@ public struct FJRouterState: Sendable {
     public let fullPath: String
     /// 匹配到的参数
     public let pathParameters: [String: String]
-    /// 匹配到的参数
+    /// 匹配到的url query参数
     public let queryParameters: [String: String]
     /// 携带的额外内容
     public let extra: (any Sendable)?
+    /// 具体的路由
     public let route: FJRoute?
     /// 错误信息
     let error: FJRouteMatchList.MatchError?
@@ -74,6 +75,6 @@ extension FJRouterState {
     ///   - queryParams: 路由查询参数
     /// - Returns: 组装之后的路由路径
     public func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) async throws -> String {
-        try await FJRouter.shared.convertLocationBy(name: name, params: params, queryParams: queryParams)
+        try await FJRouter.JumpImpl.shared.convertLocationBy(name: name, params: params, queryParams: queryParams)
     }
 }

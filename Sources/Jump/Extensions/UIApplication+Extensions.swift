@@ -31,28 +31,22 @@ extension UIApplication {
         return top
     }
     
-    /// 根据系统版本获取`UIApplication`的`keyWindow`
-    ///
-    /// 低于13.0版本直接获取`keyWindow`
-    ///
-    /// 高于或等于13.0版本,从`connectedScenes`中获取
+    /// 根据系统版本获取`UIApplication`的`keyWindow`, 从`connectedScenes`中获取
     public var versionkKeyWindow: UIWindow? {
-        if #available(iOS 13.0, *) {
-            let windows = connectedScenes.compactMap { screen -> UIWindow? in
-                guard let wc = screen as? UIWindowScene, wc.activationState != .unattached else {
-                    return nil
-                }
-                if #available(iOS 15.0, *) {
+        let windows = connectedScenes.compactMap { screen -> UIWindow? in
+            guard let wc = screen as? UIWindowScene, wc.activationState != .unattached else {
+                return nil
+            }
+            if #available(iOS 15.0, *) {
+                if wc.keyWindow != nil {
                     return wc.keyWindow
                 }
-                if let s = wc.delegate as? UIWindowSceneDelegate, let sw = s.window, let ssw = sw {
-                    return ssw
-                }
-                return wc.windows.filter { $0.isKeyWindow }.first
             }
-            return windows.first
-        } else {
-            return keyWindow
+            if let s = wc.delegate as? UIWindowSceneDelegate, let sw = s.window, let ssw = sw {
+                return ssw
+            }
+            return wc.windows.filter { $0.isKeyWindow }.first
         }
+        return windows.first
     }
 }

@@ -15,11 +15,11 @@ extension UIViewController {
     /// - Parameters:
     ///   - name: 名称
     ///   - value: 对应的值: 默认为()
-    public func triggerFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
+    public func emitFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
-            throw FJRouter.DispatchCallbackError.emptyName
+            throw FJRouter.EmitCallbackError.emptyName
         }
-        try triggerFJRouterCallBack(item: item)
+        try emitFJRouterCallBack(item: item)
     }
     
     /// 触发路由回调
@@ -27,26 +27,26 @@ extension UIViewController {
     /// 如果路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameter item: 内容
     /// - Returns: 发送回调结果.`true`: 成功, `false`: 失败
-    public func triggerFJRouterCallBack(item: FJRouter.CallbackItem) throws {
-        if fjroute_callback_trigger == nil {
-            throw FJRouter.DispatchCallbackError.noTrigger
+    public func emitFJRouterCallBack(item: FJRouter.CallbackItem) throws {
+        if fjroute_callback_emitter == nil {
+            throw FJRouter.EmitCallbackError.noTrigger
         }
-        fjroute_callback_trigger?.dispatch(item)
+        fjroute_callback_emitter?.dispatch(item)
     }
 }
 
 nonisolated(unsafe) private var fjroute_combine_callback_trigger_Key = 0
 extension UIViewController {
     @discardableResult
-    internal func fjroute_addCallbackTrigger(callback: some FJRouterCallbackable) -> FJRouter.CallbackTrigger {
-        let obj = FJRouter.CallbackTrigger(callback: callback)
+    internal func fjroute_addCallbackTrigger(callback: some FJRouterCallbackable) -> FJRouter.CallbackEmitter {
+        let obj = FJRouter.CallbackEmitter(callback: callback)
         objc_setAssociatedObject(self, &fjroute_combine_callback_trigger_Key, obj, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return obj
     }
     
-    fileprivate var fjroute_callback_trigger: FJRouter.CallbackTrigger? {
+    fileprivate var fjroute_callback_emitter: FJRouter.CallbackEmitter? {
         get {
-            if let obj = objc_getAssociatedObject(self, &fjroute_combine_callback_trigger_Key) as? FJRouter.CallbackTrigger {
+            if let obj = objc_getAssociatedObject(self, &fjroute_combine_callback_trigger_Key) as? FJRouter.CallbackEmitter {
                 return obj
             }
             return nil

@@ -1,5 +1,5 @@
 //
-//  FJRouterCallbackError.swift
+//  FJRouterEmitCallbackError.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/12/26.
@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 触发路由回调错误
-    public enum DispatchCallbackError: Error, @unchecked Sendable {
+    public enum EmitCallbackError: Error, @unchecked Sendable {
         /// 发送的`callback`的`name`为空
         case emptyName
         /// 没有路由回调触发器, 使用路由方法错误, 请使用带有`AnyPublisher`返回值的go方法
@@ -17,7 +17,7 @@ extension FJRouter {
     }
 }
 
-extension FJRouter.DispatchCallbackError: Equatable {
+extension FJRouter.EmitCallbackError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.emptyName, .emptyName):
@@ -30,7 +30,7 @@ extension FJRouter.DispatchCallbackError: Equatable {
     }
 }
 
-extension FJRouter.DispatchCallbackError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+extension FJRouter.EmitCallbackError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
     public var description: String {
         switch self {
         case .emptyName:

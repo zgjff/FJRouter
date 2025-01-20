@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FJRouteMatchList: @unchecked Sendable {
+internal struct FJRouteMatchList: @unchecked Sendable {
     /// 匹配结果
     let result: MatchResult
     /// 匹配的原始url
@@ -21,17 +21,7 @@ struct FJRouteMatchList: @unchecked Sendable {
     
     /// url中携带的query参数
     var queryParams: [String: String] {
-        guard let cp = URLComponents(string: url.absoluteString) else {
-            return [:]
-        }
-        let result = cp.queryItems?.reduce([String: String](), { partialResult, item in
-            var result = partialResult
-            if let v = item.value {
-                result.updateValue(v, forKey: item.name)
-            }
-            return result
-        })
-        return result ?? [:]
+        url.queryParams
     }
     
     /// 是否错误
@@ -106,7 +96,7 @@ extension FJRouteMatchList: CustomStringConvertible, CustomDebugStringConvertibl
 
 extension FJRouteMatchList {
     /// 匹配结果
-    enum MatchResult: Equatable, @unchecked Sendable {
+    internal enum MatchResult: Equatable, @unchecked Sendable {
         /// 成功
         case success([FJRouteMatch])
         /// 失败
