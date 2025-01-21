@@ -26,28 +26,18 @@ extension FJRouter.EventImpl: FJRouterEventable {
         return listener.publisher()
     }
 
-    func emit(_ location: String, extra: (any Sendable)? = nil) throws {
+    func emit(_ location: String, extra: (any Sendable)? = nil) async throws {
         guard let url = URL(string: location) else {
             return
         }
-        try emit(url: url, extra: extra)
+        guard let (listener, info) = await store.match(url: url, extra: extra) else {
+            return
+        }
+        listener.receive(value: info)
     }
     
-    func emit(byName name: String, extra: (any Sendable)? = nil) throws {
-        
-    }
-}
-
-private extension FJRouter.EventImpl {
-    func emit(url: URL, extra: (any Sendable)? = nil) throws {
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-            guard let (listener, info) = await self.store.match(url: url, extra: extra) else {
-                return
-            }
-            listener.receive(value: info)
-        }
+    func emit(byName name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?) async throws {
+        let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
+        try await emit(loc, extra: extra)
     }
 }
