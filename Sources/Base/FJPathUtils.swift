@@ -118,6 +118,8 @@ extension FJPathUtils {
             let name = String(describing: pattern[startIdx..<endIdx])
             if let pn = parameters[name] {
                 buffer += pn
+            } else {
+                //TODO: - throws error, 提醒缺少参数
             }
             start = match.range.location + match.range.length
         }
