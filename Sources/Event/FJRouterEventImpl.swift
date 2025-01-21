@@ -26,20 +26,20 @@ extension FJRouter.EventImpl: FJRouterEventable {
         return listener.publisher()
     }
 
-    func emit(_ location: String, extra: (any Sendable)? = nil) {
+    func emit(_ location: String, extra: (any Sendable)? = nil) throws {
         guard let url = URL(string: location) else {
             return
         }
-        emit(url: url, extra: extra)
+        try emit(url: url, extra: extra)
     }
     
-    func emit(byName name: String, extra: (any Sendable)? = nil) {
+    func emit(byName name: String, extra: (any Sendable)? = nil) throws {
         
     }
 }
 
 private extension FJRouter.EventImpl {
-    func emit(url: URL, extra: (any Sendable)? = nil) {
+    func emit(url: URL, extra: (any Sendable)? = nil) throws {
         Task { [weak self] in
             guard let self else {
                 return

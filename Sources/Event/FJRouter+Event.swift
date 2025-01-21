@@ -26,13 +26,13 @@ public protocol FJRouterEventable {
     /// - Parameters:
     ///   - location: 路径.
     ///   - extra: 携带的参数
-    func emit(_ location: String, extra: (any Sendable)?)
+    func emit(_ location: String, extra: (any Sendable)?) throws
     
     /// 通过事件名称触发事件
     /// - Parameters:
     ///   - name: 事件名称
     ///   - extra: 携带的参数
-    func emit(byName name: String, extra: (any Sendable)?)
+    func emit(byName name: String, extra: (any Sendable)?) throws
 }
 
 extension FJRouterEventable {
@@ -46,14 +46,14 @@ extension FJRouterEventable {
     /// 通过事件url路径触发事件
     /// - Parameters:
     ///   - location: 路径
-    public func emit(_ location: String) {
-        emit(location, extra: nil)
+    public func emit(_ location: String) throws {
+        try emit(location, extra: nil)
     }
     
     /// 通过事件名称触发事件
     /// - Parameters:
     ///   - name: 事件名称
-    public func emit(byName name: String) {
-        emit(byName: name, extra: nil)
+    public func emit(byName name: String) throws {
+        try emit(byName: name, extra: nil)
     }
 }

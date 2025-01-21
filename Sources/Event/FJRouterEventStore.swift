@@ -58,7 +58,8 @@ private extension FJRouter.EventStore {
         let fullPath = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: action.path)
         if nameToPath.keys.contains(name) {
             let prefullpath = nameToPath[name]
-            assert(prefullpath == fullPath, "不能添加相同的事件名称: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
+            /// 提前崩溃, 防止这种错误出现
+            assert(prefullpath == fullPath, "不能添加名称相同但path却不同的事件: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
         }
         nameToPath.updateValue(fullPath, forKey: name)
     }
