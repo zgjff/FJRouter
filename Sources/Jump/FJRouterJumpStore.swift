@@ -102,12 +102,17 @@ extension FJRouter.JumpStore {
         guard let final = cop?.string else {
             throw FJRouter.ConvertError.urlConvert
         }
-        guard final.count > 1 && final.hasSuffix("/") else {
+        guard final.count > 1 else {
             return final
         }
-        let startIndex = final.startIndex
-        let endIndex = final.index(final.endIndex, offsetBy: -1)
-        return String(describing: final[startIndex..<endIndex])
+        if queryParams.isEmpty && path.hasSuffix("/") && !final.hasSuffix("/") {
+            return final + "/"
+        }
+        if queryParams.isEmpty && !path.hasSuffix("/") && final.hasSuffix("/") {
+            let result = final.dropLast()
+            return String(result)
+        }
+        return final
     }
 }
 
