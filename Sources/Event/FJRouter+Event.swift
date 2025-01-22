@@ -26,7 +26,7 @@ public protocol FJRouterEventable {
     /// - Parameters:
     ///   - location: 路径.
     ///   - extra: 携带的参数
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) throws
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) throws
     
     /// 通过事件名称触发事件
     /// - Parameters:
@@ -63,7 +63,7 @@ extension FJRouter {
         internal let name: String
         internal let params: [String : String]
         internal let queryParams: [String : String]
-        internal let extra: @Sendable () -> (any Sendable)?
+        internal let extra: @Sendable () -> Any?
         
         /// 通过事件名称触发事件参数初始化
         /// - Parameters:
@@ -71,7 +71,7 @@ extension FJRouter {
         ///   - params: 路由参数
         ///   - queryParams: 路由查询参数
         ///   - extra: 携带的参数
-        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil) {
+        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> Any? = nil) {
             self.name = name
             self.params = params
             self.queryParams = queryParams

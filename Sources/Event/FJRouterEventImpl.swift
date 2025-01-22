@@ -26,12 +26,12 @@ extension FJRouter.EventImpl: FJRouterEventable {
         return listener.publisher()
     }
 
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) throws {
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) throws {
         guard let url = URL(string: location) else {
             return
         }
         Task {
-            guard let (listener, info) = await self.store.match(url: url, extra: extra()) else {
+            guard let (listener, info) = await self.store.match(url: url, extra: extra) else {
                 return
             }
             listener.receive(value: info)
@@ -42,7 +42,7 @@ extension FJRouter.EventImpl: FJRouterEventable {
         try emit(byName: parameters.name, params: parameters.params, queryParams: parameters.queryParams, extra: parameters.extra)
     }
     
-    func emit(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) throws {
+    func emit(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> Any?) throws {
         Task {
             let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
             try self.emit(loc, extra: extra)

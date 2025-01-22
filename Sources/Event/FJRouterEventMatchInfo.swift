@@ -21,7 +21,7 @@ extension FJRouter {
         /// 匹配到的url query参数
         public let queryParameters: [String: String]
         /// 携带的额外内容
-        public let extra: (any Sendable)?
+        public nonisolated(unsafe) let extra: Any?
         
         init(
             url: URL,
@@ -29,7 +29,7 @@ extension FJRouter {
             action: FJRouterEventAction,
             pathParameters: [String : String] = [:],
             queryParameters: [String : String] = [:],
-            extra: (any Sendable)? = nil
+            extra: Any? = nil
         ) {
             self.url = url
             self.matchedLocation = matchedLocation
