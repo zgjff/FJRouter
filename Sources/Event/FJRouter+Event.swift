@@ -16,7 +16,7 @@ extension FJRouter {
 }
 
 /// 事件总线协议
-public protocol FJRouterEventable {
+public protocol FJRouterEventable: Sendable {
     /// 监听事件
     /// - Parameter path: 事件路径path
     ///   - name: 事件名称
@@ -26,12 +26,15 @@ public protocol FJRouterEventable {
     /// - Parameters:
     ///   - location: 路径.
     ///   - extra: 携带的参数
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) throws
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) async throws
     
-    /// 通过事件名称触发事件
+    /// async 通过事件名称触发事件参数初始化
     /// - Parameters:
-    ///   - parameters: 事件名称参数
-    func emit(byName parameters: FJRouter.EmitEventByName) throws
+    ///   - name: 事件名称
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> Any?) async throws
 }
 
 extension FJRouterEventable {
@@ -45,37 +48,22 @@ extension FJRouterEventable {
     /// 通过事件url路径触发事件
     /// - Parameters:
     ///   - location: 路径
-    public func emit(_ location: String) throws {
-        try emit(location, extra: nil)
+    ///   - extra: 携带的参数
+    public func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any? = nil) throws {
+        Task {
+            try await self.emit(location, extra: extra)
+        }
     }
     
-    /// 通过事件名称触发事件
+    /// 通过事件名称触发事件参数初始化
     /// - Parameters:
     ///   - name: 事件名称
-    public func emit(byName name: String) throws {
-        try emit(byName: .init(name: name))
-    }
-}
-
-extension FJRouter {
-    /// 通过事件名称触发事件参数: 为了方便协议方法的默认值
-    public struct EmitEventByName {
-        internal let name: String
-        internal let params: [String : String]
-        internal let queryParams: [String : String]
-        internal let extra: @Sendable () -> Any?
-        
-        /// 通过事件名称触发事件参数初始化
-        /// - Parameters:
-        ///   - name: 事件名称
-        ///   - params: 路由参数
-        ///   - queryParams: 路由查询参数
-        ///   - extra: 携带的参数
-        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> Any? = nil) {
-            self.name = name
-            self.params = params
-            self.queryParams = queryParams
-            self.extra = extra
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    public func emit(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> Any? = nil) throws {
+        Task {
+            try await self.emit(name: name, params: params, queryParams: queryParams, extra: extra)
         }
     }
 }
