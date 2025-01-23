@@ -198,3 +198,7 @@ extension FJRouterJumpable {
         await goNamed(name, params: params, queryParams: queryParams, extra: extra, from: fromVC, ignoreError: false)
     }
 }
+
+extension FJRouter {
+    
+}

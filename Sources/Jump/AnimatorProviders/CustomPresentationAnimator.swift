@@ -371,13 +371,13 @@ extension FJCustomPresentationContext {
 
 extension FJCustomPresentationContext {
     /// 转场动画的过渡类型
-    public enum TransitionType: Sendable {
+    public enum TransitionType: @unchecked Sendable {
         case present(frames: TransitionContextFrames)
         case dismiss(frames: TransitionContextFrames)
     }
     
     /// 转场动画过程中的frame
-    public struct TransitionContextFrames: Sendable {
+    public struct TransitionContextFrames: @unchecked Sendable {
         public let fromInitialFrame: CGRect
         public let fromFinalFrame: CGRect
         public let toInitialFrame: CGRect
@@ -385,7 +385,7 @@ extension FJCustomPresentationContext {
     }
     
     /// 点击弹出界面的其余部分事件
-    public enum BelowCoverAction: Sendable {
+    public enum BelowCoverAction: @unchecked Sendable {
         /// 是否自动dismiss
         case autodismiss(_ auto: Bool)
         /// 自定义动作

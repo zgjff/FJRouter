@@ -135,7 +135,7 @@ extension FJRouteMatchList {
         }
     }
     
-    enum MatchError: Error, Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible {
+    enum MatchError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible {
         /// 匹配为空
         case empty
         /// 重定向次数超出限制

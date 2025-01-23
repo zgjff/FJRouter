@@ -146,7 +146,7 @@ extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
 }
 
 extension FJRoute {
-    public enum CreateError: Error, Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+    public enum CreateError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
         case emptyPath
         case emptyName
         case noPageBuilder
