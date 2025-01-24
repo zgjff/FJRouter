@@ -26,7 +26,7 @@ public protocol FJRouterEventable: Sendable {
     /// - Parameters:
     ///   - location: 路径.
     ///   - extra: 携带的参数
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) async throws
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws
     
     /// async 通过事件名称触发事件参数初始化
     /// - Parameters:
@@ -34,7 +34,7 @@ public protocol FJRouterEventable: Sendable {
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
-    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> Any?) async throws
+    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws
 }
 
 extension FJRouterEventable {
@@ -49,7 +49,7 @@ extension FJRouterEventable {
     /// - Parameters:
     ///   - location: 路径
     ///   - extra: 携带的参数
-    public func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any? = nil) throws {
+    public func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil) throws {
         Task {
             try await self.emit(location, extra: extra)
         }
@@ -61,7 +61,7 @@ extension FJRouterEventable {
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
-    public func emit(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> Any? = nil) throws {
+    public func emit(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil) throws {
         Task {
             try await self.emit(name: name, params: params, queryParams: queryParams, extra: extra)
         }
