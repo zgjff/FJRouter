@@ -12,7 +12,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.fullPath == "/details")
         #expect(result.url == url)
-        #expect(result.extra as? Int == 123)
+        #expect(result.extra() as? Int == 123)
         #expect(result.lastMatch != nil)
         #expect(result.lastMatch!.matchedLocation == "/details")
         #expect(result.lastMatch!.route.path == "/details")
@@ -28,7 +28,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.result == .error(.empty))
         #expect(result.fullPath == "")
         #expect(result.url == url)
-        #expect(result.extra as? Int == 123)
+        #expect(result.extra() as? Int == 123)
     }
     
     @Test func testSuccessDoesNotRedirectNoChildHasRedirect() async throws {
@@ -41,7 +41,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.url == url)
         #expect(result.fullPath ==  "/show/:id")
-        #expect(result.extra as? Int == 123)
+        #expect(result.extra() as? Int == 123)
         #expect(result.pathParameters == ["id": "123"])
         #expect(result.lastMatch?.matchedLocation == "/show/123")
         #expect(result.lastMatch?.route.path == "/show/:id")
@@ -60,7 +60,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.url == URL(string: rurl)!)
         #expect(result.fullPath ==  rp)
-        #expect(result.extra == nil)
+        #expect(result.extra() == nil)
         #expect(result.pathParameters == ["id": "78"])
         #expect(result.lastMatch?.matchedLocation == rurl)
         #expect(result.lastMatch?.route.path == rp)
@@ -76,7 +76,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
         #expect(result.fullPath == rp)
-        #expect(result.extra == nil)
+        #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
         #expect(result.lastMatch?.route.path == rp)
         #expect(result.queryParams.isEmpty)
@@ -99,7 +99,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
         #expect(result.fullPath == rp)
-        #expect(result.extra == nil)
+        #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
         #expect(result.lastMatch?.route.path == "c")
     }
@@ -121,7 +121,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.result == .error(.empty))
         #expect(result.url == URL(string: rp)!)
         #expect(result.fullPath == "")
-        #expect(result.extra == nil)
+        #expect(result.extra() == nil)
     }
     
     @Test func testSuccessMultipleRedirects() async throws {
@@ -144,7 +144,7 @@ struct FJRouterStoreMatchTests {
         #expect(!result.isError)
         #expect(result.url == URL(string: rp)!)
         #expect(result.fullPath == rp)
-        #expect(result.extra == nil)
+        #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
         #expect(result.lastMatch?.route.path == rp)
     }
