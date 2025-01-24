@@ -53,7 +53,7 @@ extension FJRouter.JumpImpl {
 
 // MARK: - get
 extension FJRouter.JumpImpl {
-    func viewController(byLocation location: String, extra: (any Sendable)?) async throws -> UIViewController {
+    func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
@@ -64,7 +64,7 @@ extension FJRouter.JumpImpl {
         throw FJRouter.MatchError.noBuilder
     }
     
-    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?) async throws -> UIViewController {
+    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
             let destvc = try await viewController(byLocation: loc, extra: extra)
@@ -83,13 +83,13 @@ extension FJRouter.JumpImpl {
 
 // MARK: - go
 extension FJRouter.JumpImpl {
-    func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
+    func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
         Task {
             try await self.go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
         }
     }
     
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
         Task {
             do {
                 let loc = try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
@@ -107,7 +107,7 @@ extension FJRouter.JumpImpl {
     }
     
     @discardableResult
-    func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
             let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
             return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
@@ -125,7 +125,7 @@ extension FJRouter.JumpImpl {
     }
         
     @discardableResult
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
             let loc = try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
             return await go(loc)
@@ -160,7 +160,7 @@ extension FJRouter.JumpImpl {
         try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
     }
     
-    private func go_trigger<T>(location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
+    private func go_trigger<T>(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }
@@ -183,7 +183,7 @@ extension FJRouter.JumpImpl {
         }
     }
     
-    private func go_private(location: String, extra: (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws {
+    private func go_private(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws {
         guard let url = URL(string: location) else {
             throw FJRouter.MatchError.errorLocUrl
         }

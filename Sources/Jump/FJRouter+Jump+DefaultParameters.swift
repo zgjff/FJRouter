@@ -60,7 +60,7 @@ extension FJRouterJumpable {
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
-    public func go(_ location: String, extra: (any Sendable)?) throws {
+    public func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) throws {
         try go(location, extra: extra, from: nil, ignoreError: false)
     }
     
@@ -69,7 +69,7 @@ extension FJRouterJumpable {
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    public func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?) throws {
+    public func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?) throws {
         try go(location, extra: extra, from: fromVC, ignoreError: false)
     }
     
@@ -88,7 +88,7 @@ extension FJRouterJumpable {
     ///   - extra: 携带的参数
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    public func go(_ location: String, extra: (any Sendable)?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    public func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         return await go(location, extra: extra, from: nil, ignoreError: false)
     }
     
@@ -99,7 +99,7 @@ extension FJRouterJumpable {
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    public func go(_ location: String, extra: (any Sendable)?, from fromVC: UIViewController?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    public func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         return await go(location, extra: extra, from: fromVC, ignoreError: false)
     }
     
@@ -129,7 +129,7 @@ extension FJRouterJumpable {
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
-    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?) throws {
+    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) throws {
         try goNamed(name, params: params, queryParams: queryParams, extra: extra, from: nil, ignoreError: false)
     }
     
@@ -139,7 +139,7 @@ extension FJRouterJumpable {
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
-    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?) throws {
+    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?) throws {
         try goNamed(name, params: params, queryParams: queryParams, extra: extra, from: fromVC, ignoreError: false)
     }
     
@@ -181,7 +181,7 @@ extension FJRouterJumpable {
     ///   - extra: 携带的参数
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         await goNamed(name, params: params, queryParams: queryParams, extra: extra, from: nil, ignoreError: false)
     }
     
@@ -194,7 +194,7 @@ extension FJRouterJumpable {
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️
     @discardableResult
-    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: (any Sendable)?, from fromVC: UIViewController?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    public func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         await goNamed(name, params: params, queryParams: queryParams, extra: extra, from: fromVC, ignoreError: false)
     }
 }
