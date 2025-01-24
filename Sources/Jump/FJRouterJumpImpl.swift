@@ -123,12 +123,12 @@ extension FJRouter.JumpImpl {
             return Fail(error: gerr).eraseToAnyPublisher()
         }
     }
-        
+    
     @discardableResult
     func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
         do {
-            let loc = try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return await go(loc)
+            let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
+            return await go(loc, extra: extra, from: fromVC, ignoreError: ignoreError)
         } catch {
             let gerr: FJRouter.MatchError
             if let err = error as? FJRouter.ConvertError {
