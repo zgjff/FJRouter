@@ -16,5 +16,6 @@ extension FJRouter {
 
 /// 路由资源协议
 public protocol FJRouterResourceable {
-    
+    func put()
+    func get()
 }
