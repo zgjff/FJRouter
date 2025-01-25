@@ -37,7 +37,7 @@ public struct FJRouterState: Sendable {
         fullPath = matches.fullPath
         pathParameters = matches.pathParameters
         queryParameters = matches.queryParams
-        extra = matches.extra
+        extra = matches.extra()
         route = matches.lastMatch?.route
         if case let .error(err) = matches.result {
             error = err
@@ -54,7 +54,7 @@ public struct FJRouterState: Sendable {
         queryParameters = matches.queryParams
         name = match.route.name
         path = match.route.path
-        extra = matches.extra
+        extra = matches.extra()
         route = matches.lastMatch?.route
         error = nil
     }

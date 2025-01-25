@@ -26,7 +26,7 @@ extension FJRouter.EventImpl {
         return listener.publisher()
     }
 
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> Any?) async throws {
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
         guard let url = URL(string: location) else {
             return
         }
@@ -36,7 +36,7 @@ extension FJRouter.EventImpl {
         listener.receive(value: info)
     }
     
-    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> Any?) async throws {
+    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
         let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
         try await emit(loc, extra: extra)
     }

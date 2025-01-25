@@ -43,7 +43,7 @@ extension FJRouter.JumpStore {
     ///   - extra: 携带的参数
     ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
-    func match(url: URL, extra: (any Sendable)?, ignoreError: Bool) async throws -> FJRouteMatchList {
+    func match(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, ignoreError: Bool) async throws -> FJRouteMatchList {
         let result = findMatch(url: url.adjust(), extra: extra)
         let final = await redirect(initialMatches: result)
         switch final.result {
@@ -133,12 +133,12 @@ private extension FJRouter.JumpStore {
         }
     }
     
-    func findMatch(url: URL, extra: (any Sendable)?) -> FJRouteMatchList {
+    func findMatch(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) -> FJRouteMatchList {
         let (matches, pathParameters) = getLocRouteMatches(url: url)
         if matches.isEmpty {
-            return FJRouteMatchList(error: .empty, url: url, extra: extra)
+            return FJRouteMatchList(error: .empty, url: url, extra: extra())
         }
-        return FJRouteMatchList(success: matches, url: url, pathParameters: pathParameters, extra: extra)
+        return FJRouteMatchList(success: matches, url: url, pathParameters: pathParameters, extra: extra())
     }
     
     func getLocRouteMatches(url: URL) -> (matches: [FJRouteMatch], pathParameters: [String: String]) {

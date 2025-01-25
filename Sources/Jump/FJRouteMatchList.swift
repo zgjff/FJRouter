@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal struct FJRouteMatchList: @unchecked Sendable {
+internal struct FJRouteMatchList: Sendable {
     /// 匹配结果
     let result: MatchResult
     /// 匹配的原始url
@@ -15,7 +15,7 @@ internal struct FJRouteMatchList: @unchecked Sendable {
     /// 匹配到的参数
     let pathParameters: [String: String]
     /// 携带的额外内容
-    let extra: (any Sendable)?
+    let extra: @Sendable () -> (any Sendable)?
     /// 与`url`匹配的完整路径
     let fullPath: String
     
@@ -43,7 +43,7 @@ internal struct FJRouteMatchList: @unchecked Sendable {
         }
     }
     
-    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: (any Sendable)?) {
+    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) {
         result = .success(success)
         self.url = url
         self.pathParameters = pathParameters
@@ -57,7 +57,7 @@ internal struct FJRouteMatchList: @unchecked Sendable {
         self.fullPath = fullPath
     }
     
-    init(error: MatchError, url: URL, extra: (any Sendable)?) {
+    init(error: MatchError, url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) {
         result = .error(error)
         self.url = url
         self.extra = extra
