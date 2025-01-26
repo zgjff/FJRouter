@@ -7,7 +7,7 @@
 
 import Foundation
 
-
+/// 事件
 public struct FJRouterEventAction: Sendable {
     /// 事件名称
     public let name: String?

@@ -86,7 +86,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().go(.init(path: "/first"))
+    ///     let callback = await FJRouter.jump().go("/first")
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -121,7 +121,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().goNamed(.init(name: "first"))
+    ///     let callback = await FJRouter.jump().goNamed("first")
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
