@@ -57,16 +57,16 @@ struct FJRouterViewControllerTests {
     }
     
     @Test func testSearchErrorLocUrlError() async throws {
-        await #expect(throws: FJRouter.MatchError.errorLocUrl) {
+        await #expect(throws: FJRouter.JumpMatchError.errorLocUrl) {
             try await FJRouter.jump().viewController(byLocation: "", extra: nil)
         }
     }
     
     @Test func testSearchNotFindError() async throws {
-        await #expect(throws: FJRouter.MatchError.notFind) {
+        await #expect(throws: FJRouter.JumpMatchError.notFind) {
             try await FJRouter.jump().viewController(byLocation: "/sadfsadf", extra: nil)
         }
-        await #expect(throws: FJRouter.MatchError.notFind) {
+        await #expect(throws: FJRouter.JumpMatchError.notFind) {
             try await FJRouter.jump().viewController(byLocation: "/play/123/feature4", extra: nil)
         }
     }

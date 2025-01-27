@@ -8,14 +8,12 @@
 import Foundation
 
 extension FJRouter {
-    /// 通过路由名称、路由参数、查询参数组装路由路径错误
+    /// 通过路由/事件/资源名称、路由参数、查询参数组装路由路径错误
     public enum ConvertError: Error, @unchecked Sendable, Equatable {
-        /// 不存在当前名称的路由
+        /// 不存在当前名称的路由/事件/资源名称
         case noExistName
         /// `URL`转换成`string`错误, 具体请看`URLComponents`的`string`注释
         case urlConvert
-        /// 提前取消
-        case cancelled
     }
 }
 
@@ -26,8 +24,6 @@ extension FJRouter.ConvertError: CustomStringConvertible, CustomDebugStringConve
             return "Store has no route for this name"
         case .urlConvert:
             return "Can not get string from URLComponents"
-        case .cancelled:
-            return "Convert task has cancelled"
         }
     }
     

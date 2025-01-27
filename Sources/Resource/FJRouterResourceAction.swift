@@ -9,10 +9,8 @@ import Foundation
 
 /// 系统资源
 public struct FJRouterResourceAction: Sendable {
-    /// 资源构造器: 系统分配的任意线程中调度返回数据
+    /// 资源构造器
     public typealias Value = (@Sendable (_ info: Int) -> (any Sendable)?)
-    /// 资源构造器: 主线程调度返回数据
-    public typealias MainActorValue = (@MainActor @Sendable (_ info: Int) -> (any Sendable)?)
     /// 资源名称
     public let name: String?
     
@@ -26,8 +24,7 @@ public struct FJRouterResourceAction: Sendable {
     /// 资源path解析出来的参数名称数组
     public let pathParameters: [String]
     
-    internal let value: Value?
-    internal let mainActorValue: MainActorValue?
+    internal let value: Value
     
     /// 对应正则表达式
     private let regExp: NSRegularExpression?
@@ -36,9 +33,9 @@ public struct FJRouterResourceAction: Sendable {
     /// - Parameters:
     ///   - path: 资源url匹配路径
     ///   - name: 资源名称
-    ///   - value: 构建资源的指向: 系统分配的线程调度返回数据
+    ///   - value: 构建资源的指向
     ///
-    ///         let a = try FJRouterResourceAction(path: "/amodel", value: { @Sendable info in
+    ///         let a = try FJRouterResourceAction(path: "/amodel", name: "xxxx", value: { @Sendable info in
     ///             return AModel()
     ///         })
     public init(path: String, name: String? = nil, value: @escaping Value) throws {
@@ -53,32 +50,6 @@ public struct FJRouterResourceAction: Sendable {
         self.path = p
         self.name = n
         self.value = value
-        self.mainActorValue = nil
-        (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
-    }
-    
-    /// 初始化: value闭包内容一定是在主线程调度处理的
-    /// - Parameters:
-    ///   - path: 资源url匹配路径
-    ///   - name: 资源名称
-    ///   - value: 构建资源的指向: 主线程调度返回数据, 系统自动处理, 不用在闭包内部使用`DispatchQueue.main.async{...}`
-    ///
-    ///         let a = try FJRouterResourceAction(path: "/aview", mainActorValue: { @MainActor @Sendable info in
-    ///             return AView()
-    ///         })
-    public init(path: String, name: String? = nil, mainActorValue value: @escaping MainActorValue) throws {
-        let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
-        if p.isEmpty {
-            throw CreateError.emptyPath
-        }
-        let n = name?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let n, n.isEmpty {
-            throw CreateError.emptyName
-        }
-        self.path = p
-        self.name = n
-        self.mainActorValue = value
-        self.value = nil
         (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
     

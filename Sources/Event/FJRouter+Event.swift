@@ -16,7 +16,7 @@ extension FJRouter {
 }
 
 /// 事件总线协议
-public protocol FJRouterEventable: Sendable {
+public protocol FJRouterEventable {
     /// 监听事件
     /// - Parameter path: 事件路径path
     ///   - name: 事件名称

@@ -1,5 +1,5 @@
 //
-//  FJRouterMatchError.swift
+//  FJRouterJumpMatchError.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/12/5.
@@ -8,8 +8,8 @@
 import Foundation
 
 extension FJRouter {
-    /// 路由匹配错误
-    public enum MatchError: Error, @unchecked Sendable {
+    /// 路由跳转匹配错误
+    public enum JumpMatchError: Error, @unchecked Sendable {
         /// 错误的查找路径: 不是正确的`URL`
         case errorLocUrl
         /// 没有发现路由
@@ -27,7 +27,7 @@ extension FJRouter {
     }
 }
 
-extension FJRouter.MatchError: Equatable {
+extension FJRouter.JumpMatchError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.errorLocUrl, .errorLocUrl):
@@ -50,7 +50,7 @@ extension FJRouter.MatchError: Equatable {
     }
 }
 
-extension FJRouter.MatchError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+extension FJRouter.JumpMatchError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
     public var description: String {
         switch self {
         case .errorLocUrl:

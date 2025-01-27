@@ -55,13 +55,13 @@ extension FJRouter.JumpImpl {
 extension FJRouter.JumpImpl {
     func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController {
         guard let url = URL(string: location) else {
-            throw FJRouter.MatchError.errorLocUrl
+            throw FJRouter.JumpMatchError.errorLocUrl
         }
         let match = try await store.match(url: url, extra: extra, ignoreError: true)
         if let destvc = await core.viewController(for: match) {
             return destvc
         }
-        throw FJRouter.MatchError.noBuilder
+        throw FJRouter.JumpMatchError.noBuilder
     }
     
     func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController {
@@ -71,11 +71,11 @@ extension FJRouter.JumpImpl {
             return destvc
         } catch {
             if let err = error as? FJRouter.ConvertError {
-                throw FJRouter.MatchError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.MatchError {
+                throw FJRouter.JumpMatchError.convertNameLoc(err)
+            } else if let err = error as? FJRouter.JumpMatchError {
                 throw err
             } else {
-                throw FJRouter.MatchError.cancelled
+                throw FJRouter.JumpMatchError.cancelled
             }
         }
     }
@@ -83,7 +83,7 @@ extension FJRouter.JumpImpl {
 
 // MARK: - go
 extension FJRouter.JumpImpl {
-    func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
+    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
         Task {
             try await self.go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
         }
@@ -96,47 +96,47 @@ extension FJRouter.JumpImpl {
                 try await self.go_private(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
             } catch {
                 if let err = error as? FJRouter.ConvertError {
-                    throw FJRouter.MatchError.convertNameLoc(err)
-                } else if let err = error as? FJRouter.MatchError {
+                    throw FJRouter.JumpMatchError.convertNameLoc(err)
+                } else if let err = error as? FJRouter.JumpMatchError {
                     throw err
                 } else {
-                    throw FJRouter.MatchError.cancelled
+                    throw FJRouter.JumpMatchError.cancelled
                 }
             }
         }
     }
     
     @discardableResult
-    func go(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
         do {
             let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
-            return result.subject.setFailureType(to: FJRouter.MatchError.self).eraseToAnyPublisher()
+            return result.subject.setFailureType(to: FJRouter.JumpMatchError.self).eraseToAnyPublisher()
         } catch {
-            let gerr: FJRouter.MatchError
+            let gerr: FJRouter.JumpMatchError
             if let err = error as? FJRouter.ConvertError {
                 gerr = .convertNameLoc(err)
-            } else if let err = error as? FJRouter.MatchError {
+            } else if let err = error as? FJRouter.JumpMatchError {
                 gerr = err
             } else {
-                gerr = FJRouter.MatchError.cancelled
+                gerr = FJRouter.JumpMatchError.cancelled
             }
             return Fail(error: gerr).eraseToAnyPublisher()
         }
     }
     
     @discardableResult
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return await go(loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            return await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
         } catch {
-            let gerr: FJRouter.MatchError
+            let gerr: FJRouter.JumpMatchError
             if let err = error as? FJRouter.ConvertError {
                 gerr = .convertNameLoc(err)
-            } else if let err = error as? FJRouter.MatchError {
+            } else if let err = error as? FJRouter.JumpMatchError {
                 gerr = err
             } else {
-                gerr = FJRouter.MatchError.cancelled
+                gerr = FJRouter.JumpMatchError.cancelled
             }
             return Fail(error: gerr).eraseToAnyPublisher()
         }
@@ -162,41 +162,41 @@ extension FJRouter.JumpImpl {
     
     private func go_trigger<T>(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {
-            throw FJRouter.MatchError.errorLocUrl
+            throw FJRouter.JumpMatchError.errorLocUrl
         }
         do {
             let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
             guard let vc = await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true) else {
-                throw FJRouter.MatchError.notFind
+                throw FJRouter.JumpMatchError.notFind
             }
             let cb = callback()
             await vc.fjroute_addCallbackTrigger(callback: cb)
             return cb
         } catch {
             if let err = error as? FJRouter.ConvertError {
-                throw FJRouter.MatchError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.MatchError {
+                throw FJRouter.JumpMatchError.convertNameLoc(err)
+            } else if let err = error as? FJRouter.JumpMatchError {
                 throw err
             } else {
-                throw FJRouter.MatchError.cancelled
+                throw FJRouter.JumpMatchError.cancelled
             }
         }
     }
     
     private func go_private(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws {
         guard let url = URL(string: location) else {
-            throw FJRouter.MatchError.errorLocUrl
+            throw FJRouter.JumpMatchError.errorLocUrl
         }
         do {
             let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
             await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true)
         } catch {
             if let err = error as? FJRouter.ConvertError {
-                throw FJRouter.MatchError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.MatchError {
+                throw FJRouter.JumpMatchError.convertNameLoc(err)
+            } else if let err = error as? FJRouter.JumpMatchError {
                 throw err
             } else {
-                throw FJRouter.MatchError.cancelled
+                throw FJRouter.JumpMatchError.cancelled
             }
         }
     }

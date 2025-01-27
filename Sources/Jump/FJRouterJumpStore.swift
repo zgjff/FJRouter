@@ -49,7 +49,7 @@ extension FJRouter.JumpStore {
         switch final.result {
         case .success(let ms):
             if ms.isEmpty && ignoreError {
-                throw FJRouter.MatchError.notFind
+                throw FJRouter.JumpMatchError.notFind
             }
             return final
         case .error(let err):
@@ -58,11 +58,11 @@ extension FJRouter.JumpStore {
             }
             switch err {
             case .empty:
-                throw FJRouter.MatchError.notFind
+                throw FJRouter.JumpMatchError.notFind
             case .redirectLimit(let desc):
-                throw FJRouter.MatchError.redirectLimit(desc: desc)
+                throw FJRouter.JumpMatchError.redirectLimit(desc: desc)
             case .loopRedirect(let desc):
-                throw FJRouter.MatchError.loopRedirect(desc: desc)
+                throw FJRouter.JumpMatchError.loopRedirect(desc: desc)
             }
         }
     }

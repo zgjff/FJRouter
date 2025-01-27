@@ -19,12 +19,12 @@ extension FJRouterJumpable {
     /// 通过路由路径参数导航至对应控制器
     /// - Parameter params: 参数
     public func go(location params: FJRouter.GoByLocationParams) throws {
-        try go(params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
+        try go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
     /// 通过路由名称参数导航至对应控制器
     /// - Parameter params: 参数
-    public func go(name params: FJRouter.GoByNameParams) throws {
+    public func goNamed(_ params: FJRouter.GoByNameParams) throws {
         try goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
@@ -55,8 +55,8 @@ extension FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    public func go(location params: FJRouter.GoByLocationParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
-        return await go(params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
+    public func go(location params: FJRouter.GoByLocationParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
+        return await go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
     /// 通过路由名称参数导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
@@ -86,7 +86,7 @@ extension FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    public func goNamed(_ params: FJRouter.GoByNameParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError> {
+    public func goNamed(_ params: FJRouter.GoByNameParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
         return await goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
 }
