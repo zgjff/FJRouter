@@ -1,25 +1,19 @@
 //
-//  FJRouterJumpMatchError.swift
+//  FJRouterEmitEventError.swift
 //  FJRouter
 //
-//  Created by zgjff on 2024/12/5.
+//  Created by zgjff on 2025/1/27.
 //
 
 import Foundation
 
 extension FJRouter {
-    /// 路由跳转匹配错误
-    public enum JumpMatchError: Error, @unchecked Sendable {
+    /// 触发事件错误
+    public enum EmitEventError: Error, @unchecked Sendable {
         /// 错误的查找路径: 不是正确的`URL`
         case errorLocUrl
-        /// 没有发现路由: 没有注册过此path的路由
+        /// 没有发现: 没有监听过此path的事件
         case notFind
-        /// 对应的路由没有builder: 出现在构建路由的时候没有`builder`参数, 只有`redirect`参数, 且`redirect`协议返回了`none`
-        case noBuilder
-        /// 重定向次数超出限制
-        case redirectLimit(desc: String)
-        /// 循环重定向
-        case loopRedirect(desc: String)
         /// 通过路由名称、路由参数、查询参数组装路由路径错误
         case convertNameLoc(_ error: (FJRouter.ConvertError))
         /// 提前取消匹配: async中Task{ .... }, 提前取消task
@@ -27,7 +21,7 @@ extension FJRouter {
     }
 }
 
-extension FJRouter.JumpMatchError: Equatable {
+extension FJRouter.EmitEventError: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.errorLocUrl, .errorLocUrl):
@@ -50,7 +44,7 @@ extension FJRouter.JumpMatchError: Equatable {
     }
 }
 
-extension FJRouter.JumpMatchError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+extension FJRouter.EmitEventError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
     public var description: String {
         switch self {
         case .errorLocUrl:

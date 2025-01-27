@@ -28,16 +28,26 @@ extension FJRouter.EventImpl {
 
     func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
         guard let url = URL(string: location) else {
-            return
+            throw FJRouter.EmitEventError.errorLocUrl
         }
         guard let (listener, info) = await store.match(url: url, extra: extra) else {
-            return
+            throw FJRouter.EmitEventError.notFind
         }
         listener.receive(value: info)
     }
     
     func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
-        let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
-        try await emit(loc, extra: extra)
+        do {
+            let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
+            try await emit(loc, extra: extra)
+        } catch {
+            if let err = error as? FJRouter.ConvertError {
+                throw FJRouter.EmitEventError.convertNameLoc(err)
+            } else if let err = error as? FJRouter.EmitEventError {
+                throw err
+            } else {
+                throw FJRouter.EmitEventError.cancelled
+            }
+        }
     }
 }
