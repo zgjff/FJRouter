@@ -10,43 +10,40 @@ import Foundation
 extension FJRouter {
     internal actor ResourceStore {
         private var nameToPath: [String: String] = [:]
-        private var resources: Set<FJRouterResourceAction> = []
+        private var resources: Set<FJRouterResource> = []
     }
 }
 
 extension FJRouter.ResourceStore {
-    func add(_ resource: FJRouterResourceAction) {
-//        guard let obj = listeners.first(where: { $0.action == action }) else {
-//            let listener = FJRouter.EventListener(action: action)
-//            listeners.insert(listener)
-//            beginSaveActionNamePath(action: action)
-//            return listener
-//        }
-//        guard let name = action.name else {
-//            return obj
-//        }
-//        guard obj.action.name != nil else {
-//            beginSaveActionNamePath(action: action)
-//            obj.updateActionName(name)
-//            return obj
-//        }
-//        beginSaveActionNamePath(action: action)
-//        return obj
-        guard let obj = resources.first(where: { $0 == resource }) else {
-            resources.insert(resource)
-            beginSaveResourceNamePath(resource)
-            return
+    func add(_ resource: FJRouterResource) throws {
+        if resources.contains(resource) {
+            throw FJRouter.PutResourceError.exist
         }
-        
+        resources.insert(resource)
+        beginSaveResourceNamePath(resource)
     }
     
-    func match(url: URL) async throws -> FJRouterResourceAction {
-        throw FJRouter.JumpMatchError.errorLocUrl
+    func match(url: URL) async throws -> FJRouter.ResourceMatchInfo {
+        let fixUrl = url.adjust()
+        for resource in resources {
+            if let info = findMatch(url: fixUrl, resource: resource) {
+                return info
+            }
+        }
+        throw FJRouter.GetResourceError.notFind
+    }
+    
+    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let path = nameToPath[n] else {
+            throw FJRouter.ConvertError.noExistName
+        }
+        return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
 }
 
 private extension FJRouter.ResourceStore {
-    func beginSaveResourceNamePath(_ resource: FJRouterResourceAction) {
+    func beginSaveResourceNamePath(_ resource: FJRouterResource) {
         guard let name = resource.name else {
             return
         }
@@ -57,5 +54,12 @@ private extension FJRouter.ResourceStore {
             assert(prefullpath == fullPath, "不能添加名称相同但path却不同的资源: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
         }
         nameToPath.updateValue(fullPath, forKey: name)
+    }
+    
+    func findMatch(url: URL, resource: FJRouterResource) -> FJRouter.ResourceMatchInfo? {
+        guard let pairs = FJRouter.ResourceMatch.match(resource: resource, byUrl: url) else {
+            return nil
+        }
+        return .init(url: url, matchedLocation: pairs.match.matchedLocation, resource: pairs.match.resource, pathParameters: pairs.pathParameters, queryParameters: url.queryParams)
     }
 }

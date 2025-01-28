@@ -28,12 +28,6 @@ extension FJRouter.EmitEventError: Equatable {
             return true
         case (.notFind, .notFind):
             return true
-        case (.noBuilder, .noBuilder):
-            return true
-        case let (.redirectLimit(ld), .redirectLimit(rd)):
-            return ld == rd
-        case let (.loopRedirect(ld), .loopRedirect(rd)):
-            return ld == rd
         case let (.convertNameLoc(le), .convertNameLoc(re)):
             return le == re
         case (.cancelled, .cancelled):
@@ -50,15 +44,9 @@ extension FJRouter.EmitEventError: CustomStringConvertible, CustomDebugStringCon
         case .errorLocUrl:
             return "Search loc url is correct URL"
         case .notFind:
-            return "Does not find any route"
-        case .noBuilder:
-            return "Mathed Route has no builder"
-        case .redirectLimit(desc: let desc):
-            return desc
-        case .loopRedirect(desc: let desc):
-            return desc
+            return "Does not find any event action"
         case .convertNameLoc(let err):
-            return "Convert name to loc error: \(err)"
+            return "Convert name to loc url error: \(err)"
         case .cancelled:
             return "Match task has cancelled"
         }

@@ -39,7 +39,7 @@ extension FJRouter.EventMatch {
 
 extension FJRouter.EventMatch: CustomStringConvertible, CustomDebugStringConvertible {
     var description: String {
-        return "FJRouterEventMatch#(route:\(action)),matchedLocation:\(matchedLocation)"
+        return "FJRouterEventMatch#(action:\(action)),matchedLocation:\(matchedLocation)"
     }
     
     var debugDescription: String {

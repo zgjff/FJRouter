@@ -97,6 +97,37 @@ extension FJPathUtils {
         return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
     }
     
+    internal func convertNewUrlPath(from path: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+        let newParams = params.reduce([String: String]()) { partialResult, pairs in
+            var f = partialResult
+            f.updateValue(pairs.value, forKey: pairs.key)
+            return f
+        }
+        let location = FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
+        var cop = URLComponents(string: location)
+        if !queryParams.isEmpty {
+            var queryItems = cop?.queryItems ?? []
+            for qp in queryParams {
+                queryItems.append(URLQueryItem(name: qp.key, value: qp.value))
+            }
+            cop?.queryItems = queryItems
+        }
+        guard let final = cop?.string else {
+            throw FJRouter.ConvertError.urlConvert
+        }
+        guard final.count > 1 else {
+            return final
+        }
+        if queryParams.isEmpty && path.hasSuffix("/") && !final.hasSuffix("/") {
+            return final + "/"
+        }
+        if queryParams.isEmpty && !path.hasSuffix("/") && final.hasSuffix("/") {
+            let result = final.dropLast()
+            return String(result)
+        }
+        return final
+    }
+    
     internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) -> String {
         var buffer: String
         if #available(iOS 14.0, *) {

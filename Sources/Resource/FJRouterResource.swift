@@ -1,5 +1,5 @@
 //
-//  FJRouterResourceAction.swift
+//  FJRouterResource.swift
 //  FJRouter
 //
 //  Created by zgjff on 2025/1/26.
@@ -7,10 +7,10 @@
 
 import Foundation
 
-/// 系统资源
-public struct FJRouterResourceAction: Sendable {
+/// 资源
+public struct FJRouterResource: Sendable {
     /// 资源构造器
-    public typealias Value = (@Sendable (_ info: Int) -> (any Sendable)?)
+    public typealias Value = (@Sendable (_ info: FJRouter.ResourceMatchInfo) -> (any Sendable))
     /// 资源名称
     public let name: String?
     
@@ -35,8 +35,8 @@ public struct FJRouterResourceAction: Sendable {
     ///   - name: 资源名称
     ///   - value: 构建资源的指向
     ///
-    ///         let a = try FJRouterResourceAction(path: "/amodel", name: "xxxx", value: { @Sendable info in
-    ///             return AModel()
+    ///         let a = try FJRouterResource(path: "/amodel", name: "xxxx", value: { @Sendable info -> AModel? in
+    ///             return info.xxxx ? AModel() : nil
     ///         })
     public init(path: String, name: String? = nil, value: @escaping Value) throws {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -62,7 +62,7 @@ public struct FJRouterResourceAction: Sendable {
     }
 }
 
-extension FJRouterResourceAction: Hashable {
+extension FJRouterResource: Hashable {
     public func hash(into hasher: inout Hasher) {
         if let lp = regExp?.pattern {
             hasher.combine(lp)
@@ -81,7 +81,7 @@ extension FJRouterResourceAction: Hashable {
     }
 }
 
-extension FJRouterResourceAction: CustomStringConvertible, CustomDebugStringConvertible {
+extension FJRouterResource: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
         return "FJRouterResourceAction#name:\(name == nil ? "null" : name!),path:\(path)"
     }
@@ -91,7 +91,7 @@ extension FJRouterResourceAction: CustomStringConvertible, CustomDebugStringConv
     }
 }
 
-extension FJRouterResourceAction {
+extension FJRouterResource {
     public enum CreateError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
         case emptyPath
         case emptyName

@@ -15,38 +15,49 @@ extension FJRouter {
         private init() {
             store = ResourceStore()
         }
+        
+        /// for test
+        internal static func clone() -> ResourceImpl {
+            ResourceImpl()
+        }
     }
 }
 
 extension FJRouter.ResourceImpl: FJRouterResourceable {
-    func put(_ resource: FJRouterResourceAction) async {
-        await store.add(resource)
+    func put(_ resource: FJRouterResource) async throws {
+        try await store.add(resource)
     }
-    
-    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value? where Value : Sendable {
+
+    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
+        guard let url = URL(string: location) else {
+            throw FJRouter.GetResourceError.errorLocUrl
+        }
         do {
-            let resource = try await store.match(url: URL(string: "/")!)
+            let info = try await store.match(url: url)
             if mainActor {
-                return await MainActor.run {
-                    if let rv = resource.value(1) as? Value {
-                        return rv
-                    } else {
-                        return nil
-                    }
+                let value = await MainActor.run {
+                    return info.resource.value(info)
                 }
+                if let gvalue = value as? Value {
+                    return gvalue
+                }
+                throw FJRouter.GetResourceError.valueType
             } else {
-                if let rv = resource.value(1) as? Value {
-                    return rv
-                } else {
-                    return nil
+                let value = info.resource.value(info)
+                if let gvalue = value as? Value {
+                    return gvalue
                 }
+                throw FJRouter.GetResourceError.valueType
             }
         } catch {
-            throw FJRouter.JumpMatchError.cancelled
+            if let err = error as? FJRouter.GetResourceError {
+                throw err
+            }
+            throw FJRouter.GetResourceError.notFind
         }
     }
     
-    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value? where Value : Sendable {
-        nil
+    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
+        throw FJRouter.JumpMatchError.cancelled
     }
 }

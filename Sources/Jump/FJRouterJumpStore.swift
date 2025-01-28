@@ -85,34 +85,7 @@ extension FJRouter.JumpStore {
         guard let path = nameToPath[n] else {
             throw FJRouter.ConvertError.noExistName
         }
-        let newParams = params.reduce([String: String]()) { partialResult, pairs in
-            var f = partialResult
-            f.updateValue(pairs.value, forKey: pairs.key)
-            return f
-        }
-        let location = FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
-        var cop = URLComponents(string: location)
-        if !queryParams.isEmpty {
-            var queryItems = cop?.queryItems ?? []
-            for qp in queryParams {
-                queryItems.append(URLQueryItem(name: qp.key, value: qp.value))
-            }
-            cop?.queryItems = queryItems
-        }
-        guard let final = cop?.string else {
-            throw FJRouter.ConvertError.urlConvert
-        }
-        guard final.count > 1 else {
-            return final
-        }
-        if queryParams.isEmpty && path.hasSuffix("/") && !final.hasSuffix("/") {
-            return final + "/"
-        }
-        if queryParams.isEmpty && !path.hasSuffix("/") && final.hasSuffix("/") {
-            let result = final.dropLast()
-            return String(result)
-        }
-        return final
+        return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
 }
 
