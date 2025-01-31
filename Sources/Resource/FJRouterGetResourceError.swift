@@ -42,35 +42,35 @@ extension FJRouter.GetResourceError: Equatable {
     }
 }
 
-//extension FJRouter.GetResourceError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-//    public var description: String {
-//        switch self {
-//        case .errorLocUrl:
-//            return "Search loc url is correct URL"
-//        case .notFind:
-//            return "Does not find any event action"
-//        case .convertNameLoc(let err):
-//            return "Convert name to loc url error: \(err)"
-//        case .valueType:
-//            return "Get resource type dose not same put"
-//        case .cancelled:
-//            return "Match task has cancelled"
-//        }
-//    }
-//    
-//    public var debugDescription: String {
-//        description
-//    }
-//    
-//    public var localizedDescription: String {
-//        description
-//    }
-//    
-//    public var errorDescription: String? {
-//        description
-//    }
-//    
-//    public var failureReason: String? {
-//        description
-//    }
-//}
+extension FJRouter.GetResourceError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
+    public var description: String {
+        switch self {
+        case .errorLocUrl:
+            return "传递的查询loc不是正确的URL"
+        case .notFind:
+            return "没有查询到相关资源"
+        case .convertNameLoc(let err):
+            return "转换查询name到loc错误: \(err)"
+        case .valueType:
+            return "查到存放的资源,但是get资源类型错误, 请使用正确的类型"
+        case .cancelled:
+            return "提前取消async Task"
+        }
+    }
+    
+    public var debugDescription: String {
+        description
+    }
+    
+    public var localizedDescription: String {
+        description
+    }
+    
+    public var errorDescription: String? {
+        description
+    }
+    
+    public var failureReason: String? {
+        description
+    }
+}

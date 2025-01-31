@@ -54,8 +54,11 @@ struct FJRouterResourceImplTests {
         let aTestable1: ATestable = try await impl.get("/protocolATest/1", inMainActor: false)
         #expect(aTestable1.value == 3)
         
-        let aTestable2: ATestable = try await impl.get("/protocolATest/0", inMainActor: false)
+        let aTestable2: ATestable = try await impl.get("/protocolATest/0", inMainActor: true)
         #expect(aTestable2.value == 13)
+        
+        let aTestable3: BModel = try await impl.get("/protocolATest/0", inMainActor: false)
+        #expect(aTestable3.value == 13)
     }
     
     @Test func getNil() async throws {

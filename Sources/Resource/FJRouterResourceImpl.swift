@@ -58,6 +58,17 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
     }
     
     func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
-        throw FJRouter.JumpMatchError.cancelled
+        do {
+            let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
+            return try await get(loc, inMainActor: mainActor)
+        } catch {
+            if let err = error as? FJRouter.ConvertError {
+                throw FJRouter.GetResourceError.convertNameLoc(err)
+            } else if let err = error as? FJRouter.GetResourceError {
+                throw err
+            } else {
+                throw FJRouter.GetResourceError.cancelled
+            }
+        }
     }
 }

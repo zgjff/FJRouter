@@ -21,9 +21,9 @@ extension FJRouter.ConvertError: CustomStringConvertible, CustomDebugStringConve
     public var description: String {
         switch self {
         case .noExistName:
-            return "Store has no route for this name"
+            return "没有存储此name"
         case .urlConvert:
-            return "Can not get string from URLComponents"
+            return "url生成错误, 请查看URLComponents 的 string"
         }
     }
     

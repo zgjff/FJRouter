@@ -42,13 +42,13 @@ extension FJRouter.EmitEventError: CustomStringConvertible, CustomDebugStringCon
     public var description: String {
         switch self {
         case .errorLocUrl:
-            return "Search loc url is correct URL"
+            return "传递的查询loc不是正确的URL"
         case .notFind:
-            return "Does not find any event action"
+            return "没有查询到相关事件"
         case .convertNameLoc(let err):
-            return "Convert name to loc url error: \(err)"
+            return "转换查询name到loc错误: \(err)"
         case .cancelled:
-            return "Match task has cancelled"
+            return "提前取消async Task"
         }
     }
     
