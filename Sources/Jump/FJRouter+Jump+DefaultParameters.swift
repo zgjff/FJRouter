@@ -11,18 +11,27 @@ import Combine
 
 extension FJRouterJumpable {
     /// 通过路由名称参数获取对应的控制器
-    /// - Parameter params: 参数
+    ///
+    ///     let vc = try await FJRouter.jump().viewController(byName: FJRouter.FindControllerByNameParams.init(name: "second"))
+    ///
+    /// - Parameter params: 查询参数
     public func viewController(byName params: FJRouter.FindControllerByNameParams) async throws -> UIViewController {
         try await viewController(byName: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
     }
     
     /// 通过路由路径参数导航至对应控制器
+    ///
+    ///     try FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
+    ///
     /// - Parameter params: 参数
     public func go(location params: FJRouter.GoByLocationParams) throws {
         try go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
     /// 通过路由名称参数导航至对应控制器
+    ///
+    ///     try FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
+    ///
     /// - Parameter params: 参数
     public func goNamed(_ params: FJRouter.GoByNameParams) throws {
         try goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
@@ -35,7 +44,7 @@ extension FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().go(.init(path: "/first"))
+    ///     let callback = await FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -49,7 +58,7 @@ extension FJRouterJumpable {
     ///         print("value----特殊:", item)
     ///     }).store(in: &cancels)
     ///
-    ///     触发:
+    ///     触发:需要viewController方调用
     ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
@@ -66,7 +75,7 @@ extension FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().goNamed(.init(name: "first"))
+    ///     let callback = await FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -80,7 +89,7 @@ extension FJRouterJumpable {
     ///         print("value----特殊:", item)
     ///     }).store(in: &cancels)
     ///
-    ///     触发:
+    ///     触发:需要viewController方调用
     ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
@@ -90,8 +99,6 @@ extension FJRouterJumpable {
         return await goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
 }
-
-
 
 extension FJRouter {
     /// 通过路由名称查询对应控制器: 方便协议方法传递默认参数

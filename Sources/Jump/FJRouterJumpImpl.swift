@@ -85,6 +85,7 @@ extension FJRouter.JumpImpl {
 extension FJRouter.JumpImpl {
     func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws {
         Task {
+            // TODO: - ignoreError为true, 切找不到路由对应控制器时, 抛出错误; ignoreError为false, 切找不到路由对应控制器时, 跳转到错误页面, 无需抛出错误
             try await self.go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
         }
     }

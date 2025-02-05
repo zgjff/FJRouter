@@ -6,24 +6,24 @@ struct FJRouterResourceImplTests {
     let impl: FJRouterResourceable
     init() async throws {
         impl = FJRouter.ResourceImpl.clone()
-        let r1 = try FJRouterResource(path: "/intvalue1", value: { _ in 1 })
+        let r1 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
         try await impl.put(r1)
-        let r2 = try FJRouterResource(path: "/intOptionalvalue1") { @Sendable info -> Int? in
+        let r2 = try FJRouterResource(path: "/intOptionalvalue1", name: "intOptionalvalue1") { @Sendable info -> Int? in
             return 1
         }
         try await impl.put(r2)
-        let r3 = try FJRouterResource(path: "/intOptionalvalue2") { @Sendable info -> Int? in
+        let r3 = try FJRouterResource(path: "/intOptionalvalue2", name: "intOptionalvalue2") { @Sendable info -> Int? in
             return nil
         }
         try await impl.put(r3)
-        let r4 = try FJRouterResource(path: "/stringvalue1", value: { _ in "haha" })
+        let r4 = try FJRouterResource(path: "/stringvalue1", name: "stringvalue1", value: { _ in "haha" })
         try await impl.put(r4)
-        let r5 = try FJRouterResource(path: "/intOptionalvalue3/:optional", value: { @Sendable info -> Int? in
+        let r5 = try FJRouterResource(path: "/intOptionalvalue3/:optional", name: "intOptionalvalue3", value: { @Sendable info -> Int? in
             let isOptional = info.pathParameters["optional"] == "1"
             return isOptional ? nil : 1
         })
         try await impl.put(r5)
-        let r6 = try FJRouterResource(path: "/protocolATest/:isA", value: { @Sendable info -> ATestable in
+        let r6 = try FJRouterResource(path: "/protocolATest/:isA", name: "protocolATest", value: { @Sendable info -> ATestable in
             let isA = info.pathParameters["isA"] == "1"
             return isA ? AModel() : BModel()
         })
@@ -87,6 +87,40 @@ struct FJRouterResourceImplTests {
         await #expect(throws: FJRouter.GetResourceError.valueType) {
             let _: BModel = try await impl.get("/protocolATest/1", inMainActor: false)
         }
+    }
+    
+    @Test func getValueByNameWithNoParams() async throws {
+        let intvalue1: Int = try await impl.get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: true)
+        #expect(intvalue1 == 1)
+        let intvalue11: Int = try await impl.get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: false)
+        #expect(intvalue11 == 1)
+        
+        let intOptionalvalue1: Int? = try await impl.get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
+        #expect(intOptionalvalue1 == 1)
+        let intOptionalvalue111: Int? = try await impl.get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: false)
+        #expect(intOptionalvalue111 == 1)
+        
+        let intOptionalvalue2: Int? = try await impl.get(name: "intOptionalvalue2", params: [:], queryParams: [:], inMainActor: true)
+        #expect(intOptionalvalue2 == nil)
+        let intOptionalvalue22: Int? = try await impl.get(name: "intOptionalvalue2", params: [:], queryParams: [:], inMainActor: false)
+        #expect(intOptionalvalue22 == nil)
+    }
+    
+    @Test func getValueByNameWithParams() async throws {
+        let intOptionalvalue3: Int? = try await impl.get(name: "intOptionalvalue3", params: ["optional": "1"], queryParams: [:], inMainActor: true)
+        #expect(intOptionalvalue3 == nil)
+        
+        let intOptionalvalue31: Int? = try await impl.get(name: "intOptionalvalue3", params: ["optional": "0"], queryParams: [:], inMainActor: false)
+        #expect(intOptionalvalue31 == 1)
+        
+        let intOptionalvalue32: Int = try await impl.get(name: "intOptionalvalue3", params: ["optional": "0"], queryParams: [:], inMainActor: true)
+        #expect(intOptionalvalue32 == 1)
+        
+        let protocolATest: ATestable = try await impl.get(name: "protocolATest", params: ["isA": "1"], queryParams: [:], inMainActor: true)
+        #expect(protocolATest.value == 3)
+        
+        let protocolATest1: ATestable = try await impl.get(name: "protocolATest", params: ["isA": "0"], queryParams: [:], inMainActor: false)
+        #expect(protocolATest1.value == 13)
     }
 }
 

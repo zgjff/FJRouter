@@ -21,14 +21,25 @@ public protocol FJRouterJumpable {
     ///
     /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
     ///
+    ///
+    ///     try await FJRouter.jump().registerRoute(FJRoute(path: "/first", name: "first", builder: { _ in FViewController() }, animator: { _ in FJRoute.SystemPushAnimator() }))
+    ///
     /// - Parameter route: 路由
     func registerRoute(_ route: FJRoute) async
     
     /// 设置允许重定向的次数
+    ///
+    ///     await FJRouter.jump().setRedirectLimit(50)
+    ///
     /// - Parameter limit: 次数
     func setRedirectLimit(_ limit: UInt) async
     
     /// 设置路由匹配失败时的页面
+    ///
+    ///     await FJRouter.jump().setErrorBuilder { @MainActor @Sendable state in
+    ///         return UIViewController()
+    ///     }
+    ///
     /// - Parameter builder: 失败时的页面创建逻辑
     func setErrorBuilder(_ builder: @escaping (@MainActor @Sendable (_ state: FJRouterState) -> UIViewController)) async
     
@@ -43,6 +54,9 @@ public protocol FJRouterJumpable {
     func setTopController(action: @escaping @MainActor (_ current: UIViewController?) -> UIViewController?) async
     
     /// 通过路由路径获取对应的控制器
+    ///
+    ///     let vc = try await FJRouter.jump().viewController(byLocation: "/five", extra: nil)
+    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -50,6 +64,9 @@ public protocol FJRouterJumpable {
     func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController
     
     /// 通过路由名称获取对应的控制器
+    ///
+    ///     let fvc = try await FJRouter.jump().viewController(byName: "five", params: [:], queryParams: [:], extra: nil)
+    ///
     /// - Parameters:
     ///   - name: 路由名称
     ///   - params: 路由参数
@@ -59,6 +76,9 @@ public protocol FJRouterJumpable {
     func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController
     
     /// 通过路由路径导航至对应控制器
+    ///
+    ///     try FJRouter.jump().go(location: "/second", extra: nil, from: self, ignoreError: true)
+    ///
     /// - Parameters:
     ///   - location: 路由路径
     ///   - extra: 携带的参数
@@ -67,6 +87,9 @@ public protocol FJRouterJumpable {
     func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
     
     /// 通过路由名称导航至对应控制器
+    ///
+    ///     try FJRouter.jump().goNamed("second", params: [:], queryParams: [:], extra: nil, from: self, ignoreError: true)
+    ///
     ///   - name: 路由名称
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
@@ -86,7 +109,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().go(location: "/first")
+    ///     let callback = await FJRouter.jump().go(location: "/first", extra: nil, from: nil, ignoreError: true)
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -100,7 +123,7 @@ public protocol FJRouterJumpable {
     ///         print("value----特殊:", item)
     ///     }).store(in: &cancels)
     ///
-    ///     触发:
+    ///     触发:需要viewController方调用
     ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
@@ -121,7 +144,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().goNamed("first")
+    ///     let callback = await FJRouter.jump().goNamed("first", params: [:], queryParams: [:], extra: nil, from: nil, ignoreError: true)
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -135,7 +158,7 @@ public protocol FJRouterJumpable {
     ///         print("value----特殊:", item)
     ///     }).store(in: &cancels)
     ///
-    ///     触发:
+    ///     触发: 需要viewController方调用
     ///     try? dispatchFJRouterCallBack(name: "haha", value: ())
     ///      dismiss(animated: true, completion: { [weak self] in
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
