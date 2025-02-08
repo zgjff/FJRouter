@@ -122,6 +122,43 @@ struct FJRouterResourceImplTests {
         let protocolATest1: ATestable = try await impl.get(name: "protocolATest", params: ["isA": "0"], queryParams: [:], inMainActor: false)
         #expect(protocolATest1.value == 13)
     }
+
+    @Test func deleteNotExist() async throws {
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byName: "")
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byName: "adfasdf")
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byPath: "")
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byPath: "adfasdf")
+        }
+    }
+    
+    @Test func deleteExist() async throws {
+        let intvalue1: Int = try await impl.get("/intvalue1", inMainActor: false)
+        #expect(intvalue1 == 1)
+        try await impl.delete(byPath: "/intvalue1")
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            let _: Int = try await impl.get("/intvalue1", inMainActor: false)
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byPath: "/intvalue1")
+        }
+        
+        let intOptionalvalue1: Int? = try await impl.get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
+        #expect(intOptionalvalue1 == 1)
+        try await impl.delete(byName: "intOptionalvalue1")
+        await #expect(throws: FJRouter.GetResourceError.convertNameLoc(.noExistName)) {
+            let _: Int? = try await impl.get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.delete(byName: "intOptionalvalue1")
+        }
+    }
 }
 
 

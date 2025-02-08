@@ -55,13 +55,13 @@ public protocol FJRouterResourceable {
     
     /// 根据资源路径取对应资源
     ///
-    ///     let intvalue1: Int = try await impl.get("/intvalue1", inMainActor: false)
-    ///     let intvalue3: Int? = try await impl.get("/intvalue1", inMainActor: true)
-    ///     let intOptionalvalue3: Int? = try await impl.get("/intOptionalvalue2", inMainActor: false)
-    ///     let stringvalue1: String = try await impl.get("/stringvalue1", inMainActor: false)
-    ///     let aTestable1: ATestable = try await impl.get("/protocolATest/1", inMainActor: false)
-    ///     let aTestable2: ATestable = try await impl.get("/protocolATest/0", inMainActor: true)
-    ///     let aTestable3: BModel = try await impl.get("/protocolATest/0", inMainActor: false)
+    ///     let intvalue1: Int = try await FJRouter.resource().get("/intvalue1", inMainActor: false)
+    ///     let intvalue3: Int? = try await FJRouter.resource().get("/intvalue1", inMainActor: true)
+    ///     let intOptionalvalue3: Int? = try await FJRouter.resource().get("/intOptionalvalue2", inMainActor: false)
+    ///     let stringvalue1: String = try await FJRouter.resource().get("/stringvalue1", inMainActor: false)
+    ///     let aTestable1: ATestable = try await FJRouter.resource().get("/protocolATest/1", inMainActor: false)
+    ///     let aTestable2: ATestable = try await FJRouter.resource().get("/protocolATest/0", inMainActor: true)
+    ///     let aTestable3: BModel = try await FJRouter.resource().get("/protocolATest/0", inMainActor: false)
     ///
     /// - Parameters:
     ///   - location: 资源路径
@@ -71,11 +71,11 @@ public protocol FJRouterResourceable {
     
     /// 根据资源名称取对应资源
     ///
-    ///     let intvalue1: Int = try await impl.get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: true)
-    ///     let intvalue11: Int = try await impl.get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: false)
-    ///     let intOptionalvalue1: Int? = try await impl.get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
-    ///     let intOptionalvalue3: Int? = try await impl.get(name: "intOptionalvalue3", params: ["optional": "1"], queryParams: [:], inMainActor: true)
-    ///     let protocolATest1: ATestable = try await impl.get(name: "protocolATest", params: ["isA": "0"], queryParams: [:], inMainActor: false)
+    ///     let intvalue1: Int = try await FJRouter.resource().get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: true)
+    ///     let intvalue11: Int = try await FJRouter.resource().get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: false)
+    ///     let intOptionalvalue1: Int? = try await FJRouter.resource().get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
+    ///     let intOptionalvalue3: Int? = try await FJRouter.resource().get(name: "intOptionalvalue3", params: ["optional": "1"], queryParams: [:], inMainActor: true)
+    ///     let protocolATest1: ATestable = try await FJRouter.resource().get(name: "protocolATest", params: ["isA": "0"], queryParams: [:], inMainActor: false)
     ///
     /// - Parameters:
     ///   - name: 资源名称
@@ -84,6 +84,24 @@ public protocol FJRouterResourceable {
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
     func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
+    
+    /// 根据资源路径删除已存放的资源
+    ///
+    /// 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+    ///
+    ///     try await FJRouter.resource().delete(byPath: "adfasdf")
+    ///
+    /// - Parameter path: 资源路径
+    func delete(byPath path: String) async throws
+    
+    /// 根据资源名称删除已存放的资源
+    ///
+    /// 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+    ///
+    ///     try await FJRouter.resource().delete(byName: "adfasdf")
+    ///
+    /// - Parameter name: 资源名称
+    func delete(byName name: String) async throws
 }
 
 extension FJRouterResourceable {

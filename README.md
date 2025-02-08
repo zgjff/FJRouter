@@ -352,13 +352,31 @@ func get<Value>(name: String, params: [String : String], queryParams: [String : 
 
 2: 事例代码
 ```swift
-let intvalue1: Int = try await impl.get("/intvalue1", inMainActor: false)
-let intvalue3: Int? = try await impl.get("/intvalue1", inMainActor: true)
-let intOptionalvalue3: Int? = try await impl.get("/intOptionalvalue2", inMainActor: false)
-let stringvalue1: String = try await impl.get("/stringvalue1", inMainActor: false)
-let aTestable1: ATestable = try await impl.get("/protocolATest/1", inMainActor: false)
-let aTestable2: ATestable = try await impl.get("/protocolATest/0", inMainActor: true)
-let aTestable3: BModel = try await impl.get("/protocolATest/0", inMainActor: false)
+let intvalue1: Int = try await FJRouter.resource().get("/intvalue1", inMainActor: false)
+let intvalue3: Int? = try await FJRouter.resource().get("/intvalue1", inMainActor: true)
+let intOptionalvalue3: Int? = try await FJRouter.resource().get("/intOptionalvalue2", inMainActor: false)
+let stringvalue1: String = try await FJRouter.resource().get("/stringvalue1", inMainActor: false)
+let aTestable1: ATestable = try await FJRouter.resource().get("/protocolATest/1", inMainActor: false)
+let aTestable2: ATestable = try await FJRouter.resource().get("/protocolATest/0", inMainActor: true)
+let aTestable3: BModel = try await FJRouter.resource().get("/protocolATest/0", inMainActor: false)
+```
+
+### 删除资源
+
+```swift 
+func delete(byPath path: String) async throws
+func delete(byName name: String) async throws
+```
+
+1: 必须是已经存放过的资源, 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+
+2: 可以根据名称或者路由删除
+
+3: 事例代码:
+
+```swift
+try await FJRouter.resource().delete(byPath: "/intvalue1")
+try await FJRouter.resource().delete(byName: "intOptionalvalue1")
 ```
 
 ## 事件总线

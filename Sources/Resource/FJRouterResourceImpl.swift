@@ -71,4 +71,12 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
             }
         }
     }
+    
+    func delete(byPath path: String) async throws {
+        try await store.deleteBy(path: path, name: nil)
+    }
+    
+    func delete(byName name: String) async throws {
+        try await store.deleteBy(path: nil, name: name)
+    }
 }

@@ -40,6 +40,24 @@ extension FJRouter.ResourceStore {
         }
         return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
+    
+    func deleteBy(path: String?, name: String?) throws {
+        let resource: FJRouterResource?
+        if let path {
+            resource = resources.first(where: { $0.path == path })
+        } else if let name {
+            resource = resources.first(where: { $0.name == name })
+        } else {
+            resource = nil
+        }
+        guard let resource else {
+            throw FJRouter.GetResourceError.notFind
+        }
+        if let name = resource.name {
+            nameToPath.removeValue(forKey: name)
+        }
+        resources.remove(resource)
+    }
 }
 
 private extension FJRouter.ResourceStore {
