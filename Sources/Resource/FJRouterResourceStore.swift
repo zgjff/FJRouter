@@ -23,6 +23,22 @@ extension FJRouter.ResourceStore {
         beginSaveResourceNamePath(resource)
     }
     
+    func add(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) {
+        guard let oldResource = resources.first(where: { $0 == resource }) else {
+            resources.insert(resource)
+            beginSaveResourceNamePath(resource)
+            return
+        }
+        if let name = oldResource.name {
+            nameToPath.removeValue(forKey: name)
+        }
+        // 存在
+        let finalValue = combine(oldResource.value, resource.value)
+        let finalResource = try! FJRouterResource(path: resource.path, name: resource.name ?? oldResource.name, value: finalValue)
+        resources.update(with: finalResource)
+        beginSaveResourceNamePath(finalResource)
+    }
+    
     func match(url: URL) async throws -> FJRouter.ResourceMatchInfo {
         let fixUrl = url.adjust()
         for resource in resources {

@@ -23,9 +23,18 @@ extension FJRouter {
 /// 2: 在实际app中, 资源的`URL`格式可能会随着时间而改变, 但是一般资源名称不会去更改
 public protocol FJRouterResourceable {
     /// 存放资源
+    /// 
     /// - Parameter resource: 资源
     ///
-    /// 资源可以是int, string, enum, uiview, uiviewcontroller, protocol...
+    /// 1: 资源可以是int, string, enum, uiview, uiviewcontroller, protocol...
+    ///
+    /// 2: 如果已经存放过相同`path`的资源, 则会抛出`FJRouter.PutResourceError.exist`错误。
+    ///
+    /// 3: 适用于全局只会存放一次的资源: 如单例中存放/application didFinishLaunchingWithOptions中
+    ///
+    /// 4: 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
+    ///
+    /// 5: 如果每次存放资源可能会更改, 建议使用`put(_ resource: FJRouterResource, uniquingPathWith: xxx)`方法
     ///
     ///     let r1 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
     ///     try await FJRouter.resource().put(r1)
@@ -52,6 +61,23 @@ public protocol FJRouterResourceable {
     ///     try await FJRouter.resource().put(r6)
     ///
     func put(_ resource: FJRouterResource) async throws
+    
+    /// 存放资源
+    /// - Parameters:
+    ///   - resource: 资源
+    ///   - combine: 如果已经存放过相同path的资源, 使用合并相同资源的策略
+    ///
+    /// 1: 如果已经存放过相同`path`的资源, 不会抛出`FJRouter.PutResourceError.exist`错误, 会按照`combine`参数进行合并
+    ///
+    /// 2: 适用于可能多处/多处存放: 如某个viewController, 出现的时候才去存储资源, 但是因为viewController可能会多次进入,
+    /// 而且每次存放的资源的具体值均不相同, 使用此方法可以有效的存储, 不会抛出`FJRouter.PutResourceError.exist`错误
+    ///
+    /// 3: 资源的名称会优先使用新的资源name, 如果新的资源name为nil, 才会使用旧资源name
+    ///
+    ///     await impl.put(r) { (currnet, _) in currnet }
+    ///     await impl.put(r) { (_, new) in new }
+    ///
+    func put(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async
     
     /// 根据资源路径取对应资源
     ///

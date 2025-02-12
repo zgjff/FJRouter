@@ -27,6 +27,10 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
     func put(_ resource: FJRouterResource) async throws {
         try await store.add(resource)
     }
+    
+    func put(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async {
+        await store.add(resource, uniquingPathWith: combine)
+    }
 
     func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
         guard let url = URL(string: location) else {
