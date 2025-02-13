@@ -57,6 +57,22 @@ extension FJRouter.ResourceStore {
         return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
     
+    func updateBy(path: String?, name: String?, value: @escaping FJRouterResource.Value) throws {
+        let resource: FJRouterResource?
+        if let path {
+            resource = resources.first(where: { $0.path == path })
+        } else if let name {
+            resource = resources.first(where: { $0.name == name })
+        } else {
+            resource = nil
+        }
+        guard let resource else {
+            throw FJRouter.GetResourceError.notFind
+        }
+        let newResource = try FJRouterResource(path: resource.path, name: resource.name, value: value)
+        resources.update(with: newResource)
+    }
+    
     func deleteBy(path: String?, name: String?) throws {
         let resource: FJRouterResource?
         if let path {

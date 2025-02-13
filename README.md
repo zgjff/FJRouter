@@ -315,7 +315,10 @@ func put(_ resource: FJRouterResource) async throws
 
 3: 存放资源的时候可以携带参数
 
-4: 事例代码:
+4: 适用于全局只会存放一次的资源: 如单例中或者`/applicationdidFinishLaunchingWithOptions`中, 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
+
+5: 如果每次存放资源可能会更改, 建议使用`put(_ resource: FJRouterResource, uniquingPathWith: xxx)`方法
+6: 事例代码:
 
 ```swift 
 let r1 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
@@ -340,6 +343,25 @@ let r6 = try FJRouterResource(path: "/protocolATest/:isA", name: "protocolATest"
 try await FJRouter.resource().put(r6)
 ```
 
+### 根据策略存放资源
+
+```swift 
+func put(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async
+```
+
+1: 如果已经存放过相同`path`的资源, 不会抛出`FJRouter.PutResourceError.exist`错误, 会按照`combine`策略进行合并
+
+2: 适用于可能多处/多处存放: 如某个viewController, 出现的时候才去存储资源, 但是因为viewController可能会多次进入, 而且每次存放的资源的具体值均不相同, 使用此方法可以有效的存储, 不会抛出`FJRouter.PutResourceError.exist`错误
+
+3: 资源的名称会优先使用新的资源name, 如果新的资源name为nil, 才会使用旧资源name
+
+4: 事例代码
+```swift 
+// 使用旧值
+await FJRouter.resource().put(r) { (currnet, _) in currnet }
+// 使用新值
+await FJRouter.resource().put(r) { (_, new) in new }
+```
 
 ### 获取资源
 
@@ -361,10 +383,28 @@ let aTestable2: ATestable = try await FJRouter.resource().get("/protocolATest/0"
 let aTestable3: BModel = try await FJRouter.resource().get("/protocolATest/0", inMainActor: false)
 ```
 
+### 更新资源
+1: 可以通过路径和资源名称更新资源
+```swift 
+func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws
+
+func update(byName name: String, value: @escaping FJRouterResource.Value) async throws
+```
+
+2: 如果没有存放过相同path的资源, 会抛出`FJRouter.GetResourceError.notFind`错误
+
+3: 事例代码
+```swift
+try await impl.update(byName: "sintvalue1", value: { _ in 66 })
+
+try await FJRouter.resource().delete(byPath: "adfasdf")
+```
+
 ### 删除资源
 
 ```swift 
 func delete(byPath path: String) async throws
+
 func delete(byName name: String) async throws
 ```
 

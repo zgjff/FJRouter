@@ -30,7 +30,7 @@ public protocol FJRouterResourceable {
     ///
     /// 2: 如果已经存放过相同`path`的资源, 则会抛出`FJRouter.PutResourceError.exist`错误。
     ///
-    /// 3: 适用于全局只会存放一次的资源: 如单例中存放/application didFinishLaunchingWithOptions中
+    /// 3: 适用于全局只会存放一次的资源: 如单例中或者/application didFinishLaunchingWithOptions中
     ///
     /// 4: 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
     ///
@@ -67,7 +67,7 @@ public protocol FJRouterResourceable {
     ///   - resource: 资源
     ///   - combine: 如果已经存放过相同path的资源, 使用合并相同资源的策略
     ///
-    /// 1: 如果已经存放过相同`path`的资源, 不会抛出`FJRouter.PutResourceError.exist`错误, 会按照`combine`参数进行合并
+    /// 1: 如果已经存放过相同`path`的资源, 不会抛出`FJRouter.PutResourceError.exist`错误, 会按照`combine`策略进行合并
     ///
     /// 2: 适用于可能多处/多处存放: 如某个viewController, 出现的时候才去存储资源, 但是因为viewController可能会多次进入,
     /// 而且每次存放的资源的具体值均不相同, 使用此方法可以有效的存储, 不会抛出`FJRouter.PutResourceError.exist`错误
@@ -110,6 +110,30 @@ public protocol FJRouterResourceable {
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
     func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
+    
+    /// 根据资源路径更新已存放的资源
+    ///
+    /// 更新不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+    ///
+    /// - Parameters:
+    ///   - path: 资源路径
+    ///   - value: 资源的值
+    ///
+    ///         try await impl.update(byPath: "/sintvalue1", value: { _ in 39 })
+    ///
+    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws
+    
+    /// 根据资源名称更新已存放的资源
+    ///
+    /// 更新不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+    ///
+    /// - Parameters:
+    ///   - name: 资源名称
+    ///   - value: 资源的值
+    ///
+    ///         try await impl.update(byName: "sintvalue1", value: { _ in 66 })
+    ///
+    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws
     
     /// 根据资源路径删除已存放的资源
     ///

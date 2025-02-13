@@ -76,6 +76,14 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         }
     }
     
+    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws {
+        try await store.updateBy(path: path, name: nil, value: value)
+    }
+    
+    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws {
+        try await store.updateBy(path: nil, name: name, value: value)
+    }
+    
     func delete(byPath path: String) async throws {
         try await store.deleteBy(path: path, name: nil)
     }

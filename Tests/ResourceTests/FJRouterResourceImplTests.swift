@@ -206,6 +206,26 @@ struct FJRouterResourceImplTests {
         let intvaluesecond3: Int = try await impl.get(name: "intvaluesecond3", params: [:], queryParams: [:], inMainActor: true)
         #expect(intvaluesecond3 == -18)
     }
+    
+    @Test func update() async throws {
+        let r1 = try FJRouterResource(path: "/sintvalue1", name: "sintvalue1", value: { _ in 29 })
+        try await impl.put(r1)
+        let sintvalue1: Int = try await impl.get("/sintvalue1", inMainActor: false)
+        #expect(sintvalue1 == 29)
+        try await impl.update(byPath: "/sintvalue1", value: { _ in 39 })
+        let sintvalue2: Int = try await impl.get("/sintvalue1", inMainActor: false)
+        #expect(sintvalue2 == 39)
+        try await impl.update(byName: "sintvalue1", value: { _ in 66 })
+        let sintvalue3: Int = try await impl.get("/sintvalue1", inMainActor: false)
+        #expect(sintvalue3 == 66)
+        
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.update(byName: "sdfsadfsdaf", value: { _ in 66 })
+        }
+        await #expect(throws: FJRouter.GetResourceError.notFind) {
+            try await impl.update(byPath: "/sdfsdfsadfsdaf", value: { _ in 66 })
+        }
+    }
 }
 
 
