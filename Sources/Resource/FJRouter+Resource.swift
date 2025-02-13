@@ -16,7 +16,7 @@ extension FJRouter {
 
 /// 资源中心协议
 ///
-/// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(name: xxx)方法进行相关操作。
+/// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(name: xxx)等方法进行相关操作。
 ///
 /// 1: 当资源路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
 ///

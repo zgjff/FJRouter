@@ -315,9 +315,10 @@ func put(_ resource: FJRouterResource) async throws
 
 3: 存放资源的时候可以携带参数
 
-4: 适用于全局只会存放一次的资源: 如单例中或者`/applicationdidFinishLaunchingWithOptions`中, 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
+4: 适用于全局只会存放一次的资源: 如单例中或者`application:didFinishLaunchingWithOptions`中, 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
 
 5: 如果每次存放资源可能会更改, 建议使用`put(_ resource: FJRouterResource, uniquingPathWith: xxx)`方法
+
 6: 事例代码:
 
 ```swift 
