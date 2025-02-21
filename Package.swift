@@ -14,5 +14,6 @@ let package = Package(
         .testTarget(name: "FJRouterTests",
             dependencies: ["FJRouter"]
         ),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )
