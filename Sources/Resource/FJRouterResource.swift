@@ -38,7 +38,7 @@ public struct FJRouterResource: Sendable {
     ///         let a = try FJRouterResource(path: "/amodel", name: "xxxx", value: { @Sendable info -> AModel? in
     ///             return info.xxxx ? AModel() : nil
     ///         })
-    public init(path: String, name: String? = nil, value: @escaping Value) throws {
+    public init(path: String, name: String? = nil, value: @escaping Value) throws(FJRouterResource.CreateError) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath

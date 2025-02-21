@@ -97,7 +97,7 @@ extension FJPathUtils {
         return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
     }
     
-    internal func convertNewUrlPath(from path: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+    internal func convertNewUrlPath(from path: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
         let newParams = params.reduce([String: String]()) { partialResult, pairs in
             var f = partialResult
             f.updateValue(pairs.value, forKey: pairs.key)

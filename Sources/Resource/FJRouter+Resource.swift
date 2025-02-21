@@ -60,7 +60,7 @@ public protocol FJRouterResourceable {
     ///     })
     ///     try await FJRouter.resource().put(r6)
     ///
-    func put(_ resource: FJRouterResource) async throws
+    func put(_ resource: FJRouterResource) async throws(FJRouter.PutResourceError)
     
     /// 存放资源
     /// - Parameters:
@@ -93,7 +93,7 @@ public protocol FJRouterResourceable {
     ///   - location: 资源路径
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
-    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
+    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
     
     /// 根据资源名称取对应资源
     ///
@@ -109,7 +109,7 @@ public protocol FJRouterResourceable {
     ///   - queryParams: 资源查询参数
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
-    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
+    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
     
     /// 根据资源路径更新已存放的资源
     ///
@@ -121,7 +121,7 @@ public protocol FJRouterResourceable {
     ///
     ///         try await impl.update(byPath: "/sintvalue1", value: { _ in 39 })
     ///
-    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws
+    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
     
     /// 根据资源名称更新已存放的资源
     ///
@@ -133,7 +133,7 @@ public protocol FJRouterResourceable {
     ///
     ///         try await impl.update(byName: "sintvalue1", value: { _ in 66 })
     ///
-    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws
+    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
     
     /// 根据资源路径删除已存放的资源
     ///
@@ -142,7 +142,7 @@ public protocol FJRouterResourceable {
     ///     try await FJRouter.resource().delete(byPath: "adfasdf")
     ///
     /// - Parameter path: 资源路径
-    func delete(byPath path: String) async throws
+    func delete(byPath path: String) async throws(FJRouter.GetResourceError)
     
     /// 根据资源名称删除已存放的资源
     ///
@@ -151,7 +151,7 @@ public protocol FJRouterResourceable {
     ///     try await FJRouter.resource().delete(byName: "adfasdf")
     ///
     /// - Parameter name: 资源名称
-    func delete(byName name: String) async throws
+    func delete(byName name: String) async throws(FJRouter.GetResourceError)
 }
 
 extension FJRouterResourceable {

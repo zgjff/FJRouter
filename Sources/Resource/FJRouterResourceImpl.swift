@@ -24,7 +24,7 @@ extension FJRouter {
 }
 
 extension FJRouter.ResourceImpl: FJRouterResourceable {
-    func put(_ resource: FJRouterResource) async throws {
+    func put(_ resource: FJRouterResource) async throws(FJRouter.PutResourceError) {
         try await store.add(resource)
     }
     
@@ -32,7 +32,7 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         await store.add(resource, uniquingPathWith: combine)
     }
 
-    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
+    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value : Sendable {
         guard let url = URL(string: location) else {
             throw FJRouter.GetResourceError.errorLocUrl
         }
@@ -61,7 +61,7 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         }
     }
     
-    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value : Sendable {
+    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value : Sendable {
         do {
             let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
             return try await get(loc, inMainActor: mainActor)
@@ -76,19 +76,19 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         }
     }
     
-    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws {
+    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
         try await store.updateBy(path: path, name: nil, value: value)
     }
     
-    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws {
+    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
         try await store.updateBy(path: nil, name: name, value: value)
     }
     
-    func delete(byPath path: String) async throws {
+    func delete(byPath path: String) async throws(FJRouter.GetResourceError) {
         try await store.deleteBy(path: path, name: nil)
     }
     
-    func delete(byName name: String) async throws {
+    func delete(byName name: String) async throws(FJRouter.GetResourceError) {
         try await store.deleteBy(path: nil, name: name)
     }
 }

@@ -15,7 +15,7 @@ extension FJRouter {
 }
 
 extension FJRouter.ResourceStore {
-    func add(_ resource: FJRouterResource) throws {
+    func add(_ resource: FJRouterResource) throws(FJRouter.PutResourceError) {
         if resources.contains(resource) {
             throw FJRouter.PutResourceError.exist
         }
@@ -39,7 +39,7 @@ extension FJRouter.ResourceStore {
         beginSaveResourceNamePath(finalResource)
     }
     
-    func match(url: URL) async throws -> FJRouter.ResourceMatchInfo {
+    func match(url: URL) async throws(FJRouter.GetResourceError) -> FJRouter.ResourceMatchInfo {
         let fixUrl = url.adjust()
         for resource in resources {
             if let info = findMatch(url: fixUrl, resource: resource) {
@@ -49,7 +49,7 @@ extension FJRouter.ResourceStore {
         throw FJRouter.GetResourceError.notFind
     }
     
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let path = nameToPath[n] else {
             throw FJRouter.ConvertError.noExistName
@@ -57,7 +57,7 @@ extension FJRouter.ResourceStore {
         return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
     
-    func updateBy(path: String?, name: String?, value: @escaping FJRouterResource.Value) throws {
+    func updateBy(path: String?, name: String?, value: @escaping FJRouterResource.Value) throws(FJRouter.GetResourceError) {
         let resource: FJRouterResource?
         if let path {
             resource = resources.first(where: { $0.path == path })
@@ -69,11 +69,11 @@ extension FJRouter.ResourceStore {
         guard let resource else {
             throw FJRouter.GetResourceError.notFind
         }
-        let newResource = try FJRouterResource(path: resource.path, name: resource.name, value: value)
+        let newResource = try! FJRouterResource(path: resource.path, name: resource.name, value: value)
         resources.update(with: newResource)
     }
     
-    func deleteBy(path: String?, name: String?) throws {
+    func deleteBy(path: String?, name: String?) throws(FJRouter.GetResourceError) {
         let resource: FJRouterResource?
         if let path {
             resource = resources.first(where: { $0.path == path })
