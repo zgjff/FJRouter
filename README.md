@@ -475,6 +475,7 @@ try await FJRouter.event().emit(name: "onSeekProgress", params: ["progress": "1"
 ```
 
 ## 安装
+> 从2.0.2分支开始, 要求swfitVersion>=6, 即必须使用xcode 16.0版本以上
 
 ### Swift Package Manager
 > 使用 **Swift PM** 的最简单的方式是找到 Project Setting -> Swift Packages 
