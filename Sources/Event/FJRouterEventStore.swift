@@ -45,7 +45,7 @@ extension FJRouter.EventStore {
         return nil
     }
     
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let path = nameToPath[n] else {
             throw FJRouter.ConvertError.noExistName

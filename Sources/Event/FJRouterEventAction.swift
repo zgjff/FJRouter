@@ -25,7 +25,7 @@ public struct FJRouterEventAction: Sendable {
     /// 对应正则表达式
     private let regExp: NSRegularExpression?
     
-    public init(path: String, name: String? = nil) throws {
+    public init(path: String, name: String? = nil) throws(FJRouterEventAction.CreateError) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath

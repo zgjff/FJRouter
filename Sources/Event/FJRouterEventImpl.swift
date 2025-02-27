@@ -20,13 +20,13 @@ extension FJRouter {
 }
 
 extension FJRouter.EventImpl {
-    func onReceive(path: String, name: String?) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
+    func onReceive(path: String, name: String?) async throws(FJRouterEventAction.CreateError) -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
         let action = try FJRouterEventAction(path: path, name: name)
         let listener = await store.saveOrCreateListener(action: action)
         return listener.publisher()
     }
 
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.EmitEventError) {
         guard let url = URL(string: location) else {
             throw FJRouter.EmitEventError.errorLocUrl
         }
@@ -36,7 +36,7 @@ extension FJRouter.EventImpl {
         listener.receive(value: info)
     }
     
-    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws {
+    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.EmitEventError) {
         do {
             let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
             try await emit(loc, extra: extra)

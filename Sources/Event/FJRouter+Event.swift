@@ -43,7 +43,7 @@ public protocol FJRouterEventable {
     ///   - path: 事件路径path
     ///   - name: 事件名称
     /// - Returns: 监听事件响应
-    func onReceive(path: String, name: String?) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never>
+    func onReceive(path: String, name: String?) async throws(FJRouterEventAction.CreateError) -> AnyPublisher<FJRouter.EventMatchInfo, Never>
     
     /// 通过事件url路径触发事件: 通过系统`Combine`框架进行响应, 不持有监听者
     /// - Parameters:
@@ -55,7 +55,7 @@ public protocol FJRouterEventable {
     ///         有参: 1就是监听"/seek/:progress"中的progress字段
     ///         try await FJRouter.event().emit("/seek/1", extra: nil)
     ///
-    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws
+    func emit(_ location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.EmitEventError)
     
     /// async 通过事件名称触发事件参数: 通过系统`Combine`框架进行响应, 不持有监听者
     /// - Parameters:
@@ -69,7 +69,7 @@ public protocol FJRouterEventable {
     ///         有参
     ///         try await FJRouter.event().emit(name: "onSeekProgress", params: ["progress": "1"], queryParams: [:], extra: nil)
     ///
-    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws
+    func emit(name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.EmitEventError)
 }
 
 extension FJRouterEventable {
@@ -82,7 +82,7 @@ extension FJRouterEventable {
     ///
     /// - Parameter path: 事件路径path
     ///   - name: 事件名称
-    public func onReceive(path: String) async throws -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
+    public func onReceive(path: String) async throws(FJRouterEventAction.CreateError) -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
         try await onReceive(path: path, name: nil)
     }
     
@@ -94,7 +94,7 @@ extension FJRouterEventable {
     ///     有参: 1就是监听"/seek/:progress"中的progress字段
     ///      try await FJRouter.event().emit(name: FJRouter.EmitEventByNameParams.init(name: "onSeekProgress", params: ["progress": "1"]))
     ///
-    public func emit(name params: FJRouter.EmitEventByNameParams) async throws {
+    public func emit(name params: FJRouter.EmitEventByNameParams) async throws(FJRouter.EmitEventError) {
         try await emit(name: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
     }
 }
