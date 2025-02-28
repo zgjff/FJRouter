@@ -58,10 +58,16 @@ extension FJRouter.JumpImpl {
             throw FJRouter.JumpMatchError.errorLocUrl
         }
         let match = try await store.match(url: url, extra: extra, ignoreError: true)
+        guard let lastMatch = match.lastMatch else {
+            throw FJRouter.JumpMatchError.notFind
+        }
+        if lastMatch.route.builder == nil {
+            throw FJRouter.JumpMatchError.noBuilder
+        }
         if let destvc = await core.viewController(for: match) {
             return destvc
         }
-        throw FJRouter.JumpMatchError.noBuilder
+        throw FJRouter.JumpMatchError.builderNil
     }
     
     func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController {

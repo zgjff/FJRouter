@@ -83,10 +83,12 @@ dismiss(animated: true, completion: { [weak self] in
 #### 构建路由方式: `builder`
 1: 此参数是`block`形式的类型别名
 ```swift
-public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController)
+public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController?)
 ```
 
 2: 此参数可以为`nil`, 但是为`nil`时, 重定向参数`redirect`不能为`nil`
+
+3: `builder`可以根据路由信息`BuilderInfo`返回对应的控制器, 也可以在不符合条件的情况下, 返回`nil`
 
 #### 显示路由控制器的方式: `animator`
 1: 此参数是`block`形式的类型别名
@@ -146,7 +148,7 @@ try FJRoute(path: "/user/settings", name: "user_settings", xxx, routes: [
 ])
 ```
 
-3: 只路由也支持此当前路由的参数
+3: 子路由也支持此当前路由的参数
 
 4: 强烈建议子路由的`path`不要以`/`为开头
 
