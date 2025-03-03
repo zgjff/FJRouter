@@ -61,7 +61,7 @@ public protocol FJRouterJumpable {
     ///   - location: 路由路径
     ///   - extra: 携带的参数
     /// - Returns: 对应路由控制器
-    func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController
+    func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
     
     /// 通过路由名称获取对应的控制器
     ///
@@ -73,7 +73,7 @@ public protocol FJRouterJumpable {
     ///   - queryParams: 路由查询参数
     ///   - extra: 携带的参数
     /// - Returns: 对应路由控制器
-    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws -> UIViewController
+    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
     
     /// 通过路由路径导航至对应控制器
     ///
@@ -84,7 +84,7 @@ public protocol FJRouterJumpable {
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
+    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws(FJRouter.JumpMatchError)
     
     /// 通过路由名称导航至对应控制器
     ///
@@ -96,7 +96,7 @@ public protocol FJRouterJumpable {
     ///   - extra: 携带的参数
     ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
     ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws(FJRouter.JumpMatchError)
     
     /// 通过路由路径导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:

@@ -10,7 +10,7 @@ import Combine
 
 extension FJRouter {
     /// 事件总线
-    struct EventImpl: FJRouterEventable {
+    internal final class EventImpl: FJRouterEventable, Sendable {
         internal static let shared = EventImpl()
         private let store: EventStore
         private init() {

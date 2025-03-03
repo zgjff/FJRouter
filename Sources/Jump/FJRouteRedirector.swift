@@ -31,7 +31,7 @@ public struct FJRouteCommonRedirector: Sendable, FJRouteRedirector {
             }
             return nil
         } catch {
-            return nil
+            throw error
         }
     }
 }

@@ -15,7 +15,7 @@ extension FJRouterJumpable {
     ///     let vc = try await FJRouter.jump().viewController(byName: FJRouter.FindControllerByNameParams.init(name: "second"))
     ///
     /// - Parameter params: 查询参数
-    public func viewController(byName params: FJRouter.FindControllerByNameParams) async throws -> UIViewController {
+    public func viewController(byName params: FJRouter.FindControllerByNameParams) async throws(FJRouter.JumpMatchError) -> UIViewController {
         try await viewController(byName: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
     }
     
@@ -24,7 +24,7 @@ extension FJRouterJumpable {
     ///     try FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
     ///
     /// - Parameter params: 参数
-    public func go(location params: FJRouter.GoByLocationParams) throws {
+    public func go(location params: FJRouter.GoByLocationParams) throws(FJRouter.JumpMatchError) {
         try go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
@@ -33,7 +33,7 @@ extension FJRouterJumpable {
     ///     try FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
     ///
     /// - Parameter params: 参数
-    public func goNamed(_ params: FJRouter.GoByNameParams) throws {
+    public func goNamed(_ params: FJRouter.GoByNameParams) throws(FJRouter.JumpMatchError) {
         try goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     

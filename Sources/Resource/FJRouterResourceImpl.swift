@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     /// 事件总线
-    internal struct ResourceImpl: Sendable {
+    internal final class ResourceImpl: Sendable {
         internal static let shared = ResourceImpl()
         private let store: ResourceStore
         private init() {

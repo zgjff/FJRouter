@@ -43,7 +43,7 @@ extension FJRouter.JumpStore {
     ///   - extra: 携带的参数
     ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
-    func match(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, ignoreError: Bool) async throws -> FJRouteMatchList {
+    func match(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> FJRouteMatchList {
         let result = findMatch(url: url.adjust(), extra: extra)
         let final = await redirect(initialMatches: result)
         switch final.result {
@@ -80,7 +80,7 @@ extension FJRouter.JumpStore {
     ///   - params: 路由参数
     ///   - queryParams: 路由查询参数
     /// - Returns: 组装之后的路由路径
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws -> String {
+    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
         let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let path = nameToPath[n] else {
             throw FJRouter.ConvertError.noExistName
@@ -145,11 +145,7 @@ private extension FJRouter.JumpStore {
             let newRedirectHistory = try addRedirect(history: redirectHistory, newMatch: newMatch)
             return await tryRedirect(prevMatchList: newMatch, redirectHistory: newRedirectHistory)
         } catch {
-            if let err = error as? FJRouteMatchList.MatchError {
-                let errorMatch = FJRouteMatchList(error: err, url: prevMatchList.url, extra: nil)
-                return (errorMatch, [])
-            }
-            let errorMatch = FJRouteMatchList(error: FJRouteMatchList.MatchError.empty, url: prevMatchList.url, extra: nil)
+            let errorMatch = FJRouteMatchList(error: error, url: prevMatchList.url, extra: nil)
             return (errorMatch, [])
         }
     }
@@ -172,7 +168,7 @@ private extension FJRouter.JumpStore {
         return redirectLocation
     }
     
-    func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws -> [FJRouteMatchList] {
+    func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws(FJRouteMatchList.MatchError) -> [FJRouteMatchList] {
         var newRedirectHistory = history
         newRedirectHistory.append(newMatch)
         if history.count >= redirectLimit {
