@@ -10,7 +10,10 @@ let package = Package(
         .library(name: "FJRouter", targets: ["FJRouter"]),
     ],
     targets: [
-        .target(name: "FJRouter", path: "Sources"),
+        .target(name: "FJRouter",
+                path: "Sources",
+                resources: [.process("PrivacyInfo.xcprivacy")]
+               ),
         .testTarget(name: "FJRouterTests",
             dependencies: ["FJRouter"]
         ),

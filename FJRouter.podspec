@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FJRouter"
-  s.version      = "2.0.2"
+  s.version      = "2.0.3"
   s.summary      = "正则、重定向、支持参数、路由、回调、子路由、资源中心、事件总线"
   s.homepage     = "https://github.com/zgjff/FJRouter"
   s.license      = "MIT"
@@ -14,6 +14,7 @@ Pod::Spec.new do |s|
 
   s.subspec 'Base' do |ss|
     ss.source_files = 'Sources/Base/*.swift', 'Sources/Base/**/*.{swift}'
+    ss.resource_bundles = {'FJRouter' => ['Sources/PrivacyInfo.xcprivacy']}
   end
 
   s.subspec 'Jump' do |ss|
