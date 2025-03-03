@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import UIKit
 import Combine
-
+#if canImport(UIKit)
+import UIKit
 extension FJRouterJumpable {
     /// 通过路由名称参数获取对应的控制器
     ///
@@ -169,3 +169,5 @@ extension FJRouter {
         }
     }
 }
+
+#endif

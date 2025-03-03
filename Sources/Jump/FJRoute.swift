@@ -5,6 +5,8 @@
 //  Created by zgjff on 2024/11/21.
 //
 
+import Foundation
+#if canImport(UIKit)
 import UIKit
 
 /// 路由
@@ -177,3 +179,5 @@ extension FJRoute {
         }
     }
 }
+
+#endif

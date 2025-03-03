@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 /// 匹配路由的状态
 public struct FJRouterState: Sendable {
     /// 要匹配的原始url
@@ -78,3 +79,5 @@ extension FJRouterState {
         try await FJRouter.JumpImpl.shared.convertLocationBy(name: name, params: params, queryParams: queryParams)
     }
 }
+
+#endif

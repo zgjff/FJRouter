@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
 
 /// 显示匹配路由控制器的动画协议
@@ -29,3 +30,5 @@ extension FJRoute {
         public let matchState: FJRouterState
     }
 }
+
+#endif

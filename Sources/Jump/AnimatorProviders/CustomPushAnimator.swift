@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import UIKit
 import Combine
+#if canImport(UIKit)
+import UIKit
 
 extension FJRoute {
     /// 使用自定义转场动画进行push
@@ -279,3 +280,5 @@ extension UIViewController {
         }
     }
 }
+
+#endif

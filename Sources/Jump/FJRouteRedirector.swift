@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 /// 路由重定向协议
 public protocol FJRouteRedirector: Sendable {
     /// 指向需要重定向的路由路径。返回`nil`, 则代表不需要重定向
@@ -35,3 +36,4 @@ public struct FJRouteCommonRedirector: Sendable, FJRouteRedirector {
         }
     }
 }
+#endif

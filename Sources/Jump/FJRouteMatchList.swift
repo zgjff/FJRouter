@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+#if canImport(UIKit)
 internal struct FJRouteMatchList: Sendable {
     /// 匹配结果
     let result: MatchResult
@@ -197,3 +197,5 @@ extension FJRouteMatchList {
         }
     }
 }
+
+#endif

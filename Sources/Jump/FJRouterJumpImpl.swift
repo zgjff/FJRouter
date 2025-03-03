@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import UIKit
 import Combine
+#if canImport(UIKit)
+import UIKit
 
 extension FJRouter {
     /// 路由管理中心
@@ -186,3 +187,5 @@ extension FJRouter.JumpImpl {
         }
     }
 }
+
+#endif

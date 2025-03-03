@@ -5,6 +5,8 @@
 //  Created by zgjff on 2024/11/21.
 //
 
+import Foundation
+#if canImport(UIKit)
 import UIKit
 
 extension UIApplication {
@@ -50,3 +52,5 @@ extension UIApplication {
         return windows.first
     }
 }
+
+#endif

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+#if canImport(UIKit)
 /// 路由匹配信息
 internal struct FJRouteMatch: Sendable {
     /// 匹配到的路由
@@ -85,3 +85,5 @@ extension FJRouteMatch: Hashable {
         lhs.route == rhs.route && lhs.matchedLocation == rhs.matchedLocation
     }
 }
+
+#endif

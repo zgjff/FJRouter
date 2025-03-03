@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
 
 extension FJRoute {
@@ -32,3 +33,5 @@ extension FJRoute {
         }
     }
 }
+
+#endif

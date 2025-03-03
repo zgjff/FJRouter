@@ -1,6 +1,7 @@
 import Foundation
-import UIKit
 import Combine
+#if canImport(UIKit)
+import UIKit
 
 extension FJRouter {
     /// 路由跳转管理中心
@@ -166,3 +167,5 @@ public protocol FJRouterJumpable {
     @discardableResult
     func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError>
 }
+
+#endif

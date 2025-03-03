@@ -5,6 +5,7 @@
 //  Created by zgjff on 2024/11/21.
 //
 
+#if canImport(UIKit)
 import UIKit
 
 final class FJRouterErrorController: UIViewController {
@@ -84,3 +85,5 @@ private extension FJRouterErrorController {
         navi.popViewController(animated: true)
     }
 }
+
+#endif

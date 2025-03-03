@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 
 extension FJRouter {
     internal actor JumpStore {
@@ -182,3 +183,5 @@ private extension FJRouter.JumpStore {
         return newRedirectHistory
     }
 }
+
+#endif

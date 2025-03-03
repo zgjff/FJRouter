@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import UIKit
 import Combine
+#if canImport(UIKit)
+import UIKit
 
 extension FJRouter {
     internal final class JumpCore: @unchecked Sendable {
@@ -93,3 +94,5 @@ extension FJRouter.JumpCore {
         fromController.present(destController, animated: flag)
     }
 }
+
+#endif

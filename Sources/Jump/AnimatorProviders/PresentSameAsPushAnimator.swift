@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
 
 extension FJRoute {
@@ -307,3 +308,5 @@ extension PushPopPresentAnimator: UIViewControllerAnimatedTransitioning {
         self.animator = nil
     }
 }
+
+#endif
