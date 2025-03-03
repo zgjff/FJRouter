@@ -158,7 +158,7 @@ extension FJRouterResourceable {
     /// 根据资源名称参数取对应资源
     /// - Parameter params: 资源名称参数, 方便协议方法传递默认参数
     /// - Returns: 对应资源
-    public func get<Value>(name params: FJRouter.GetResourceByNameParams) async throws -> Value where Value: Sendable {
+    public func get<Value>(name params: FJRouter.GetResourceByNameParams) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable {
         try await get(name: params.name, params: params.params, queryParams: params.queryParams, inMainActor: params.mainActor)
     }
 }
