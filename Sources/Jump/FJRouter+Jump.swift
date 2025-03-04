@@ -17,7 +17,7 @@ extension FJRouter {
 /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
 ///
 /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-public protocol FJRouterJumpable {
+public protocol FJRouterJumpable: Sendable {
     /// 注册路由
     ///
     /// 注意: 如果注册多个相同的`path`的路由, 后续所有的查找均是指向同一`path`路由中的第一个注册路由
@@ -87,7 +87,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().go(location: "/first", extra: nil, from: nil, ignoreError: true)
+    ///     let callback = try await FJRouter.jump().go(location: "/first", extra: nil, from: nil, ignoreError: true)
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -107,7 +107,7 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError>
+    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never>
     
     /// 通过路由名称导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:
@@ -122,7 +122,7 @@ public protocol FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().goNamed("first", params: [:], queryParams: [:], extra: nil, from: nil, ignoreError: true)
+    ///     let callback = try await FJRouter.jump().goNamed("first", params: [:], queryParams: [:], extra: nil, from: nil, ignoreError: true)
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -142,7 +142,7 @@ public protocol FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError>
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never>
 }
 
 #endif

@@ -26,7 +26,7 @@ extension FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
+    ///     let callback = try await FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -46,8 +46,8 @@ extension FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    public func go(location params: FJRouter.GoByLocationParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
-        return await go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
+    public func go(location params: FJRouter.GoByLocationParams) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
+        return try await go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
     }
     
     /// 通过路由名称参数导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
@@ -57,7 +57,7 @@ extension FJRouterJumpable {
     /// 回调使用方法:
     ///
     ///     监听:
-    ///     let callback = await FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
+    ///     let callback = try await FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
     ///     callback.sink(receiveCompletion: { cop in
     ///         print("cop----全部", cop)
     ///     }, receiveValue: { item in
@@ -77,8 +77,42 @@ extension FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    public func goNamed(_ params: FJRouter.GoByNameParams) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
-        return await goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
+    public func goNamed(_ params: FJRouter.GoByNameParams) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
+        return try await goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
+    }
+}
+
+extension FJRouterJumpable {
+    /// 通过路由路径导航至对应控制器.外界调用无需使用`await`, 且无路由回调.
+    ///
+    ///     try? FJRouter.jump().go(location: "/root")
+    ///
+    /// - Parameters:
+    ///   - location: 路由路径
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    public func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = true) throws(FJRouter.JumpMatchError) {
+        Task { [weak fromVC] in
+            let _ = try await self.go(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
+        }
+    }
+    
+    /// 通过路由名称导航至对应控制器.外界调用无需使用`await`, 且无路由回调.
+    ///
+    ///     try? FJRouter.jump().goNamed("root")
+    ///
+    /// - Parameters:
+    ///   - name: 路由名称
+    ///   - params: 路由参数
+    ///   - queryParams: 路由查询参数
+    ///   - extra: 携带的参数
+    ///   - fromVC: 源控制器, 若为nil, 则在框架内部获取app的top controller
+    ///   - ignoreError: 是否忽略匹配失败时返回`errorBuilder`返回的控制器。true: 失败时不跳转至`error`页面
+    public func goNamed(_ name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = true) throws(FJRouter.JumpMatchError) {
+        Task { [weak fromVC] in
+            let _ = try await self.goNamed(name, params: params, queryParams: queryParams, extra: extra, from: fromVC, ignoreError: ignoreError)
+        }
     }
 }
 

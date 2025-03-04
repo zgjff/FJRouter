@@ -89,24 +89,26 @@ extension FJRouter.JumpImpl {
 }
 
 // MARK: - go
-extension FJRouter.JumpImpl {    
+extension FJRouter.JumpImpl {
     @discardableResult
-    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
-        do {
-            let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
-            return result.subject.setFailureType(to: FJRouter.JumpMatchError.self).eraseToAnyPublisher()
-        } catch {
-            return Fail(error: error).eraseToAnyPublisher()
-        }
+    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
+        let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
+        return result.subject.eraseToAnyPublisher()
     }
     
     @discardableResult
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
+    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
         do {
             let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            return try await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
         } catch {
-            return Fail(error: .convertNameLoc(error)).eraseToAnyPublisher()
+            if let err = error as? FJRouter.ConvertError {
+                throw FJRouter.JumpMatchError.convertNameLoc(err)
+            }
+            if let err = error as? FJRouter.JumpMatchError {
+                throw err
+            }
+            throw FJRouter.JumpMatchError.cancelled
         }
     }
 }
