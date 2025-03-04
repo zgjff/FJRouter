@@ -11,10 +11,9 @@ Pod::Spec.new do |s|
                     '2: 方便简单, 使用正则进行匹配, 支持资源的存储和取回的资源管理中心, 资源可以是int, string, enum, uiview, uiviewcontroller, protocol...;'   \
                     '3: 方便简单, 使用正则进行匹配, 监听和触发事件总线'
 
-
+  s.resource_bundles = {'FJRouter' => ['Sources/PrivacyInfo.xcprivacy']}
   s.subspec 'Base' do |ss|
     ss.source_files = 'Sources/Base/*.swift', 'Sources/Base/**/*.{swift}'
-    ss.resource_bundles = {'FJRouter' => ['Sources/PrivacyInfo.xcprivacy']}
   end
 
   s.subspec 'Jump' do |ss|

@@ -89,31 +89,7 @@ extension FJRouter.JumpImpl {
 }
 
 // MARK: - go
-extension FJRouter.JumpImpl {
-    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws(FJRouter.JumpMatchError) {
-        Task {
-            // TODO: - ignoreError为true, 切找不到路由对应控制器时, 抛出错误; ignoreError为false, 切找不到路由对应控制器时, 跳转到错误页面, 无需抛出错误
-            try await self.go_private(location: location, extra: extra, from: fromVC, ignoreError: ignoreError)
-        }
-    }
-    
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) throws(FJRouter.JumpMatchError) {
-        Task {
-            do {
-                let loc = try await self.convertLocationBy(name: name, params: params, queryParams: queryParams)
-                try await self.go_private(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
-            } catch {
-                if let err = error as? FJRouter.ConvertError {
-                    throw FJRouter.JumpMatchError.convertNameLoc(err)
-                } else if let err = error as? FJRouter.JumpMatchError {
-                    throw err
-                } else {
-                    throw FJRouter.JumpMatchError.cancelled
-                }
-            }
-        }
-    }
-    
+extension FJRouter.JumpImpl {    
     @discardableResult
     func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
         do {

@@ -19,24 +19,6 @@ extension FJRouterJumpable {
         try await viewController(byName: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
     }
     
-    /// 通过路由路径参数导航至对应控制器
-    ///
-    ///     try FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/second"))
-    ///
-    /// - Parameter params: 参数
-    public func go(location params: FJRouter.GoByLocationParams) throws(FJRouter.JumpMatchError) {
-        try go(location: params.location, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
-    }
-    
-    /// 通过路由名称参数导航至对应控制器
-    ///
-    ///     try FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
-    ///
-    /// - Parameter params: 参数
-    public func goNamed(_ params: FJRouter.GoByNameParams) throws(FJRouter.JumpMatchError) {
-        try goNamed(params.name, params: params.params, queryParams: params.queryParams, extra: params.extra, from: params.fromVC, ignoreError: params.ignoreError)
-    }
-    
     /// 通过路由路径参数导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameter params: 参数
     /// - Returns: 路由回调.⚠️⚠️⚠️不要持有此对象, 防止内存泄漏⚠️⚠️⚠️

@@ -25,7 +25,6 @@ extension UIViewController {
     
     /// 触发路由回调
     ///
-    /// 如果路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
     /// - Parameter item: 内容
     public func emitFJRouterCallBack(item: FJRouter.CallbackItem) throws(FJRouter.EmitCallbackError) {
         if fjroute_callback_emitter == nil {
