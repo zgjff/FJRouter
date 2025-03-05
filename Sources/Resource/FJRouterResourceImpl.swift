@@ -32,11 +32,12 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         await store.add(resource, uniquingPathWith: combine)
     }
 
-    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value : Sendable {
-        guard let url = URL(string: location) else {
-            throw FJRouter.GetResourceError.errorLocUrl
-        }
+    func get<Value>(_ uri: FJRouter.URI, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value : Sendable {
         do {
+            let loc = try await store.convertLocation(by: uri)
+            guard let url = URL(string: loc) else {
+                throw FJRouter.GetResourceError.errorLocUrl
+            }
             let info = try await store.match(url: url)
             if mainActor {
                 let value = await MainActor.run {
@@ -54,25 +55,13 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
                 throw FJRouter.GetResourceError.valueType
             }
         } catch {
+            if let err = error as? FJRouter.ConvertError {
+                throw FJRouter.GetResourceError.convertNameLoc(err)
+            }
             if let err = error as? FJRouter.GetResourceError {
                 throw err
             }
             throw FJRouter.GetResourceError.notFind
-        }
-    }
-    
-    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value : Sendable {
-        do {
-            let loc =  try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return try await get(loc, inMainActor: mainActor)
-        } catch {
-            if let err = error as? FJRouter.ConvertError {
-                throw FJRouter.GetResourceError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.GetResourceError {
-                throw err
-            } else {
-                throw FJRouter.GetResourceError.cancelled
-            }
         }
     }
     

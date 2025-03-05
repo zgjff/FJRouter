@@ -16,7 +16,7 @@ extension FJRouter {
 
 /// 资源中心协议
 ///
-/// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(name: xxx)等方法进行相关操作。
+/// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(.name(xxx))等方法进行相关操作。
 ///
 /// 1: 当资源路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
 ///
@@ -79,38 +79,22 @@ public protocol FJRouterResourceable {
     ///
     func put(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async
     
-    /// 根据资源路径取对应资源
+    /// 根据资源uri取对应资源
     ///
-    ///     let intvalue1: Int = try await FJRouter.resource().get("/intvalue1", inMainActor: false)
-    ///     let intvalue3: Int? = try await FJRouter.resource().get("/intvalue1", inMainActor: true)
-    ///     let intOptionalvalue3: Int? = try await FJRouter.resource().get("/intOptionalvalue2", inMainActor: false)
-    ///     let stringvalue1: String = try await FJRouter.resource().get("/stringvalue1", inMainActor: false)
-    ///     let aTestable1: ATestable = try await FJRouter.resource().get("/protocolATest/1", inMainActor: false)
-    ///     let aTestable2: ATestable = try await FJRouter.resource().get("/protocolATest/0", inMainActor: true)
-    ///     let aTestable3: BModel = try await FJRouter.resource().get("/protocolATest/0", inMainActor: false)
-    ///
-    /// - Parameters:
-    ///   - location: 资源路径
-    ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
-    /// - Returns: 对应资源
-    func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
-    
-    /// 根据资源名称取对应资源
-    ///
-    ///     let intvalue1: Int = try await FJRouter.resource().get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: true)
-    ///     let intvalue11: Int = try await FJRouter.resource().get(name: "intvalue1", params: [:], queryParams: [:], inMainActor: false)
-    ///     let intOptionalvalue1: Int? = try await FJRouter.resource().get(name: "intOptionalvalue1", params: [:], queryParams: [:], inMainActor: true)
-    ///     let intOptionalvalue3: Int? = try await FJRouter.resource().get(name: "intOptionalvalue3", params: ["optional": "1"], queryParams: [:], inMainActor: true)
-    ///     let protocolATest1: ATestable = try await FJRouter.resource().get(name: "protocolATest", params: ["isA": "0"], queryParams: [:], inMainActor: false)
+    ///     let intvalue1: Int = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: false)
+    ///     let intvalue3: Int? = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: true)
+    ///     let intOptionalvalue3: Int? = try await FJRouter.resource().get(.loc("/intOptionalvalue2"), inMainActor: false)
+    ///     let stringvalue1: String = try await FJRouter.resource().get(.name("intvalue1"), inMainActor: false)
+    ///     let aTestable1: ATestable = try await FJRouter.resource().get(.loc("/protocolATest/1"), inMainActor: false)
+    ///     let aTestable2: ATestable = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: true)
+    ///     let aTestable3: BModel = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: false)
     ///
     /// - Parameters:
-    ///   - name: 资源名称
-    ///   - params: 资源path参数
-    ///   - queryParams: 资源查询参数
+    ///   - uri: 资源uri
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
-    func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
-    
+    func get<Value>(_ uri: FJRouter.URI, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
+
     /// 根据资源路径更新已存放的资源
     ///
     /// 更新不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
@@ -152,36 +136,4 @@ public protocol FJRouterResourceable {
     ///
     /// - Parameter name: 资源名称
     func delete(byName name: String) async throws(FJRouter.GetResourceError)
-}
-
-extension FJRouterResourceable {
-    /// 根据资源名称参数取对应资源
-    /// - Parameter params: 资源名称参数, 方便协议方法传递默认参数
-    /// - Returns: 对应资源
-    public func get<Value>(name params: FJRouter.GetResourceByNameParams) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable {
-        try await get(name: params.name, params: params.params, queryParams: params.queryParams, inMainActor: params.mainActor)
-    }
-}
-
-extension FJRouter {
-    /// 根据资源名称取对应资源: 方便协议方法传递默认参数
-    public struct GetResourceByNameParams: Sendable {
-        fileprivate let name: String
-        fileprivate let params: [String : String]
-        fileprivate let queryParams: [String : String]
-        fileprivate let mainActor: Bool
-        
-        /// 初始化
-        /// - Parameters:
-        ///   - name: 资源名称
-        ///   - params: 资源path参数
-        ///   - queryParams: 资源查询参数
-        ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
-        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], inMainActor mainActor: Bool = true) {
-            self.name = name
-            self.params = params
-            self.queryParams = queryParams
-            self.mainActor = mainActor
-        }
-    }
 }
