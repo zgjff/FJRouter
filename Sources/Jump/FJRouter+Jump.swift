@@ -71,7 +71,8 @@ public protocol FJRouterJumpable: Sendable {
     
     /// 获取对应的控制器
     ///
-    ///     let vc = try await FJRouter.jump().viewController(.loc("/"), extra: nil)
+    ///     let vc1 = try await FJRouter.jump().viewController(.loc("/"), extra: nil)
+    ///     let vc2 = try await FJRouter.jump().viewController(.name("root", params: ["id": "123"]), extra: nil)
     ///
     /// - Parameters:
     ///   - uri: 路由定位

@@ -26,7 +26,7 @@
 1: 路由页面跳转是定义为`FJRouterJumpable`的协议, 可以通过`FJRouter.jump()`获取框架内跳转管理中心对象.
 
 2: 支持通过路由路径和已经注册的路由名称进行对应操作
-> 当然在这里, 建议通过路由名称相关的api进行操作, 如`goNamed`, `viewController(name...)`方法; why:
+> 当然在这里, 建议通过路由名称相关的api进行操作, 如`go(.name(...))`, `viewController(.name(...))`方法; why:
 
 > 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
 
@@ -34,27 +34,25 @@
 
 ```swift 
 通过路由路径获取对应的控制器: 
-let vc = try await FJRouter.jump().viewController(byLocation: "/five", extra: nil)
+let vc = try await FJRouter.jump().viewController(.loc("/"), extra: nil)
 
 通过路由名称获取对应的控制器:
-let fvc = try await FJRouter.jump().viewController(byName: "five", params: [:], queryParams: [:], extra: nil)
+let vc2 = try await FJRouter.jump().viewController(.name("root", params: ["id": "123"]), extra: nil)
 
 通过路由路径导航至对应控制器:
-try FJRouter.jump().go(location: "/second", extra: nil, from: self, ignoreError: true)
+try await FJRouter.jump().go(.loc("/"), extra: nil, from: self, ignoreError: true)
 
 通过路由名称导航至对应控制器:
-try FJRouter.jump().goNamed("second", params: [:], queryParams: [:], extra: nil, from: self, ignoreError: true)
+try await FJRouter.jump().go(.name("root"), extra: nil, from: self, ignoreError: true)
 ```
 
 3: 支持路由回调
 > 路由回调是使用`Combine`框架实现的
 
-> 只支持跳转的使用使用`async`异步, 且返回值是`AnyPublisher<FJRouter.CallbackItem, FJRouter.MatchError>`的`go`方法
-
 > 不需要提前注册回调方法, 只需要在收到`Combine`事件流中区分对应的事件
 
 ```swift
-let callback = await FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
+let callback = try await FJRouter.jump().go(.name("root"), extra: nil, from: self, ignoreError: true)
 callback.sink(receiveCompletion: { cop in
     print("cop----全部", cop)
 }, receiveValue: { item in
@@ -120,7 +118,7 @@ let route = try FJRoute(path: "/", name: "root", builder: nil, redirect: FJRoute
             if let app = await UIApplication.shared.versionkKeyWindow?.rootViewController, !(app is AppTabBarViewController) {
                 return nil // 返回nil代表不需要进行重定向
             }
-            return try? await FJRouter.shared.convertLocationBy(name: "loginAccount")
+            return try? await FJRouter.jump().convertLocation(by: .name("loginAccount"))
     }
 }))
 ```
@@ -371,19 +369,18 @@ await FJRouter.resource().put(r) { (_, new) in new }
 1: 可以通过路径和资源名称获取资源
 
 ```swift 
-func get<Value>(_ location: String, inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
-func get<Value>(name: String, params: [String : String], queryParams: [String : String], inMainActor mainActor: Bool) async throws -> Value where Value: Sendable
+func get<Value>(_ uri: FJRouter.URI, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
 ```
 
 2: 事例代码
 ```swift
-let intvalue1: Int = try await FJRouter.resource().get("/intvalue1", inMainActor: false)
-let intvalue3: Int? = try await FJRouter.resource().get("/intvalue1", inMainActor: true)
-let intOptionalvalue3: Int? = try await FJRouter.resource().get("/intOptionalvalue2", inMainActor: false)
-let stringvalue1: String = try await FJRouter.resource().get("/stringvalue1", inMainActor: false)
-let aTestable1: ATestable = try await FJRouter.resource().get("/protocolATest/1", inMainActor: false)
-let aTestable2: ATestable = try await FJRouter.resource().get("/protocolATest/0", inMainActor: true)
-let aTestable3: BModel = try await FJRouter.resource().get("/protocolATest/0", inMainActor: false)
+let intvalue1: Int = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: false)
+let intvalue3: Int? = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: true)
+let intOptionalvalue3: Int? = try await FJRouter.resource().get(.loc("/intOptionalvalue2"), inMainActor: false)
+let stringvalue1: String = try await FJRouter.resource().get(.name("intvalue1"), inMainActor: false)
+let aTestable1: ATestable = try await FJRouter.resource().get(.loc("/protocolATest/1"), inMainActor: false)
+let aTestable2: ATestable = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: true)
+let aTestable3: BModel = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: false)
 ```
 
 ### 更新资源
@@ -471,9 +468,9 @@ try await FJRouter.event().emit("/seek/1", extra: nil)
 
 通过事件名称触发事件
 //无参
-try await FJRouter.event().emit(name: "onSeekSuccess", params: [:], queryParams: [:], extra: 5)
+try await FJRouter.event().emit(.name("onSeekProgress"), extra: nil)
 // 有参
-try await FJRouter.event().emit(name: "onSeekProgress", params: ["progress": "1"], queryParams: [:], extra: nil)
+try await FJRouter.event().emit(.name("onSeekProgress", params: ["progress": "1"]), extra: nil)
 ```
 
 ## 安装
