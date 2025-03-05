@@ -45,12 +45,10 @@ extension FJRouter.EventStore {
         return nil
     }
     
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
-        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let path = nameToPath[n] else {
-            throw FJRouter.ConvertError.noExistName
+    func convertLocation(by uri: FJRouter.URI) throws(FJRouter.ConvertError) -> String {
+        return try uri.finalLocation { name in
+            self.nameToPath[name]
         }
-        return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
     
     func numbers() -> Int {
