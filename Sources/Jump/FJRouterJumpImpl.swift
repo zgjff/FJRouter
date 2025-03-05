@@ -86,16 +86,11 @@ extension FJRouter.JumpImpl {
 // MARK: - go
 extension FJRouter.JumpImpl {
     @discardableResult
-    func go(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
-        let result = try await go_trigger(location: location, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
-        return result.subject.eraseToAnyPublisher()
-    }
-    
-    @discardableResult
-    func goNamed(_ name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
+    func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
         do {
-            let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            return try await go(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError)
+            let loc = try await store.convertLocation(by: uri)
+            let result = try await go_trigger(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
+            return result.subject.eraseToAnyPublisher()
         } catch {
             if let err = error as? FJRouter.ConvertError {
                 throw FJRouter.JumpMatchError.convertNameLoc(err)
@@ -108,21 +103,9 @@ extension FJRouter.JumpImpl {
     }
 }
 
-extension FJRouter.JumpImpl {
-    /// 通过路由名称、路由参数、查询参数组装路由路径
-    ///
-    /// 建议在使用路由的时候使用此方法来组装路由路径。
-    ///
-    /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-    ///
-    /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    /// - Returns: 组装之后的路由路径
-    internal func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) async throws(FJRouter.ConvertError) -> String {
-        try await store.convertLocationBy(name: name, params: params, queryParams: queryParams)
+extension FJRouter.JumpImpl {    
+    func convertLocation(by uri: FJRouter.URI) async throws(FJRouter.ConvertError) -> String {
+        try await store.convertLocation(by: uri)
     }
     
     private func go_trigger<T>(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws(FJRouter.JumpMatchError) -> T where T: FJRouterCallbackable {

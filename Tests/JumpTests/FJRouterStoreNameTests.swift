@@ -13,22 +13,22 @@ struct FJRouterStoreNameTests {
             ])
             await store.addRoute(route)
         }
-        let homeLoc = try await store.convertLocationBy(name: "home")
+        let homeLoc = try await store.convertLocation(by: .name("home"))
         #expect(homeLoc == "/")
-        let nameaLoc = try await store.convertLocationBy(name: "namea")
+        let nameaLoc = try await store.convertLocation(by: .name("namea"))
         #expect(nameaLoc == "/a")
-        let namebLoc = try await store.convertLocationBy(name: "nameb")
+        let namebLoc = try await store.convertLocation(by: .name("nameb"))
         #expect(namebLoc == "/b")
-        let namecLoc = try await store.convertLocationBy(name: "namec")
+        let namecLoc = try await store.convertLocation(by: .name("namec"))
         #expect(namecLoc == "/c")
         await #expect(throws: FJRouter.ConvertError.noExistName) {
-            try await store.convertLocationBy(name: "named")
+            try await store.convertLocation(by: .name("named"))
         }
         
-        let nameaOneQueryParamsLoc = try await store.convertLocationBy(name: "namea", queryParams: ["p": "1"])
+        let nameaOneQueryParamsLoc = try await store.convertLocation(by: .name("namea", queryParams: ["p": "1"]))
         #expect(nameaOneQueryParamsLoc == "/a?p=1")
         
-        let nameaTwoQueryParamsLoc = try await store.convertLocationBy(name: "namea", queryParams: ["p": "1", "q": "2"])
+        let nameaTwoQueryParamsLoc = try await store.convertLocation(by: .name("namea", queryParams: ["p": "1", "q": "2"]))
         #expect(["/a?p=1&q=2", "/a?q=2&p=1"].contains(nameaTwoQueryParamsLoc))
     }
     
@@ -40,10 +40,10 @@ struct FJRouterStoreNameTests {
             await store.addRoute(route)
         }
         
-        let settingsf1Loc = try await store.convertLocationBy(name: "settingsf1", params: ["id": "123"])
+        let settingsf1Loc = try await store.convertLocation(by: .name("settingsf1", params: ["id": "123"]))
         #expect(settingsf1Loc == "/settings/f1/123")
         
-        let settingsf1QPLoc = try await store.convertLocationBy(name: "settingsf1", params: ["id": "123"], queryParams: ["q1": "v1", "q2": "v2"])
+        let settingsf1QPLoc = try await store.convertLocation(by: .name("settingsf1", params: ["id": "123"], queryParams: ["q1": "v1", "q2": "v2"]))
         #expect(["/settings/f1/123?q1=v1&q2=v2", "/settings/f1/123?q2=v2&q1=v1"].contains(settingsf1QPLoc))
     }
     
@@ -57,16 +57,16 @@ struct FJRouterStoreNameTests {
             await store.addRoute(route)
         }
         
-        let userInfoLoc = try await store.convertLocationBy(name: "userInfo", params: ["id": "123"])
+        let userInfoLoc = try await store.convertLocation(by: .name("userInfo", params: ["id": "123"]))
         #expect(userInfoLoc == "/user/123")
         
-        let userBooksLoc = try await store.convertLocationBy(name: "userBooks", params: ["id": "123"])
+        let userBooksLoc = try await store.convertLocation(by: .name("userBooks", params: ["id": "123"]))
         #expect(userBooksLoc == "/user/123/books")
         
-        let userBookInfoLoc = try await store.convertLocationBy(name: "userBookInfo", params: ["id": "123", "bookId": "78"])
+        let userBookInfoLoc = try await store.convertLocation(by: .name( "userBookInfo", params: ["id": "123", "bookId": "78"]))
         #expect(userBookInfoLoc == "/user/123/books/78")
         
-        let userBookInfoQPLoc = try await store.convertLocationBy(name: "userBookInfo", params: ["id": "123", "bookId": "78"], queryParams: ["q1": "v1", "q2": "v2"])
+        let userBookInfoQPLoc = try await store.convertLocation(by: .name("userBookInfo", params: ["id": "123", "bookId": "78"], queryParams: ["q1": "v1", "q2": "v2"]))
         #expect(["/user/123/books/78?q1=v1&q2=v2", "/user/123/books/78?q2=v2&q1=v1"].contains(userBookInfoQPLoc))
     }
     
@@ -79,10 +79,10 @@ struct FJRouterStoreNameTests {
             await store.addRoute(route)
         }
         
-        let nameaLoc = try await store.convertLocationBy(name: "namea")
+        let nameaLoc = try await store.convertLocation(by: .name( "namea"))
         #expect(nameaLoc == "/a")
         
-        let nameALoc = try await store.convertLocationBy(name: "nameA")
+        let nameALoc = try await store.convertLocation(by: .name("nameA"))
         #expect(nameALoc == "/b")
     }
     

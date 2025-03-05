@@ -51,9 +51,9 @@ public protocol FJRouterEventable {
     ///   - extra: 携带的参数
     ///
     ///         无参
-    ///         try await FJRouter.event().emit(name: "onSeekSuccess", params: [:], queryParams: [:], extra: 5)
+    ///         try await FJRouter.event().emit(name: "onSeekSuccess", extra: nil)
     ///         有参
-    ///         try await FJRouter.event().emit(name: "onSeekProgress", params: ["progress": "1"], queryParams: [:], extra: nil)
+    ///         try await FJRouter.event().emit(.name("onSeekProgress", params: ["progress": "1"]), extra: nil)
     func emit(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.EmitEventError)
 }
 

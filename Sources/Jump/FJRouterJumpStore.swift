@@ -68,27 +68,6 @@ extension FJRouter.JumpStore {
         }
     }
     
-    /// 通过路由名称、路由参数、查询参数组装路由路径
-    ///
-    /// 建议在使用路由的时候使用此方法来组装路由路径。
-    ///
-    /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-    ///
-    /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
-    ///
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    /// - Returns: 组装之后的路由路径
-    func convertLocationBy(name: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
-        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let path = nameToPath[n] else {
-            throw FJRouter.ConvertError.noExistName
-        }
-        return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
-    }
-    
     func convertLocation(by uri: FJRouter.URI) throws(FJRouter.ConvertError) -> String {
         return try uri.finalLocation { name in
             self.nameToPath[name]
