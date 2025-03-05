@@ -11,11 +11,11 @@ extension FJRouter {
 }
 
 /// 路由跳转协议
-///
+/// 
 /// 建议使用goNamed, viewController(name...)方法进行相关操作。
-///
+/// 
 /// 1: 当路由路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-///
+/// 
 /// 2: 在实际app中, 路由的`URL`格式可能会随着时间而改变, 但是一般路由名称不会去更改
 public protocol FJRouterJumpable: Sendable {
     /// 注册路由
@@ -54,28 +54,16 @@ public protocol FJRouterJumpable: Sendable {
     /// 如果不使用框架提供的`apptopController`,可以提供自己实现的`apptopController`
     func setTopController(action: @escaping @MainActor (_ current: UIViewController?) -> UIViewController?) async
     
-    /// 通过路由路径获取对应的控制器
+    /// 通过路由uri获取对应的控制器
     ///
     ///     let vc = try await FJRouter.jump().viewController(byLocation: "/five", extra: nil)
     ///
     /// - Parameters:
-    ///   - location: 路由路径
+    ///   - uri: 路由定位
     ///   - extra: 携带的参数
     /// - Returns: 对应路由控制器
-    func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
-    
-    /// 通过路由名称获取对应的控制器
-    ///
-    ///     let fvc = try await FJRouter.jump().viewController(byName: "five", params: [:], queryParams: [:], extra: nil)
-    ///
-    /// - Parameters:
-    ///   - name: 路由名称
-    ///   - params: 路由参数
-    ///   - queryParams: 路由查询参数
-    ///   - extra: 携带的参数
-    /// - Returns: 对应路由控制器
-    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
-    
+    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
+
     /// 通过路由路径导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:
     ///   - location: 路由路径

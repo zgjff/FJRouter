@@ -15,9 +15,9 @@ extension FJRouterJumpable {
     ///     let vc = try await FJRouter.jump().viewController(byName: FJRouter.FindControllerByNameParams.init(name: "second"))
     ///
     /// - Parameter params: 查询参数
-    public func viewController(byName params: FJRouter.FindControllerByNameParams) async throws(FJRouter.JumpMatchError) -> UIViewController {
-        try await viewController(byName: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
-    }
+//    public func viewController(byName params: FJRouter.FindControllerByNameParams) async throws(FJRouter.JumpMatchError) -> UIViewController {
+//        try await viewController(byName: params.name, params: params.params, queryParams: params.queryParams, extra: params.extra)
+//    }
     
     /// 通过路由路径参数导航至对应控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameter params: 参数
@@ -117,26 +117,26 @@ extension FJRouterJumpable {
 }
 
 extension FJRouter {
-    /// 通过路由名称查询对应控制器: 方便协议方法传递默认参数
-    public struct FindControllerByNameParams: Sendable {
-        fileprivate let name: String
-        fileprivate let params: [String : String]
-        fileprivate let queryParams: [String : String]
-        fileprivate let extra: @Sendable () -> (any Sendable)
-        
-        /// 初始化
-        /// - Parameters:
-        ///   - name: 路由名称
-        ///   - params: 路由参数
-        ///   - queryParams: 路由查询参数
-        ///   - extra: 携带的参数
-        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil) {
-            self.name = name
-            self.params = params
-            self.queryParams = queryParams
-            self.extra = extra
-        }
-    }
+//    /// 通过路由名称查询对应控制器: 方便协议方法传递默认参数
+//    public struct FindControllerByNameParams: Sendable {
+//        fileprivate let name: String
+//        fileprivate let params: [String : String]
+//        fileprivate let queryParams: [String : String]
+//        fileprivate let extra: @Sendable () -> (any Sendable)
+//        
+//        /// 初始化
+//        /// - Parameters:
+//        ///   - name: 路由名称
+//        ///   - params: 路由参数
+//        ///   - queryParams: 路由查询参数
+//        ///   - extra: 携带的参数
+//        public init(name: String, params: [String : String] = [:], queryParams: [String : String] = [:], extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil) {
+//            self.name = name
+//            self.params = params
+//            self.queryParams = queryParams
+//            self.extra = extra
+//        }
+//    }
     
     /// 通过路由路径导航参数: 方便协议方法传递默认参数
     public struct GoByLocationParams: Sendable {

@@ -58,10 +58,10 @@ extension FJRouter {
         ///
         ///    `params`参数和`queryParams`可以省略输入. eg:
         ///
-        ///         let a: FJRouter.URI = .name("root")
-        ///         let b: FJRouter.URI = .name("user", params: ["id": "1"])
-        ///         let c: FJRouter.URI = .name("user", queryParams: ["name": "ha"])
-        ///         let d: FJRouter.URI = .name("user", params: ["id": "1"], queryParams: ["name": "ha"])
+        ///         let a: FJRouter.PrivateURI = .name("root")
+        ///         let b: FJRouter.PrivateURI = .name("user", params: ["id": "1"])
+        ///         let c: FJRouter.PrivateURI = .name("user", queryParams: ["name": "ha"])
+        ///         let d: FJRouter.PrivateURI = .name("user", params: ["id": "1"], queryParams: ["name": "ha"])
         ///
         ///   - name: 路由名称
         ///   - params: 路由参数(可以省略)

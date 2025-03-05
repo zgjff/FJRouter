@@ -88,6 +88,12 @@ extension FJRouter.JumpStore {
         }
         return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
     }
+    
+    func convertLocation(by uri: FJRouter.URI) throws(FJRouter.ConvertError) -> String {
+        return try uri.finalLocation { name in
+            self.nameToPath[name]
+        }
+    }
 }
 
 private extension FJRouter.JumpStore {

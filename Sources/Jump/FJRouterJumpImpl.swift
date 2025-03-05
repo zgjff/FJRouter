@@ -54,36 +54,31 @@ extension FJRouter.JumpImpl {
 
 // MARK: - get
 extension FJRouter.JumpImpl {
-    func viewController(byLocation location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController {
-        guard let url = URL(string: location) else {
-            throw FJRouter.JumpMatchError.errorLocUrl
-        }
-        let match = try await store.match(url: url, extra: extra, ignoreError: true)
-        guard let lastMatch = match.lastMatch else {
-            throw FJRouter.JumpMatchError.notFind
-        }
-        if lastMatch.route.builder == nil {
-            throw FJRouter.JumpMatchError.noBuilder
-        }
-        if let destvc = await core.viewController(for: match) {
-            return destvc
-        }
-        throw FJRouter.JumpMatchError.builderNil
-    }
-    
-    func viewController(byName name: String, params: [String : String], queryParams: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController {
+    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController {
         do {
-            let loc = try await convertLocationBy(name: name, params: params, queryParams: queryParams)
-            let destvc = try await viewController(byLocation: loc, extra: extra)
-            return destvc
+            let loc = try await store.convertLocation(by: uri)
+            guard let url = URL(string: loc) else {
+                throw FJRouter.JumpMatchError.errorLocUrl
+            }
+            let match = try await store.match(url: url, extra: extra, ignoreError: true)
+            guard let lastMatch = match.lastMatch else {
+                throw FJRouter.JumpMatchError.notFind
+            }
+            if lastMatch.route.builder == nil {
+                throw FJRouter.JumpMatchError.noBuilder
+            }
+            if let destvc = await core.viewController(for: match) {
+                return destvc
+            }
+            throw FJRouter.JumpMatchError.builderNil
         } catch {
             if let err = error as? FJRouter.ConvertError {
                 throw FJRouter.JumpMatchError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.JumpMatchError {
-                throw err
-            } else {
-                throw FJRouter.JumpMatchError.cancelled
             }
+            if let err = error as? FJRouter.JumpMatchError {
+                throw err
+            }
+            throw FJRouter.JumpMatchError.cancelled
         }
     }
 }
