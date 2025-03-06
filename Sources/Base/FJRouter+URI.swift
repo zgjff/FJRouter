@@ -50,7 +50,7 @@ extension FJRouter {
 
 extension FJRouter {
     /// 资源标识符
-    public enum PrivateURI: @unchecked Sendable {
+    fileprivate enum PrivateURI: @unchecked Sendable {
         /// 通过资源路径定位
         case loc(_ location: String)
         
