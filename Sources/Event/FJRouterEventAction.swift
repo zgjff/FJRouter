@@ -69,7 +69,15 @@ extension FJRouterEventAction: Hashable {
 
 extension FJRouterEventAction: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
-        return "FJRouterEventAction#name:\(name == nil ? "null" : name!),path:\(path)"
+        var result = "FJRouterEventAction(path: \(path)"
+        if let name {
+            result.append(", name: \(name)")
+        }
+        if !pathParameters.isEmpty {
+            result.append(", pathParameters: \(pathParameters)")
+        }
+        result += ")"
+        return result
     }
     
     public var debugDescription: String {

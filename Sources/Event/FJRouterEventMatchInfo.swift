@@ -40,3 +40,24 @@ extension FJRouter {
         }
     }
 }
+
+extension FJRouter.EventMatchInfo: CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String {
+        var result = "FJRouter.EventMatchInfo(url: \(url), action: \(action)"
+        if !pathParameters.isEmpty {
+            result.append(", pathParameters: \(pathParameters)")
+        }
+        if !queryParameters.isEmpty {
+            result.append(", queryParameters: \(queryParameters)")
+        }
+        if let extra {
+            result.append(", extra: \(extra)")
+        }
+        result += ")"
+        return result
+    }
+    
+    public var debugDescription: String {
+        description
+    }
+}
