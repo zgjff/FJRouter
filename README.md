@@ -73,7 +73,7 @@ dismiss(animated: true, completion: { [weak self] in
 #### 路由匹配路径`path`
 1: 如果是起始父路由, 其`path`必须以`/`为前缀
 
-2: 支持路径参数, 路由参数将被解析并储存在`JJRouterState`中, 用于[builder](#构建路由方式-builder)和`redirect`
+2: 支持路径参数, 路由参数将被解析并储存在`JJRouterState`中, 用于[builder](#构建路由方式-builder)和[redirect](#路由拦截器-redirect)
 
 #### 路由的名称: `name`
 如果赋值, 必须提供唯一的字符串名称, 且不能为空
@@ -93,7 +93,7 @@ public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIView
 ```swift 
 public typealias Animator = (@MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator)
 ```
-2: 用于在使用`go`、`goNamed`方法进行跳转时, 页面的展现方式。
+2: 用于在使用`go(...)`方法进行跳转时, 页面的展现方式。
 
 3: 可以使用框架已内置的动画方式对象, 或者可以使用自己实现的协议对象, 具体参考[FJRouteAnimator](#路由显示动画协议-fjrouteanimator)。
 
@@ -279,16 +279,16 @@ static func register() async throws {
 
 ```swift 
 跳转
-try? FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "first"))
+FJRouter.jump().go(.name("first"))
 
-let callback = await FJRouter.jump().goNamed(FJRouter.GoByNameParams.init(name: "second"))
+let callback = await FJRouter.jump().go(.name("second"), extra: nil, from: self, ignoreError: true)
 callback.sink(receiveCompletion: { cop in
     print("cop----全部", cop)
 }, receiveValue: { item in
     print("value----全部", item)
 }).store(in: &cancels)
 
-try? FJRouter.jump().go(location: FJRouter.GoByLocationParams.init(location: "/six"))
+FJRouter.jump().go(.loc("/six"))
 ```
 
 ## 资源管理中心
@@ -396,8 +396,6 @@ func update(byName name: String, value: @escaping FJRouterResource.Value) async 
 3: 事例代码
 ```swift
 try await impl.update(byName: "sintvalue1", value: { _ in 66 })
-
-try await FJRouter.resource().delete(byPath: "adfasdf")
 ```
 
 ### 删除资源
