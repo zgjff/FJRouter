@@ -141,7 +141,15 @@ extension FJRoute: Hashable {
 
 extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
-        return "FJRoute#name:\(name == nil ? "null" : name!),path:\(path)"
+        var result = "FJRoute(path: \(path)"
+        if let name {
+            result.append(", name: \(name)")
+        }
+        if !pathParameters.isEmpty {
+            result.append(", pathParameters: \(pathParameters)")
+        }
+        result += ")"
+        return result
     }
     
     public var debugDescription: String {

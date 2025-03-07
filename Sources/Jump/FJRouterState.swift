@@ -80,4 +80,32 @@ extension FJRouterState {
     }
 }
 
+extension FJRouterState: CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String {
+        var result = "FJRouterState(url: \(url)"
+        if let error {
+            result.append(", error: \(error)")
+        } else {
+            if let route {
+                result.append(", route: \(route)")
+            }
+            if !pathParameters.isEmpty {
+                result.append(", pathParameters: \(pathParameters)")
+            }
+            if !queryParameters.isEmpty {
+                result.append(", queryParameters: \(queryParameters)")
+            }
+            if let extra {
+                result.append(", extra: \(extra)")
+            }
+        }
+        result += ")"
+        return result
+    }
+    
+    public var debugDescription: String {
+        description
+    }
+}
+
 #endif

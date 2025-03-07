@@ -83,7 +83,15 @@ extension FJRouterResource: Hashable {
 
 extension FJRouterResource: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
-        return "FJRouterResourceAction#name:\(name == nil ? "null" : name!),path:\(path)"
+        var result = "FJRouterResourceAction(path: \(path)"
+        if let name {
+            result.append(", name: \(name)")
+        }
+        if !pathParameters.isEmpty {
+            result.append(", pathParameters: \(pathParameters)")
+        }
+        result += ")"
+        return result
     }
     
     public var debugDescription: String {

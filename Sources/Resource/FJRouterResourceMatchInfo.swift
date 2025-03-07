@@ -36,3 +36,21 @@ extension FJRouter {
         }
     }
 }
+
+extension FJRouter.ResourceMatchInfo: CustomStringConvertible, CustomDebugStringConvertible {
+    public var description: String {
+        var result = "FJRouter.ResourceMatchInfo(url: \(url), resource: \(resource)"
+        if !pathParameters.isEmpty {
+            result.append(", pathParameters: \(pathParameters)")
+        }
+        if !queryParameters.isEmpty {
+            result.append(", queryParameters: \(queryParameters)")
+        }
+        result += ")"
+        return result
+    }
+    
+    public var debugDescription: String {
+        description
+    }
+}
