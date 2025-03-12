@@ -24,6 +24,14 @@ extension FJRouter {
         }
         
         /// 通过资源名称初始化
+        ///
+        ///     注册的URI:
+        ///     FJRoute(path: "/users/:id", name: "fetchUser".....)
+        ///     let userUrl = URI.name("fetchUser", params: ["id": "1"])
+        ///     此时 userUrl = "/users/1"
+        ///     let userUrl = URI.name("fetchUser", params: ["id": "1"], queryParams: ["p": "a", "q": "b"])
+        ///     此时 userUrl = "/users/1?p=a&q=b"
+        ///
         /// - Parameters:
         ///   - name: 资源名称
         ///   - params: 资源参数
