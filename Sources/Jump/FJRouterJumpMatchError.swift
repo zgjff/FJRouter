@@ -18,6 +18,8 @@ extension FJRouter {
         case noBuilder
         /// 路由的`builder`中返回的是`nil`控制器
         case builderNil
+        /// 路由守卫拦截
+        case guardInterception
         /// 重定向次数超出限制
         case redirectLimit(desc: String)
         /// 循环重定向
@@ -39,6 +41,8 @@ extension FJRouter.JumpMatchError: Equatable {
         case (.noBuilder, .noBuilder):
             return true
         case (.builderNil, .builderNil):
+            return true
+        case (.guardInterception, .guardInterception):
             return true
         case let (.redirectLimit(ld), .redirectLimit(rd)):
             return ld == rd
@@ -65,6 +69,8 @@ extension FJRouter.JumpMatchError: CustomStringConvertible, CustomDebugStringCon
             return "Mathed Route has no builder"
         case .builderNil:
             return "Mathed Route builder return nil"
+        case .guardInterception:
+            return "Match Route success, but route guard interception"
         case .redirectLimit(desc: let desc):
             return desc
         case .loopRedirect(desc: let desc):

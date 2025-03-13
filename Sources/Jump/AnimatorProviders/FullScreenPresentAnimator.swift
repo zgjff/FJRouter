@@ -5,8 +5,8 @@
 //  Created by zgjff on 2025/1/1.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 import UIKit
 
 extension FJRoute {

@@ -5,8 +5,8 @@
 //  Created by zgjff on 2024/11/21.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 
 extension FJRouter {
     internal actor JumpStore {
@@ -60,6 +60,8 @@ extension FJRouter.JumpStore {
             switch err {
             case .empty:
                 throw FJRouter.JumpMatchError.notFind
+            case .guardInterception:
+                throw FJRouter.JumpMatchError.guardInterception
             case .redirectLimit(let desc):
                 throw FJRouter.JumpMatchError.redirectLimit(desc: desc)
             case .loopRedirect(let desc):
@@ -122,36 +124,37 @@ private extension FJRouter.JumpStore {
         guard !prevMatchList.isError else {
             return (prevMatchList, redirectHistory)
         }
-        guard let redirectLocation = await redirectLocationFor(matchList: prevMatchList),
-              let redirectLocationUrl = URL(string: redirectLocation) else {
+        let redirectAction = await redirectActionFor(matchList: prevMatchList)
+        switch redirectAction {
+        case .interception:
+            let errorMatch = FJRouteMatchList(error: .guardInterception, url: prevMatchList.url, extra: nil)
+            return (errorMatch, redirectHistory)
+        case .original:
             return (prevMatchList, redirectHistory)
-        }
-        let newMatch = findMatch(url: redirectLocationUrl, extra: nil)
-        do {
-            let newRedirectHistory = try addRedirect(history: redirectHistory, newMatch: newMatch)
-            return await tryRedirect(prevMatchList: newMatch, redirectHistory: newRedirectHistory)
-        } catch {
-            let errorMatch = FJRouteMatchList(error: error, url: prevMatchList.url, extra: nil)
-            return (errorMatch, [])
+        case .new(let np):
+            guard let redirectLocation = np, let redirectLocationUrl = URL(string: redirectLocation) else {
+                return (prevMatchList, redirectHistory)
+            }
+            let newMatch = findMatch(url: redirectLocationUrl, extra: nil)
+            do {
+                let newRedirectHistory = try addRedirect(history: redirectHistory, newMatch: newMatch)
+                return await tryRedirect(prevMatchList: newMatch, redirectHistory: newRedirectHistory)
+            } catch {
+                let errorMatch = FJRouteMatchList(error: error, url: prevMatchList.url, extra: nil)
+                return (errorMatch, [])
+            }
         }
     }
     
-    func redirectLocationFor(matchList: FJRouteMatchList) async -> String? {
+    func redirectActionFor(matchList: FJRouteMatchList) async -> FJRouteRedirectorNext {
         guard let match = matchList.lastMatch else {
-            return nil
+            return .original
         }
         guard let redirector = match.route.redirect else {
-            return nil
+            return .original
         }
         let state = FJRouterState(matches: matchList)
-        guard let redirectLocation = try? await redirector.redirectRoute(state: state) else {
-            return nil
-        }
-        let prevLocation = matchList.url.absoluteString
-        guard !redirectLocation.isEmpty, redirectLocation != prevLocation else {
-            return nil
-        }
-        return redirectLocation
+        return await redirector.redirectRouteNext(state: state)
     }
     
     func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws(FJRouteMatchList.MatchError) -> [FJRouteMatchList] {

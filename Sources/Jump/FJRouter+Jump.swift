@@ -1,8 +1,8 @@
-import Foundation
-import Combine
+
 #if canImport(UIKit)
 import UIKit
-
+import Foundation
+import Combine
 extension FJRouter {
     /// 路由跳转管理中心
     public static func jump() -> any FJRouterJumpable {

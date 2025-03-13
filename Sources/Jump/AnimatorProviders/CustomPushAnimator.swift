@@ -5,9 +5,9 @@
 //  Created by zgjff on 2025/1/1.
 //
 
+#if canImport(UIKit)
 import Foundation
 import Combine
-#if canImport(UIKit)
 import UIKit
 
 extension FJRoute {

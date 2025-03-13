@@ -5,8 +5,9 @@
 //  Created by zgjff on 2024/11/21.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
+
 /// 匹配路由的状态
 public struct FJRouterState: Sendable {
     /// 要匹配的原始url

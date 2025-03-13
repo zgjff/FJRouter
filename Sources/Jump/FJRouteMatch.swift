@@ -5,8 +5,8 @@
 //  Created by zgjff on 2024/11/21.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 /// 路由匹配信息
 internal struct FJRouteMatch: Sendable {
     /// 匹配到的路由

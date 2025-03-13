@@ -5,10 +5,10 @@
 //  Created by zgjff on 2025/1/17.
 //
 
-import Foundation
-import Combine
 #if canImport(UIKit)
 import UIKit
+import Foundation
+import Combine
 
 extension FJRouter {
     /// 路由管理中心

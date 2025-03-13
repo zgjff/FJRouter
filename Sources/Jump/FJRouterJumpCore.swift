@@ -5,10 +5,10 @@
 //  Created by zgjff on 2024/11/21.
 //
 
-import Foundation
-import Combine
 #if canImport(UIKit)
 import UIKit
+import Foundation
+import Combine
 
 extension FJRouter {
     internal final class JumpCore: @unchecked Sendable {

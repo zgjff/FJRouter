@@ -5,8 +5,8 @@
 //  Created by zgjff on 2024/11/21.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 internal struct FJRouteMatchList: Sendable {
     /// 匹配结果
     let result: MatchResult
@@ -138,6 +138,8 @@ extension FJRouteMatchList {
     enum MatchError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible {
         /// 匹配为空
         case empty
+        /// 路由守卫拦截
+        case guardInterception
         /// 重定向次数超出限制
         case redirectLimit(desc: String)
         /// 循环重定向
@@ -147,6 +149,14 @@ extension FJRouteMatchList {
             switch (lhs, rhs) {
             case (.empty, .empty):
                 return true
+            case (.guardInterception, .guardInterception):
+                return true
+            case (.empty, .guardInterception), (.guardInterception, .empty):
+                return false
+            case (.redirectLimit, .guardInterception), (.guardInterception, .redirectLimit):
+                return false
+            case (.loopRedirect, .guardInterception), (.guardInterception, .loopRedirect):
+                return false
             case let (.redirectLimit(desc: ld), .redirectLimit(desc: rd)):
                 return ld == rd
             case let (.loopRedirect(desc: ld), .loopRedirect(desc: rd)):
@@ -185,6 +195,8 @@ extension FJRouteMatchList {
             switch self {
             case .empty:
                 return "no routes"
+            case .guardInterception:
+                return "Match Route success, but route guard interception"
             case .redirectLimit(let desc):
                 return "too many redirects \(desc)"
             case .loopRedirect(let desc):

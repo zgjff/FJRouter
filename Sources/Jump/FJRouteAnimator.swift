@@ -5,8 +5,8 @@
 //  Created by zgjff on 2024/12/12.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 import UIKit
 
 /// 显示匹配路由控制器的动画协议

@@ -5,8 +5,8 @@
 //  Created by zgjff on 2024/12/27.
 //
 
-import Foundation
 #if canImport(UIKit)
+import Foundation
 import UIKit
 
 extension UIViewController {
