@@ -50,9 +50,7 @@ extension FJRouter.ResourceStore {
     }
     
     func convertLocation(by uri: FJRouter.URI) throws(FJRouter.ConvertError) -> String {
-        return try uri.finalLocation { name in
-            self.nameToPath[name]
-        }
+        try uri.finalLocation(in: nameToPath)
     }
     
     func updateBy(path: String?, name: String?, value: @escaping FJRouterResource.Value) throws(FJRouter.GetResourceError) {

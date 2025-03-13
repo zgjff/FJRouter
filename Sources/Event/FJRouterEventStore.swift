@@ -46,9 +46,7 @@ extension FJRouter.EventStore {
     }
     
     func convertLocation(by uri: FJRouter.URI) throws(FJRouter.ConvertError) -> String {
-        return try uri.finalLocation { name in
-            self.nameToPath[name]
-        }
+        try uri.finalLocation(in: nameToPath)
     }
     
     func numbers() -> Int {

@@ -237,8 +237,8 @@ static func register() async throws {
     try await FJRouter.jump().registerRoute(FJRoute(path: "/first", name: "first", builder: { _ in FViewController() }, animator: { _ in FJRoute.SystemPushAnimator() }))
         
     try await FJRouter.jump().registerRoute(FJRoute(path: "/second", name: "second", builder: { _ in SViewController() }, animator: { _ in
-            FJRoute.CustomPresentationAnimator(navigationController: UINavigationController())
-        }))
+        FJRoute.CustomPresentationAnimator(navigationController: UINavigationController())
+    }))
         
     try await FJRouter.jump().registerRoute(FJRoute(path: "/third", name: "third", builder: { _ in TViewController() }, animator: { _ in FJRoute.SystemPresentAnimator(fullScreen: true, navigationController: UINavigationController()) }))
         
@@ -252,7 +252,7 @@ static func register() async throws {
     }))
         
     try await FJRouter.jump().registerRoute(FJRoute(path: "/five", name: "five", builder: { _ in FiveViewController() }, animator: { _ in FJRoute.  CustomPresentationAnimator(navigationController: UINavigationController()) { @Sendable ctx in
-            ctx.usingBottomPresentation()
+        ctx.usingBottomPresentation()
     }}))
         
     try await FJRouter.jump().registerRoute(FJRoute(path: "/six", name: "six", builder: { _ in SixViewController() }, animator: { info in

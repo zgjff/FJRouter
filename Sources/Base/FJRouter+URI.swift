@@ -41,13 +41,13 @@ extension FJRouter {
             .init(uri: .name(name, params: params, queryParams: queryParams))
         }
 
-        internal func finalLocation(transform: (_ name: String) -> String?) throws(FJRouter.ConvertError) -> String {
+        internal func finalLocation(in store: [String: String]) throws(FJRouter.ConvertError) -> String {
             switch uri {
             case .loc(let v):
                 return v
             case let .name(name, params: params, queryParams: queryParams):
                 let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard let path = transform(n) else {
+                guard let path = store[n] else {
                     throw FJRouter.ConvertError.noExistName
                 }
                 return try FJPathUtils.default.convertNewUrlPath(from: path, params: params, queryParams: queryParams)
