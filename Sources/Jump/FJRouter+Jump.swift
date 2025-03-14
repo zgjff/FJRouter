@@ -56,7 +56,12 @@ public protocol FJRouterJumpable: Sendable {
     
     /// 通过路由uri(特别是路由名称、路由参数、查询参数)组装路由路径
     ///
-    ///     let url = try await FJRouter.jump().convertLocation(by: .name("finda", params: ["id": "1"]))
+    ///     注册的URI:
+    ///     FJRoute(path: "/users/:id", name: "fetchUser".....)
+    ///     let userUrl = URI.name("fetchUser", params: ["id": "1"])
+    ///     此时 userUrl = "/users/1"
+    ///     let userUrl = URI.name("fetchUser", params: ["id": "1"], queryParams: ["p": "a", "q": "b"])
+    ///     此时 userUrl = "/users/1?p=a&q=b"
     ///
     /// 建议在使用路由的时候使用此方法来组装路由路径。
     ///

@@ -21,6 +21,10 @@ public enum FJRouteRedirectorNext: @unchecked Sendable {
     /// 原目标: 不需要重定向
     case original
     /// 需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
+    ///
+    /// loc为nil主要是适配`convert`. eg
+    ///
+    ///     return .new(try? await FJRouter.jump().convertLocation(by: .name("login")))
     case new(_ loc: String?)
 }
 
