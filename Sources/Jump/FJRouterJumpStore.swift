@@ -145,14 +145,31 @@ private extension FJRouter.JumpStore {
     }
     
     func redirectActionFor(matchList: FJRouteMatchList) async -> FJRouteRedirectorNext {
-        guard let match = matchList.lastMatch else {
+        switch matchList.result {
+        case .error:
+            return .original
+        case .success(let matchs):
+            let state = FJRouterState(matches: matchList)
+            for match in matchs {
+                if let redirector = match.route.redirect {
+                    let fresult = await redirector.redirectRouteNext(state: state)
+                    switch fresult {
+                    case .interception:
+                        return .interception
+                    case .original:
+                        break
+                    case .new(let nloc):
+                        if let nloc {
+                            let floc = nloc.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !floc.isEmpty {
+                                return .new(floc)
+                            }
+                        }
+                    }
+                }
+            }
             return .original
         }
-        guard let redirector = match.route.redirect else {
-            return .original
-        }
-        let state = FJRouterState(matches: matchList)
-        return await redirector.redirectRouteNext(state: state)
     }
     
     func addRedirect(history: [FJRouteMatchList], newMatch: FJRouteMatchList) throws(FJRouteMatchList.MatchError) -> [FJRouteMatchList] {
