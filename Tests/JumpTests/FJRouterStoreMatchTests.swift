@@ -33,7 +33,7 @@ struct FJRouterStoreMatchTests {
     
     @Test func testSuccessDoesNotRedirectNoChildHasRedirect() async throws {
         let config = await createConfig(action: { config in
-            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, redirect: FJRouteCommonRedirector(redirect: { _  in .original })))
+            await config.addRoute(try! FJRoute(path: "/show/:id", builder: self._builder, redirect: FJRouteCommonRedirector(redirect: { _  in .pass })))
         })
         let p = "/show/123?name=haha&age=18"
         let url = URL(string: p)!

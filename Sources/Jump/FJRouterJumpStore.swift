@@ -124,10 +124,10 @@ private extension FJRouter.JumpStore {
         }
         let redirectAction = await redirectActionFor(matchList: prevMatchList)
         switch redirectAction {
-        case .interception:
+        case .guard:
             let errorMatch = FJRouteMatchList(error: .guardInterception, url: prevMatchList.url, extra: nil)
             return (errorMatch, redirectHistory)
-        case .original:
+        case .pass:
             return (prevMatchList, redirectHistory)
         case .new(let np):
             guard let redirectLocation = np, let redirectLocationUrl = URL(string: redirectLocation) else {
@@ -144,19 +144,19 @@ private extension FJRouter.JumpStore {
         }
     }
     
-    func redirectActionFor(matchList: FJRouteMatchList) async -> FJRouteRedirectorNext {
+    func redirectActionFor(matchList: FJRouteMatchList) async -> FJRoute.RedirectorNext {
         switch matchList.result {
         case .error:
-            return .original
+            return .pass
         case .success(let matchs):
             let state = FJRouterState(matches: matchList)
             for match in matchs {
                 if let redirector = match.route.redirect {
                     let fresult = await redirector.redirectRouteNext(state: state)
                     switch fresult {
-                    case .interception:
-                        return .interception
-                    case .original:
+                    case .guard:
+                        return .guard
+                    case .pass:
                         break
                     case .new(let nloc):
                         if let nloc {
@@ -168,7 +168,7 @@ private extension FJRouter.JumpStore {
                     }
                 }
             }
-            return .original
+            return .pass
         }
     }
     

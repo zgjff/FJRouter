@@ -8,24 +8,26 @@
 #if canImport(UIKit)
 import Foundation
 
-/// 重定向行为
-///
-/// interception: 不可以跳转, 即路由守卫
-///
-/// original: 不需要重定向
-///
-/// new(xxx)需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
-public enum FJRouteRedirectorNext: @unchecked Sendable {
-    /// 拦截: 不可以跳转, 即路由守卫
-    case interception
-    /// 原目标: 不需要重定向
-    case original
-    /// 需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
+extension FJRoute {
+    /// 重定向行为
     ///
-    /// loc为nil主要是适配`convert`. eg
+    /// interception: 不可以跳转, 即路由守卫
     ///
-    ///     return .new(try? await FJRouter.jump().convertLocation(by: .name("login")))
-    case new(_ loc: String?)
+    /// original: 不需要重定向
+    ///
+    /// new(xxx)需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
+    public enum RedirectorNext: @unchecked Sendable {
+        /// 守卫拦截: 不可以跳转, 即路由守卫
+        case `guard`
+        /// 通过: 不需要重定向
+        case pass
+        /// 需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
+        ///
+        /// loc为nil主要是适配`convert`. eg
+        ///
+        ///     return .new(try? await FJRouter.jump().convertLocation(by: .name("login")))
+        case new(_ loc: String?)
+    }
 }
 
 /// 路由重定向
@@ -33,12 +35,12 @@ public protocol FJRouteRedirector: Sendable {
     /// 重定向
     /// - Parameter state: 路由跳转信息
     /// - Returns: 行为
-    func redirectRouteNext(state: FJRouterState) async -> FJRouteRedirectorNext
+    func redirectRouteNext(state: FJRouterState) async -> FJRoute.RedirectorNext
 }
 
 /// 通用路由重定向+守卫
 public struct FJRouteCommonRedirector: Sendable, FJRouteRedirector {
-    private let redirect: @Sendable (_ state: FJRouterState) async throws -> FJRouteRedirectorNext
+    private let redirect: @Sendable (_ state: FJRouterState) async throws -> FJRoute.RedirectorNext
     
     /// 初始化方法
     ///
@@ -54,27 +56,27 @@ public struct FJRouteCommonRedirector: Sendable, FJRouteRedirector {
     ///     }))
     ///
     /// - Parameter redirect: 重定向行为
-    public init(redirect: @Sendable @escaping (_ state: FJRouterState) async throws -> FJRouteRedirectorNext) {
+    public init(redirect: @Sendable @escaping (_ state: FJRouterState) async throws -> FJRoute.RedirectorNext) {
         self.redirect = redirect
     }
     
-    public func redirectRouteNext(state: FJRouterState) async -> FJRouteRedirectorNext {
+    public func redirectRouteNext(state: FJRouterState) async -> FJRoute.RedirectorNext {
         do {
             let action = try await redirect(state)
             switch action {
-            case .interception, .original:
+            case .guard, .pass:
                 return action
             case .new(let loc):
                 guard let floc = loc?.trimmingCharacters(in: .whitespacesAndNewlines) else {
-                    return .original
+                    return .pass
                 }
                 if floc.isEmpty {
-                    return .original
+                    return .pass
                 }
                 return .new(floc)
             }
         } catch {
-            return .original
+            return .pass
         }
     }
 }
