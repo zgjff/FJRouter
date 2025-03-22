@@ -25,7 +25,9 @@ extension FJRouter.EventMatch {
         }
         let encodedParams = action.extractPathParameters(inString: remainingLocation, useRegExp: regExp)
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
-        let pathLoc = FJPathUtils.default.patternToPath(pattern: action.path, pathParameters: encodedParams)
+        guard let pathLoc = try? FJPathUtils.default.patternToPath(pattern: action.path, pathParameters: encodedParams) else {
+            return nil
+        }
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: pathLoc)
         
         let matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()

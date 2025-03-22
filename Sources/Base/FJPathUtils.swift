@@ -103,7 +103,7 @@ extension FJPathUtils {
             f.updateValue(pairs.value, forKey: pairs.key)
             return f
         }
-        let location = FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
+        let location = try FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
         var cop = URLComponents(string: location)
         if !queryParams.isEmpty {
             var queryItems = cop?.queryItems ?? []
@@ -128,7 +128,7 @@ extension FJPathUtils {
         return final
     }
     
-    internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) -> String {
+    internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) throws(FJRouter.ConvertError) -> String {
         var buffer: String
         if #available(iOS 14.0, *) {
             buffer = String(unsafeUninitializedCapacity: pattern.count, initializingUTF8With: { _ in 0 })
@@ -150,7 +150,8 @@ extension FJPathUtils {
             if let pn = parameters[name] {
                 buffer += pn
             } else {
-                //TODO: - throws error, 提醒缺少参数
+                print("sdfsadf缺少参数", pattern, parameters)
+                throw .missingParameters
             }
             start = match.range.location + match.range.length
         }

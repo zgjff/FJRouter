@@ -43,7 +43,7 @@ struct FJPathUtilsTests {
         #expect(match != nil)
         
         let parameterValues = FJPathUtils.default.extractPathParameters(pathParameter, inString: url, useRegExp: reg)
-        let restoredUrl = FJPathUtils.default.patternToPath(pattern: pattern, pathParameters: parameterValues)
+        let restoredUrl = try FJPathUtils.default.patternToPath(pattern: pattern, pathParameters: parameterValues)
         #expect(url == restoredUrl)
     }
     
@@ -56,7 +56,7 @@ struct FJPathUtilsTests {
         #expect(match != nil)
         
         let parameterValues = FJPathUtils.default.extractPathParameters(pathParameter, inString: url, useRegExp: reg)
-        let restoredUrl = FJPathUtils.default.patternToPath(pattern: pattern, pathParameters: parameterValues)
+        let restoredUrl = try FJPathUtils.default.patternToPath(pattern: pattern, pathParameters: parameterValues)
         #expect(url == restoredUrl)
     }
     
