@@ -150,8 +150,7 @@ extension FJPathUtils {
             if let pn = parameters[name] {
                 buffer += pn
             } else {
-                print("sdfsadf缺少参数", pattern, parameters)
-                throw .missingParameters
+                throw .missingParameters(name)
             }
             start = match.range.location + match.range.length
         }

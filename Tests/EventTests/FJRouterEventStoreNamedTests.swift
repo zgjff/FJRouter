@@ -72,10 +72,10 @@ struct FJRouterEventStoreNamedTests {
         #expect(urla1 == "/a/1")
         let urla2 = try await store.convertLocation(by: .name("finda", params: ["id": "1", "p": "q"]))
         #expect(urla2 == "/a/1")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("finda", params: ["pid": "1", "p": "q"]))
         }
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("finda"))
         }
         
@@ -83,10 +83,10 @@ struct FJRouterEventStoreNamedTests {
         #expect(urlc1 == "c/1")
         let urlc2 = try await store.convertLocation(by: .name("findc", params: ["id": "1", "p": "q"]))
         #expect(urlc2 == "c/1")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findc", params: ["pid": "1", "p": "q"]))
         }
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findc"))
         }
         
@@ -94,7 +94,7 @@ struct FJRouterEventStoreNamedTests {
         #expect(urld1 == "/d/1/")
         let urld2 = try await store.convertLocation(by: .name("findd", params: ["id": "1", "p": "q"]))
         #expect(urld2 == "/d/1/")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findd", params: ["pid": "1", "p": "q"]))
         }
     }
@@ -115,31 +115,31 @@ struct FJRouterEventStoreNamedTests {
         
         let users1 = try await store.convertLocation(by: .name("finduser", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(users1 == "/user/1?age=22")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("finduser", queryParams: ["age": "22"]))
         }
         
         let books1 = try await store.convertLocation(by: .name("findbooks", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(books1 == "/books/1/?age=22")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findbooks", queryParams: ["age": "22"]))
         }
         
         let pages1 = try await store.convertLocation(by: .name("findpages", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(pages1 == "pages/1?age=22")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findpages", queryParams: ["age": "22"]))
         }
         
         let players1 = try await store.convertLocation(by: .name("findplayers", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(players1 == "players/1/?age=22")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findplayers", queryParams: ["age": "22"]))
         }
         
         let tvs1 = try await store.convertLocation(by: .name("findtvs", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(tvs1 == "/tvs/1/?age=22")
-        await #expect(throws: FJRouter.ConvertError.missingParameters) {
+        await #expect(throws: FJRouter.ConvertError.missingParameters("id")) {
             let _ = try await store.convertLocation(by: .name("findtvs", queryParams: ["age": "22"]))
         }
     }

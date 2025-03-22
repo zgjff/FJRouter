@@ -15,7 +15,7 @@ extension FJRouter {
         /// `URL`转换成`string`错误, 具体请看`URLComponents`的`string`注释
         case urlConvert
         /// 缺少参数
-        case missingParameters
+        case missingParameters(_ name: String)
     }
 }
 
@@ -26,8 +26,8 @@ extension FJRouter.ConvertError: CustomStringConvertible, CustomDebugStringConve
             return "没有存储此name"
         case .urlConvert:
             return "url生成错误, 请查看URLComponents 的 string"
-        case .missingParameters:
-            return "缺少参数"
+        case .missingParameters(let name):
+            return "缺少参数: \(name)"
         }
     }
     
