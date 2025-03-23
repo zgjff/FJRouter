@@ -90,7 +90,7 @@ public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIView
 
 2: 此参数可以为`nil`, 但是为`nil`时, 重定向参数`redirect`不能为`nil`
 
-3: `builder`可以根据路由信息`BuilderInfo`返回对应的控制器, 也可以在不符合条件的情况下, 返回`nil`
+3: `builder`可以根据路由信息`BuilderInfo`返回对应的控制器.
 
 #### 显示路由控制器的方式: `animator`
 1: 此参数是`block`形式的类型别名

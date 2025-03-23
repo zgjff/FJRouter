@@ -23,8 +23,8 @@ import UIKit
 public struct FJRoute: Sendable {
     /// 构建路由控制器
     ///
-    /// 可以根据路由信息`BuilderInfo`返回对应的控制器, 也可以在不符合条件的情况下, 返回`nil`
-    public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController?)
+    /// 可以根据路由信息`BuilderInfo`返回对应的控制器
+    public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController)
     
     /// 显示路由指向控制器的转场动画
     ///

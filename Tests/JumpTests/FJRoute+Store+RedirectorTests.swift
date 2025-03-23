@@ -63,7 +63,7 @@ private extension FJRouteStoreRedirectorTests {
         await store.addRoute(r6)
     }
     
-    @MainActor func builderController(_ info: FJRoute.BuilderInfo) -> UIViewController? {
+    @MainActor func builderController(_ info: FJRoute.BuilderInfo) -> UIViewController {
         return UIViewController()
     }
     
