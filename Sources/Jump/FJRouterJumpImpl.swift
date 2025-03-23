@@ -70,7 +70,7 @@ extension FJRouter.JumpImpl {
             if let destvc = await core.viewController(for: match) {
                 return destvc
             }
-            throw FJRouter.JumpMatchError.builderNil
+            throw FJRouter.JumpMatchError.noBuilder
         } catch {
             if let err = error as? FJRouter.ConvertError {
                 throw FJRouter.JumpMatchError.convertNameLoc(err)

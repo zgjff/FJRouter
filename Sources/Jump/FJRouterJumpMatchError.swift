@@ -16,8 +16,6 @@ extension FJRouter {
         case notFind
         /// 对应的路由没有builder: 出现在构建路由的时候没有`builder`参数, 只有`redirect`参数, 且`redirect`协议返回了`none`
         case noBuilder
-        /// 路由的`builder`中返回的是`nil`控制器
-        case builderNil
         /// 路由守卫拦截
         case guardInterception
         /// 重定向次数超出限制
@@ -39,8 +37,6 @@ extension FJRouter.JumpMatchError: Equatable {
         case (.notFind, .notFind):
             return true
         case (.noBuilder, .noBuilder):
-            return true
-        case (.builderNil, .builderNil):
             return true
         case (.guardInterception, .guardInterception):
             return true
@@ -67,8 +63,6 @@ extension FJRouter.JumpMatchError: CustomStringConvertible, CustomDebugStringCon
             return "Does not find any route"
         case .noBuilder:
             return "Mathed Route has no builder"
-        case .builderNil:
-            return "Mathed Route builder return nil"
         case .guardInterception:
             return "Match Route success, but route guard interception"
         case .redirectLimit(desc: let desc):
