@@ -13,7 +13,7 @@ extension FJRoute {
     ///
     /// interception: 不可以跳转, 即路由守卫
     ///
-    /// original: 不需要重定向
+    /// pass: 不需要重定向
     ///
     /// new(xxx)需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
     public enum RedirectorNext: @unchecked Sendable {

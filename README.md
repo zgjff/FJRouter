@@ -116,7 +116,7 @@ let loginRoute = try! FJRoute(path: "/login", name: "login", builder: { info in
 }, redirect: FJRouteCommonRedirector(redirect: { state in
     let hasLogin = xxx
     if hasLogin { // true, 即代表已经登录, 此时允许可以跳转至login路由
-        return .original
+        return .pass
      }
     // hasLogin: false, 即代表未登录, 此时页面在未登录相关的页面, 如登录/注册/发送验证码...等页面, 此时不允许跳转至login路由, 防止多重的跳转至登录
     return .interception
@@ -213,7 +213,7 @@ let route = try FJRoute(path: "/play/:id", builder: ({ _  in ViewControllerPlay(
 1: 此协议只有一个方法: 根据匹配状态进行判断返回对应路由的url路径
 
 ```swift
-/// 重定向行为: interception: 不可以跳转, 即路由守卫/original: 不需要重定向/new(xxx)需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
+/// 重定向行为: interception: 不可以跳转, 即路由守卫/pass: 不需要重定向/new(xxx)需要重定向到新路由路径: 如果返回的是`nil`, 也不需要重定向
 func redirectRouteNext(state: FJRouterState) async -> FJRouteRedirectorNext
 ```
 
