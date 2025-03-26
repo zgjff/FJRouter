@@ -24,12 +24,12 @@ public struct FJRoute: Sendable {
     /// 构建路由控制器
     ///
     /// 可以根据路由信息`BuilderInfo`返回对应的控制器
-    public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController)
+    public typealias Builder = @MainActor @Sendable (_ info: BuilderInfo) -> UIViewController
     
     /// 显示路由指向控制器的转场动画
     ///
     /// 框架内部提供了多种内置实现: FJRoute.XXXXAnimator
-    public typealias Animator = (@MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator)
+    public typealias Animator = @MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator
     
     /// 路由的名称
     ///
@@ -53,8 +53,13 @@ public struct FJRoute: Sendable {
     /// 显示匹配路由控制器的方式。只适用与适用go、goNamed进行跳转的方式
     public let animator: Animator
 
-    /// 路由拦截器
-    public let redirect: (any FJRouteRedirector)?
+    /// 路由拦截器: 数组, 可以添加多个, 按顺序检查
+    ///
+    /// 比如:
+    /// 登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
+    ///
+    /// 职能单一, 方便测试
+    public let redirect: @Sendable () -> [any FJRouteRedirector]
     
     /// 路由`path`中解析出来的参数名称数组
     public let pathParameters: [String]
@@ -69,11 +74,11 @@ public struct FJRoute: Sendable {
     /// - Parameters:
     ///   - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
-    ///   - builder: 构建路由的`controller`指向
+    ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: (any FJRouteRedirector)? = nil, routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
+    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw CreateError.emptyPath
@@ -82,7 +87,7 @@ public struct FJRoute: Sendable {
         if let n, n.isEmpty {
             throw CreateError.emptyName
         }
-        if builder == nil && redirect == nil {
+        if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
         }
         do {

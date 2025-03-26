@@ -151,7 +151,7 @@ private extension FJRouter.JumpStore {
         case .success(let matchs):
             let state = FJRouterState(matches: matchList)
             for match in matchs {
-                if let redirector = match.route.redirect {
+                for redirector in match.route.redirect() {
                     let fresult = await redirector.redirectRouteNext(state: state)
                     switch fresult {
                     case .guard:

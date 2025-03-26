@@ -14,23 +14,23 @@ struct FJRouteStoreRedirectorTests {
 
 private extension FJRouteStoreRedirectorTests {
     func addRoutes() async throws {
-        let r1 = try FJRoute(path: "/", name: "root", builder: nil, redirect: FJRouteCommonRedirector(redirect: { state in
+        let r1 = try FJRoute(path: "/", name: "root", builder: nil, redirect: [FJRouteCommonRedirector(redirect: { state in
             let login = await self.hasLogin()
             if login {
                 return .new("/app")
             }
             return .new("/login")
-        }))
+        })])
         await store.addRoute(r1)
         
-        let r2 = try FJRoute(path: "/login", name: "login", builder: builderController, redirect: FJRouteCommonRedirector(redirect: { state in
+        let r2 = try FJRoute(path: "/login", name: "login", builder: builderController, redirect: [FJRouteCommonRedirector(redirect: { state in
             let login = await self.hasLogin()
             if login { // 已经登录, 可以退出到登录页
                 return .pass
             }
             // 否则, 本身就在登录相关页, 没必要再次进入登录页
             return .guard
-        }), routes: [
+        })], routes: [
             FJRoute(path: "register", name: "registerAccount", builder: self.builderController)
         ])
         await store.addRoute(r2)
@@ -43,21 +43,21 @@ private extension FJRouteStoreRedirectorTests {
         ])
         await store.addRoute(r4)
         
-        let r5 = try FJRoute(path: "/books", name: "books", builder: builderController, redirect: FJRouteCommonRedirector(redirect: { state in
+        let r5 = try FJRoute(path: "/books", name: "books", builder: builderController, redirect: [FJRouteCommonRedirector(redirect: { state in
             return .pass
-        }), routes: [
+        })], routes: [
             FJRoute(path: "detail/:id", name: "detailBook", builder: self.builderController),
-            FJRoute(path: "shop", name: "bookShop", builder: self.builderController, redirect: FJRouteCommonRedirector(redirect: { state in
+            FJRoute(path: "shop", name: "bookShop", builder: self.builderController, redirect: [FJRouteCommonRedirector(redirect: { state in
                 return .new("/settings")
-            }), routes: [
+            })], routes: [
                 FJRoute(path: "center", name: "bookShopCenter", builder: self.builderController)
             ])
         ])
         await store.addRoute(r5)
         
-        let r6 = try FJRoute(path: "/games", name: "games", builder: builderController, redirect: FJRouteCommonRedirector(redirect: { state in
+        let r6 = try FJRoute(path: "/games", name: "games", builder: builderController, redirect: [FJRouteCommonRedirector(redirect: { state in
             return .guard
-        }), routes: [
+        })], routes: [
             FJRoute(path: "detail/:id", name: "detailGame", builder: self.builderController),
         ])
         await store.addRoute(r6)

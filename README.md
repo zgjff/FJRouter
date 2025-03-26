@@ -113,17 +113,19 @@ public typealias Animator = (@MainActor @Sendable (_ info: AnimatorInfo) -> any 
 ```swift
 let loginRoute = try! FJRoute(path: "/login", name: "login", builder: { info in
     return UIViewController()
-}, redirect: FJRouteCommonRedirector(redirect: { state in
+}, redirect: [FJRouteCommonRedirector(redirect: { state in
     let hasLogin = xxx
     if hasLogin { // true, 即代表已经登录, 此时允许可以跳转至login路由
         return .pass
      }
     // hasLogin: false, 即代表未登录, 此时页面在未登录相关的页面, 如登录/注册/发送验证码...等页面, 此时不允许跳转至login路由, 防止多重的跳转至登录
     return .interception
-}))
+})])
 ```
 
-2: 此参数可以为`nil`, 但是为`nil`时, 构建控制器参数`builder`不能为`nil`
+2: 此参数是个数组, 可以添加多个, 按顺序检查; 比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写;职能单一, 方便测试
+
+3: 此参数可以为空, 但是为空时, 构建控制器参数`builder`不能为`nil`
 
 #### 关联的子路由: `routes`
 
