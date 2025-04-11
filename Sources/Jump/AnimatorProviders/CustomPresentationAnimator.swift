@@ -27,13 +27,15 @@ extension FJRoute {
             self.config = config
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
             guard let fromVC else {
                 return
             }
-            var destVC = toVC
+            // TODO: - check presentedViewController
+            let tvc = toVC()
+            var destVC = tvc
             if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
+                useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
             let pd = FJCustomPresentationController(show: destVC, from: fromVC, config: config)

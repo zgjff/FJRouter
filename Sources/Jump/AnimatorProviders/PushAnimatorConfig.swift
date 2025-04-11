@@ -46,14 +46,15 @@ extension FJRoute.PushAnimatorConfig {
         /// 不做任何动作: 不`push`, 也不`dismiss`再`push`
         case none
         
-        /// 自定义动作. eg:
+        /// 自定义动作. 使用于特殊的需求, eg:
         ///
-        ///
-        ///     await FJRouter.jump().registerRoute(try FJRoute(path: "/second", name: "second", builder: { _ in SecondViewController() }, animator: { _ in
+        ///     await FJRouter.jump().registerRoute(try FJRoute(path: "/second", name: "second", builder: { _ in    SecondViewController() }, animator: { _ in
         ///         FJRoute.SystemPushAnimator(config: FJRoute.PushAnimatorConfig.init(ptedAction: .custom(action: { ptedvc, start in
         ///             let alertvc = UIAlertController(title: "已有弹窗", message: "确定push吗?", preferredStyle: .alert)
-        ///             let ok = UIAlertAction(title: "确定", style: .default) { _ in
-        ///                 push()
+        ///             let ok = UIAlertAction(title: "确定", style: .default) { [weak ptedvc] _ in
+        ///                 ptedvc?.dismiss(animated: true) {
+        ///                     push()
+        ///                 }
         ///             }
         ///             let cancel = UIAlertAction(title: "取消", style: .cancel)
         ///             alertvc.addAction(ok)

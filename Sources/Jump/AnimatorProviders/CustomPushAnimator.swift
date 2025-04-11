@@ -47,8 +47,8 @@ extension FJRoute {
             )
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            private_customPushAnimator.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            private_customPushAnimator.startAnimated(from: fromVC, to: toVC, state: matchState)
         }
     }
 }

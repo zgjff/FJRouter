@@ -34,10 +34,8 @@ extension FJRoute {
             self.refresh = refresh
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            if let fromVC {
-                refresh(fromVC, matchState)
-            }
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            
         }
     }
 }

@@ -23,18 +23,23 @@ extension FJRoute {
             self.sideslipBack = sideslipBack
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            if sideslipBack {
-                toVC.fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss()
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            guard let fromVC else {
+                return
             }
-            var destVC = toVC
+            // TODO: - check presentedViewController
+            let tvc = toVC()
+            if sideslipBack {
+                tvc.fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss()
+            }
+            var destVC = tvc
             if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
+                useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
             destVC.modalPresentationStyle = .fullScreen
-            destVC.transitioningDelegate = toVC.fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegate
-            fromVC?.present(destVC, animated: true)
+            destVC.transitioningDelegate = tvc.fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegate
+            fromVC.present(destVC, animated: true)
         }
     }
 }

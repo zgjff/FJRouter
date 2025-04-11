@@ -114,11 +114,8 @@ extension FJRouter.JumpImpl {
         }
         do {
             let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-            guard let vc = await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true) else {
-                throw FJRouter.JumpMatchError.notFind
-            }
             let cb = callback()
-            await vc.fjroute_addCallbackTrigger(callback: cb)
+            try await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true, callback: cb)
             return cb
         } catch {
             if let err = error as? FJRouter.ConvertError {
@@ -128,18 +125,6 @@ extension FJRouter.JumpImpl {
             } else {
                 throw FJRouter.JumpMatchError.cancelled
             }
-        }
-    }
-    
-    private func go_private(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) {
-        guard let url = URL(string: location) else {
-            throw FJRouter.JumpMatchError.errorLocUrl
-        }
-        do {
-            let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-            await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true)
-        } catch {
-            throw error
         }
     }
 }

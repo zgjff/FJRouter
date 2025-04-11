@@ -26,19 +26,19 @@ extension FJRoute {
             self.useNavigationController = useNavigationController
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
             guard let fromVC else {
                 let ar = AppRootControllerAnimator(navigationController: useNavigationController)
-                ar.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
+                ar.startAnimated(from: fromVC, to: toVC, state: matchState)
                 return
             }
             if fromVC.navigationController != nil {
                 let pp = SystemPushAnimator()
-                pp.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
+                pp.startAnimated(from: fromVC, to: toVC, state: matchState)
                 return
             }
             let sp = SystemPresentAnimator(navigationController: useNavigationController)
-            return sp.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
+            sp.startAnimated(from: fromVC, to: toVC, state: matchState)
         }
     }
 }

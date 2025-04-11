@@ -25,29 +25,26 @@ extension FJRoute {
             self.interactive = interactive
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            guard let fromVC else {
-                return
-            }
-            guard let finalNavi = checkNavigationController(from: fromVC) else {
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            guard let fromVC, let finalNavi = checkNavigationController(from: fromVC) else {
                 return
             }
             guard let fptedvc = finalNavi.presentedViewController else {
-                doPush(from: finalNavi, to: toVC)
+                doPush(from: finalNavi, to: toVC())
                 return
             }
             switch config.ptedAction {
             case .push:
-                doPush(from: finalNavi, to: toVC)
+                doPush(from: finalNavi, to: toVC())
             case .none:
                 return
             case .dismiss(animated: let flag):
-                fptedvc.dismiss(animated: flag) { [finalNavi, toVC] in
-                    self.doPush(from: finalNavi, to: toVC)
+                fptedvc.dismiss(animated: flag) { [finalNavi] in
+                    self.doPush(from: finalNavi, to: toVC())
                 }
             case .custom(action: let action):
-                action(fptedvc, { [finalNavi, toVC] in
-                    self.doPush(from: finalNavi, to: toVC)
+                action(fptedvc, { [finalNavi] in
+                    self.doPush(from: finalNavi, to: toVC())
                 })
             }
         }

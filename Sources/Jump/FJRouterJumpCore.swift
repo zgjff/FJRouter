@@ -35,38 +35,44 @@ extension FJRouter.JumpCore {
         return match.route.builder?(FJRoute.BuilderInfo(fromVC: tvc, matchState: state))
     }
     
-    @discardableResult
-    @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool) -> UIViewController? {
+    @MainActor func go(matchList: FJRouteMatchList, sourceController: UIViewController?, ignoreError: Bool, animated flag: Bool, callback: FJRouterCallbackable) throws(FJRouter.JumpMatchError) {
         switch matchList.result {
         case .error:
             if ignoreError {
-                return nil
+                throw FJRouter.JumpMatchError.notFind
             }
             goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
-            return nil
+            return
         case .success:
             guard let match = matchList.lastMatch else {
                 if ignoreError {
-                    return nil
+                    throw FJRouter.JumpMatchError.notFind
                 }
                 goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
-                return nil
+                return
             }
             let state = FJRouterState(matches: matchList, match: match)
             guard let route = state.route else {
                 if ignoreError {
-                    return nil
+                    throw FJRouter.JumpMatchError.notFind
                 }
                 goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
-                return nil
+                return
+            }
+            guard route.builder != nil else {
+                if ignoreError {
+                    throw FJRouter.JumpMatchError.noBuilder
+                }
+                goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
+                return
             }
             let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
-            guard let tovc = route.builder?(FJRoute.BuilderInfo(fromVC: fromController, matchState: state)) else {
-                return nil
-            }
-            let animator = route.animator(FJRoute.AnimatorInfo(fromVC: fromController, toVC: tovc, matchState: state))
-            animator.startAnimatedTransitioning(from: fromController, to: tovc, state: state)
-            return tovc
+            let animator = route.animator(FJRoute.AnimatorInfo(fromVC: fromController, matchState: state))
+            animator.startAnimated(from: fromController, to: { [fromController] in
+                let vc = route.builder!(FJRoute.BuilderInfo(fromVC: fromController, matchState: state))
+                vc.fjroute_addCallbackTrigger(callback: callback)
+                return vc
+            }, state: state)
         }
     }
     
@@ -83,6 +89,7 @@ extension FJRouter.JumpCore {
             return
         }
         if let navi = fromController.navigationController {
+            destController.hidesBottomBarWhenPushed = true
             navi.pushViewController(destController, animated: flag)
             return
         }

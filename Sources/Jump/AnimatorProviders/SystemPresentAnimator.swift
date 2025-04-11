@@ -24,17 +24,21 @@ extension FJRoute {
             self.useNavigationController = useNavigationController
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            var destVC = toVC
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            guard let fromVC else {
+                return
+            }
+            // TODO: - check presentedViewController
+            var destVC = toVC()
             if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
+                useNavigationController.setViewControllers([toVC()], animated: false)
                 destVC = useNavigationController
             }
             destVC.transitioningDelegate = nil
             if fullScreen {
                 destVC.modalPresentationStyle = .fullScreen
             }
-            fromVC?.present(destVC, animated: true)
+            fromVC.present(destVC, animated: true)
         }
     }
 }

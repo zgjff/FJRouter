@@ -56,10 +56,15 @@ extension FJRoute {
             self.useNavigationController = useNavigationController
         }
         
-        public func startAnimatedTransitioning(from fromVC: UIViewController?, to toVC: UIViewController, state matchState: FJRouterState) {
-            var destVC = toVC
+        public func startAnimated(from fromVC: UIViewController?, to toVC: @escaping @MainActor () -> UIViewController, state matchState: FJRouterState) {
+            guard let fromVC else {
+                return
+            }
+            // TODO: - check presentedViewController
+            let tvc = toVC()
+            var destVC = tvc
             if let useNavigationController {
-                useNavigationController.setViewControllers([toVC], animated: false)
+                useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
             destVC.modalPresentationStyle = .fullScreen
@@ -68,7 +73,7 @@ extension FJRoute {
                 interactive: interactive
             )
             destVC.transitioningDelegate = destVC.fjroute_custom_present_uHBvZ$zAmEIWonLreDu6cC_delegate
-            fromVC?.present(destVC, animated: true)
+            fromVC.present(destVC, animated: true)
         }
     }
 }
