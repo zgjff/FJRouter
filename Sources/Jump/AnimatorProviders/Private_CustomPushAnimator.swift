@@ -29,7 +29,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            guard let finalNavi = fromVC.navigationController ?? checkNavigationController(from: fromVC) else {
+            guard let finalNavi = checkNavigationController(from: fromVC) else {
                 return
             }
             guard let fptedvc = finalNavi.presentedViewController else {
@@ -53,6 +53,9 @@ extension FJRoute {
         }
         
         @MainActor private func checkNavigationController(from fromVC: UIViewController) -> UINavigationController? {
+            if fromVC is UINavigationController {
+                return fromVC as! UINavigationController
+            }
             if let navi = fromVC.navigationController {
                 return navi
             }
