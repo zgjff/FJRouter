@@ -1,5 +1,5 @@
 //
-//  FJRouterCallbackEmitter.swift
+//  FJRouterCallbackDispatcher.swift
 //  FJRouter
 //
 //  Created by zgjff on 2024/12/26.
@@ -17,7 +17,7 @@ protocol FJRouterCallbackable: Sendable {
 
 extension FJRouter {
     /// 路由callback触发器
-    internal final class CallbackEmitter: Sendable {
+    internal final class CallbackDispatcher: Sendable {
         private let callback: any FJRouterCallbackable
         init(callback: some FJRouterCallbackable) {
             self.callback = callback
