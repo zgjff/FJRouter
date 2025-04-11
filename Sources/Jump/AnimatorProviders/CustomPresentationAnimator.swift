@@ -120,7 +120,7 @@ extension FJCustomPresentationController {
             if isDismiss {
                 presentingViewController.dismiss(animated: true, completion: nil)
             }
-        case .customize(action: let block):
+        case .custom(action: let block):
             block()
         }
     }
@@ -390,7 +390,7 @@ extension FJCustomPresentationContext {
         /// 是否自动dismiss
         case autodismiss(_ auto: Bool)
         /// 自定义动作
-        case customize(action: @Sendable () -> ())
+        case custom(action: @Sendable () -> ())
     }
     
     /// 源控制器触发生命周期

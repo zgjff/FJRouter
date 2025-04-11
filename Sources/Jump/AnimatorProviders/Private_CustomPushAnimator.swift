@@ -12,15 +12,15 @@ import UIKit
 
 extension FJRoute {
     internal struct Private_CustomPushAnimator: FJRouteAnimator {
-        private let hidesBottomBarWhenPushed: Bool
+        private let config: PushAnimatorConfig
         private let animator: FJRoute.CustomPushAnimator.Animator?
         private let interactive: FJRoute.CustomPushAnimator.Interactive?
         internal init(
             animator: FJRoute.CustomPushAnimator.Animator?,
             interactive: FJRoute.CustomPushAnimator.Interactive?,
-            hidesBottomBarWhenPushed: Bool = true
+            config: PushAnimatorConfig = PushAnimatorConfig()
         ) {
-            self.hidesBottomBarWhenPushed = hidesBottomBarWhenPushed
+            self.config = config
             self.animator = animator
             self.interactive = interactive
         }
@@ -29,16 +29,65 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
+            guard let finalNavi = fromVC.navigationController ?? checkNavigationController(from: fromVC) else {
+                return
+            }
+            guard let fptedvc = finalNavi.presentedViewController else {
+                doPush(from: finalNavi, to: toVC)
+                return
+            }
+            switch config.ptedAction {
+            case .push:
+                doPush(from: finalNavi, to: toVC)
+            case .none:
+                return
+            case .dismiss(animated: let flag):
+                fptedvc.dismiss(animated: flag) { [finalNavi, toVC] in
+                    self.doPush(from: finalNavi, to: toVC)
+                }
+            case .custom(action: let action):
+                action(fptedvc, { [finalNavi, toVC] in
+                    self.doPush(from: finalNavi, to: toVC)
+                })
+            }
+        }
+        
+        @MainActor private func checkNavigationController(from fromVC: UIViewController) -> UINavigationController? {
+            if let navi = fromVC.navigationController {
+                return navi
+            }
+            if let fp = fromVC.parent {
+                if let fpnavi = fp as? UINavigationController {
+                    return fpnavi
+                }
+                if let navi = checkNavigationController(from: fp) {
+                    return navi
+                }
+                return nil
+            }
+            if let fptingvc = fromVC.presentingViewController {
+                if let ftnavi = fptingvc as? UINavigationController {
+                    return ftnavi
+                }
+                if let navi = checkNavigationController(from: fptingvc) {
+                    return navi
+                }
+                return nil
+            }
+            return nil
+        }
+        
+        @MainActor private func doPush(from navi: UINavigationController, to toVC: UIViewController) {
             let nd = NavigationDelegateBrigde(
-                primary: fromVC.navigationController?.delegate,
-                primaryIsSameType: fromVC.fjroute_push_navigation_uHBvZ$zAmEIWonLreDu6cC_delegate_bridge != nil,
+                primary: navi.delegate,
+                primaryIsSameType: navi.visibleViewController?.fjroute_push_navigation_uHBvZ$zAmEIWonLreDu6cC_delegate_bridge != nil,
                 animator: animator,
                 interactive: interactive
             )
             toVC.fjroute_push_navigation_uHBvZ$zAmEIWonLreDu6cC_delegate_bridge = nd
-            toVC.hidesBottomBarWhenPushed = hidesBottomBarWhenPushed
-            fromVC.navigationController?.delegate = toVC.fjroute_push_navigation_uHBvZ$zAmEIWonLreDu6cC_delegate_bridge?.delegate
-            fromVC.navigationController?.pushViewController(toVC, animated: true)
+            toVC.hidesBottomBarWhenPushed = config.hidesBottomBarWhenPushed
+            navi.delegate = toVC.fjroute_push_navigation_uHBvZ$zAmEIWonLreDu6cC_delegate_bridge?.delegate
+            navi.pushViewController(toVC, animated: true)
         }
     }
 }

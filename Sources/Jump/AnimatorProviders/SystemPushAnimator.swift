@@ -19,12 +19,12 @@ extension FJRoute {
         /// 初始化
         ///
         /// ⚠️⚠️⚠️: 使用此方法的时候, 请不要在`viewController`内部设置`navigationController?.delegate = xxx`⚠️⚠️⚠️
-        /// - Parameter hidesBottomBarWhenPushed: hidesBottomBarWhenPushed: 设置push时`hidesBottomBarWhenPushed`
-        public init(hidesBottomBarWhenPushed: Bool = true) {
+        /// - Parameter config: push设置
+        public init(config: PushAnimatorConfig = PushAnimatorConfig()) {
             private_customPushAnimator = Private_CustomPushAnimator(
                 animator: nil,
                 interactive: nil,
-                hidesBottomBarWhenPushed: hidesBottomBarWhenPushed
+                config: config
             )
         }
         

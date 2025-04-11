@@ -33,7 +33,7 @@ extension FJRoute {
                 return
             }
             if fromVC.navigationController != nil {
-                let pp = SystemPushAnimator(hidesBottomBarWhenPushed: true)
+                let pp = SystemPushAnimator()
                 pp.startAnimatedTransitioning(from: fromVC, to: toVC, state: matchState)
                 return
             }

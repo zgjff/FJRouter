@@ -34,16 +34,16 @@ extension FJRoute {
         /// - Parameters:
         ///   - animator: 自定义转场动画
         ///   - interactive: 转场动画的交互
-        ///   - hidesBottomBarWhenPushed: 设置push时`hidesBottomBarWhenPushed`
+        ///   - config: push设置
         public init(
             animator: @escaping FJRoute.CustomPushAnimator.Animator,
             interactive: Interactive?,
-            hidesBottomBarWhenPushed: Bool = true
+            config: PushAnimatorConfig = PushAnimatorConfig()
         ) {
             private_customPushAnimator = FJRoute.Private_CustomPushAnimator(
                 animator: animator,
                 interactive: interactive,
-                hidesBottomBarWhenPushed: hidesBottomBarWhenPushed
+                config: config
             )
         }
         
