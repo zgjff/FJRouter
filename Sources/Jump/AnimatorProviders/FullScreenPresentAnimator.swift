@@ -60,7 +60,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            // TODO: - check presentedViewController
+            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
             let tvc = toVC()
             var destVC = tvc
             if let useNavigationController {
@@ -73,7 +73,7 @@ extension FJRoute {
                 interactive: interactive
             )
             destVC.transitioningDelegate = destVC.fjroute_custom_present_uHBvZ$zAmEIWonLreDu6cC_delegate
-            fromVC.present(destVC, animated: true)
+            finalFromVC.present(destVC, animated: true)
         }
     }
 }

@@ -28,7 +28,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            // TODO: - check presentedViewController
+            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
             var destVC = toVC()
             if let useNavigationController {
                 useNavigationController.setViewControllers([toVC()], animated: false)
@@ -38,7 +38,7 @@ extension FJRoute {
             if fullScreen {
                 destVC.modalPresentationStyle = .fullScreen
             }
-            fromVC.present(destVC, animated: true)
+            finalFromVC.present(destVC, animated: true)
         }
     }
 }

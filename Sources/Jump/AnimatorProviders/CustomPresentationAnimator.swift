@@ -31,15 +31,15 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            // TODO: - check presentedViewController
+            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
             let tvc = toVC()
             var destVC = tvc
             if let useNavigationController {
                 useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
-            let pd = FJCustomPresentationController(show: destVC, from: fromVC, config: config)
-            fromVC.present(destVC, animated: true) {
+            let pd = FJCustomPresentationController(show: destVC, from: finalFromVC, config: config)
+            finalFromVC.present(destVC, animated: true) {
                 let _ = pd
             }
         }

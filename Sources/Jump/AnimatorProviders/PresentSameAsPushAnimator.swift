@@ -27,7 +27,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            // TODO: - check presentedViewController
+            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
             let tvc = toVC()
             if sideslipBack {
                 tvc.fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss()
@@ -39,7 +39,7 @@ extension FJRoute {
             }
             destVC.modalPresentationStyle = .fullScreen
             destVC.transitioningDelegate = tvc.fjroute_pushPopStylePresent_pNc4BJVZea8ep_ZV9Cgy2_delegate
-            fromVC.present(destVC, animated: true)
+            finalFromVC.present(destVC, animated: true)
         }
     }
 }
