@@ -112,20 +112,10 @@ extension FJRouter.JumpImpl {
         guard let url = URL(string: location) else {
             throw FJRouter.JumpMatchError.errorLocUrl
         }
-        do {
-            let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
-            let cb = callback()
-            try await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true, callback: cb)
-            return cb
-        } catch {
-            if let err = error as? FJRouter.ConvertError {
-                throw FJRouter.JumpMatchError.convertNameLoc(err)
-            } else if let err = error as? FJRouter.JumpMatchError {
-                throw err
-            } else {
-                throw FJRouter.JumpMatchError.cancelled
-            }
-        }
+        let match = try await store.match(url: url, extra: extra, ignoreError: ignoreError)
+        let cb = callback()
+        try await core.go(matchList: match, sourceController: fromVC, ignoreError: ignoreError, animated: true, callback: cb)
+        return cb
     }
 }
 

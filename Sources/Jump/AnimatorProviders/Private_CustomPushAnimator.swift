@@ -51,9 +51,12 @@ extension FJRoute {
         
         @MainActor private func checkNavigationController(from fromVC: UIViewController) -> UINavigationController? {
             if fromVC is UINavigationController {
-                return fromVC as! UINavigationController
+                return (fromVC as! UINavigationController)
             }
             if let navi = fromVC.navigationController {
+                return navi
+            }
+            if let tab = fromVC as? UITabBarController, let navi = tab.selectedViewController as? UINavigationController {
                 return navi
             }
             if let fp = fromVC.parent {
@@ -103,7 +106,7 @@ extension FJRoute.Private_CustomPushAnimator {
             delegate = nil
         }
         init(
-            primary: UINavigationControllerDelegate?,
+             primary: UINavigationControllerDelegate?,
              primaryIsSameType: Bool,
              animator: FJRoute.CustomPushAnimator.Animator?,
              interactive: FJRoute.CustomPushAnimator.Interactive?
