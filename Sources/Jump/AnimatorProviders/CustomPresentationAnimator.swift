@@ -17,7 +17,7 @@ extension FJRoute {
         
         /// 初始化
         ///
-        /// ⚠️: 一定要在控制器内部设置`preferredContentSize`,
+        /// ⚠️: 一定要在目标控制器内部设置`preferredContentSize`,
         ///
         /// - Parameters:
         ///   - useNavigationController: 使用导航栏包裹控制器. 注意navigationController必须是新初始化生成的
@@ -352,10 +352,11 @@ extension FJCustomPresentationContext {
         frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
     }
     
-    /// 使用一套从底部弹出动画
-    @MainActor public func usingBottomPresentation() {
-        transitionAnimator = `default`.bottomTransitionAnimator
-        frameOfPresentedViewInContainerView = `default`.bottomFrameOfPresentedView
+    /// 使用一套从屏幕边缘弹出动画
+    /// - Parameter edge: 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
+    @MainActor public func usingEdgePresentation(_ edge: UIRectEdge) {
+        transitionAnimator = `default`.edgeTransitionAnimator(edge)
+        frameOfPresentedViewInContainerView = `default`.edgeFrameOfPresentedView(edge)
     }
     
     /// 使用一套clear view的显示/隐藏动画
@@ -587,11 +588,34 @@ extension FJCustomPresentationContext {
             return CGRect(origin: CGPoint(x: x, y: y), size: size)
         }
         
-        /// 使presentedViewController的view在底部显示的frame
-        public private(set) var bottomFrameOfPresentedView: @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable bounds, size in
-            let x = bounds.midX - size.width * 0.5
-            let y = bounds.maxY - size.height
-            return CGRect(origin: CGPoint(x: x, y: y), size: size)
+        /// 使presentedViewController的view在屏幕边缘显示的frame
+        ///
+        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
+        public private(set) var edgeFrameOfPresentedView: (_ edges: UIRectEdge) -> @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable edge in
+            return { @Sendable bounds, size in
+                switch edge {
+                case .top:
+                    let x = bounds.midX - size.width * 0.5
+                    let y: CGFloat = 0
+                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
+                case .bottom:
+                    let x = bounds.midX - size.width * 0.5
+                    let y = bounds.maxY - size.height
+                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
+                case .left:
+                    let x: CGFloat = 0
+                    let y = bounds.midY - size.height * 0.5
+                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
+                case .right:
+                    let x = bounds.maxX - size.width
+                    let y = bounds.midY - size.height * 0.5
+                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
+                default:
+                    let x = bounds.midX - size.width * 0.5
+                    let y = bounds.maxY - size.height
+                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
+                }
+            }
         }
         
         /// 居中弹出presentedViewController的动画效果
@@ -628,36 +652,62 @@ extension FJCustomPresentationContext {
             }
         }
         
-        /// 从底部弹出presentedViewController的动画效果
-        public private(set) var bottomTransitionAnimator: @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable fromView, toView, style, duration, ctx in
-            switch style {
-            case .present(frames: let frames):
-                let f = frames.toFinalFrame
-                toView.frame = f.offsetBy(dx: 0, dy: f.height)
-                if #available(iOS 17.0, *) {
-                    UIView.animate(springDuration: duration, bounce: 0.23, initialSpringVelocity: 10, options: .curveEaseInOut) {
-                        toView.frame = frames.toFinalFrame
-                    } completion: { _ in
-                        let wasCancelled = ctx.transitionWasCancelled
-                        ctx.completeTransition(!wasCancelled)
+        /// 从屏幕边缘弹出`presentedViewController`的动画效果;
+        ///
+        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
+        public private(set) var edgeTransitionAnimator: (_ edges: UIRectEdge) -> @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable edge in
+            return { @Sendable fromView, toView, style, duration, ctx in
+                switch style {
+                case .present(frames: let frames):
+                    let f = frames.toFinalFrame
+                    switch edge {
+                    case .top:
+                        toView.frame = f.offsetBy(dx: 0, dy: -f.height)
+                    case .left:
+                        toView.frame = f.offsetBy(dx: -f.width, dy: 0)
+                    case .bottom:
+                        toView.frame = f.offsetBy(dx: 0, dy: f.height)
+                    case .right:
+                        toView.frame = f.offsetBy(dx: f.width, dy: 0)
+                    default:
+                        toView.frame = f.offsetBy(dx: 0, dy: f.height)
                     }
-                } else {
-                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.80, initialSpringVelocity: 10, options: .curveEaseInOut) {
-                        toView.frame = frames.toFinalFrame
-                    } completion: { _ in
-                        let wasCancelled = ctx.transitionWasCancelled
-                        ctx.completeTransition(!wasCancelled)
+                    if #available(iOS 17.0, *) {
+                        UIView.animate(springDuration: duration, bounce: 0.23, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                            toView.frame = frames.toFinalFrame
+                        } completion: { _ in
+                            let wasCancelled = ctx.transitionWasCancelled
+                            ctx.completeTransition(!wasCancelled)
+                        }
+                    } else {
+                        UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.80, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                            toView.frame = frames.toFinalFrame
+                        } completion: { _ in
+                            let wasCancelled = ctx.transitionWasCancelled
+                            ctx.completeTransition(!wasCancelled)
+                        }
                     }
-                }
-            case .dismiss(frames: let frames):
-                let f = frames.fromInitialFrame
-                fromView.frame = f
-                UIView.animate(withDuration: duration, animations: {
+                case .dismiss(frames: let frames):
                     let f = frames.fromInitialFrame
-                    fromView.frame = f.offsetBy(dx: 0, dy: f.height)
-                }) { _ in
-                    let wasCancelled = ctx.transitionWasCancelled
-                    ctx.completeTransition(!wasCancelled)
+                    fromView.frame = f
+                    UIView.animate(withDuration: duration, animations: {
+                        let f = frames.fromInitialFrame
+                        switch edge {
+                        case .top:
+                            fromView.frame = f.offsetBy(dx: 0, dy: -f.height)
+                        case .bottom:
+                            fromView.frame = f.offsetBy(dx: 0, dy: f.height)
+                        case .left:
+                            fromView.frame = f.offsetBy(dx: -f.width, dy: 0)
+                        case .right:
+                            fromView.frame = f.offsetBy(dx: f.width, dy: 0)
+                        default:
+                            fromView.frame = f.offsetBy(dx: 0, dy: f.height)
+                        }
+                    }) { _ in
+                        let wasCancelled = ctx.transitionWasCancelled
+                        ctx.completeTransition(!wasCancelled)
+                    }
                 }
             }
         }
