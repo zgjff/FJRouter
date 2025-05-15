@@ -222,10 +222,18 @@ extension FJCustomPresentationController: UIViewControllerTransitioningDelegate 
 
 extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning {
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        if let ctx = transitionContext {
-            return ctx.isAnimated ? context.duration : 0
+        guard let transitionContext else {
+            return context.duration(true)
         }
-        return context.duration
+        if !transitionContext.isAnimated {
+           return 0
+        }
+        guard let fromVC = transitionContext.viewController(forKey: .from),
+              let toVC = transitionContext.viewController(forKey: .to) else {
+            return context.duration(true)
+        }
+        let isPresenting = presentingViewController == fromVC
+        return context.duration(isPresenting)
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
@@ -258,7 +266,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
 
 // MARK: - FJCustomAlertPresentationContext
 /// 弹窗驱动上下文
-@MainActor final public class FJCustomPresentationContext: Sendable {
+@MainActor final public class FJCustomPresentationContext: @unchecked Sendable {
     init() {
         `default` = FJCustomPresentationContext.Default()
         frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
@@ -273,7 +281,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     public let `default`: FJCustomPresentationContext.Default
     
     /// 转场动画持续时间---默认0.25s
-    public var duration: TimeInterval = 0.25
+    public var duration: (_ isPresenting: Bool) -> TimeInterval = { _ in 0.25 }
     
     /// 源控制器是否触发生命周期(viewWillDisappear/viewDidDisappear/viewWillAppear/viewDidAppear),默认不触发任何
     public var presentingControllerTriggerAppearLifecycle = TriggerPresentingControllerLifecycle.none
@@ -396,7 +404,7 @@ extension FJCustomPresentationContext {
     }
     
     /// 源控制器触发生命周期
-    public struct TriggerPresentingControllerLifecycle: OptionSet, Sendable {
+    public struct TriggerPresentingControllerLifecycle: OptionSet, @unchecked Sendable {
         public let rawValue: UInt
         public init(rawValue: UInt) {
             self.rawValue = rawValue
@@ -430,7 +438,7 @@ extension FJCustomPresentationContext {
 // MARK: - FJCustomAlertPresentationContext Default
 extension FJCustomPresentationContext {
     /// 提供GenericPresentationContext的一些基本默认设置
-    public struct Default: Sendable {
+    public struct Default: @unchecked Sendable {
         /// 转场动画时,高斯模糊view作为presentedViewController view的背景
         public private(set) var blurBelowCoverView: @MainActor @Sendable (CGRect) -> UIView = { @Sendable f in
             let v = UIVisualEffectView(frame: f)

@@ -85,7 +85,7 @@ dismiss(animated: true, completion: { [weak self] in
 #### 构建路由方式: `builder`
 1: 此参数是`block`形式的类型别名
 ```swift
-public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController?)
+public typealias Builder = (@MainActor @Sendable (_ info: BuilderInfo) -> UIViewController)
 ```
 
 2: 此参数可以为`nil`, 但是为`nil`时, 重定向参数`redirect`不能为`nil`
