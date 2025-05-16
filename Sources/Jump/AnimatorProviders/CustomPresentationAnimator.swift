@@ -67,6 +67,7 @@ fileprivate final class FJCustomPresentationController: UIPresentationController
     private let context: FJCustomPresentationContext
     private var belowCoverView: UIView?
     private var presentationWrappingView: UIView?
+    private var didTransitionToNewSize = false
 }
 
 extension FJCustomPresentationController {
@@ -163,13 +164,15 @@ extension FJCustomPresentationController {
 extension FJCustomPresentationController {
     override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
         super.preferredContentSizeDidChange(forChildContentContainer: container)
-        print("layout------a")
         guard let vc = container as? UIViewController, vc == presentedViewController else {
             return
         }
-        containerView?.setNeedsLayout()
+        guard let containerView else {
+            return
+        }
+        containerView.setNeedsLayout()
         guard let config = context.preferredContentSizeDidChangeAnimationInfo else {
-            containerView?.layoutIfNeeded()
+            containerView.layoutIfNeeded()
             return
         }
         UIView.animate(withDuration: config.duration, delay: config.delay, options: config.options) {
@@ -194,24 +197,34 @@ extension FJCustomPresentationController {
         guard let cv = containerView else {
             return .zero
         }
-        print("layout------c", cv.bounds.size)
         let s = size(forChildContentContainer: presentedViewController, withParentContainerSize: cv.bounds.size)
-        return context.frameOfPresentedViewInContainerView(cv.bounds, s)
+        return context.frameOfPresentedViewInContainerView(cv.bounds, cv.safeAreaInsets, s)
     }
     
     override func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews()
-        print("layout------d")
-        if let cv = containerView {
-            belowCoverView?.frame = cv.bounds
-            presentationWrappingView?.frame = frameOfPresentedViewInContainerView
+        guard let containerView else {
+            return
         }
+        if didTransitionToNewSize {
+            context.willTransitionSize(context, containerView.bounds.size, containerView.safeAreaInsets, presentedViewController)
+        }
+        belowCoverView?.frame = containerView.bounds
+        presentationWrappingView?.frame = frameOfPresentedViewInContainerView
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        print("layout------z", size)
         // TODO: - 横竖屏切换时先通过block通知vc去设置preferredContentSize
+        guard let containerView else {
+            return
+        }
+        didTransitionToNewSize = true
+        coordinator.animate { _ in
+            
+        } completion: { [weak self] _ in
+            self?.didTransitionToNewSize = false
+        }
     }
 }
 
@@ -283,9 +296,11 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     /// presentingViewController的view修饰view
     public typealias PresentationWrappingView = @MainActor @Sendable (_ presentedViewControllerView: UIView, _ frameOfPresentedView: CGRect) -> UIView
     /// 转场动画化过程中, 弹窗底部view的动画
-    public typealias AnimatorForBelowCoverView = (_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ()
+    public typealias AnimatorForBelowCoverView = @MainActor @Sendable (_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ()
     /// 转场动画中presentingViewController的View的frame
-    public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ preferredContentSize: CGSize) -> (CGRect)
+    public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ containerViewSafeAreaInsets: UIEdgeInsets, _ preferredContentSize: CGSize) -> (CGRect)
+    /// 横竖屏切换回调
+    public typealias WillTransitionSize = @MainActor @Sendable (_ ctx: FJCustomPresentationContext, _ containerViewSize: CGSize, _ containerViewSafeAreaInsets: UIEdgeInsets, _ tovc: UIViewController) -> ()
     
     init() {
         `default` = FJCustomPresentationContext.Default()
@@ -295,6 +310,9 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
         transitionAnimator = `default`.centerTransitionAnimator
         willPresentAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(true)
         willDismissAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(false)
+        willTransitionSize = {  @Sendable ctx, size, safeAreaInsets, tovc in
+            
+        }
     }
     
     /// 默认配置
@@ -365,6 +383,33 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     ///     }
     ///
     public var willDismissAnimatorForBelowCoverView: AnimatorForBelowCoverView
+    
+    /// 切换横竖屏逻辑, 默认什么都不做
+    ///
+    /// 如果弹窗需要在横竖屏展示和动画不一致的时候, 请在这里更新配置;
+    ///
+    ///     eg: 横竖屏都是底部弹窗, 但是横竖屏高度不同, 且横竖屏切换之后, 弹窗宽度均跟随屏幕宽度
+    ///     ctx.usingEdgePresentation { @Sendable containerViewSize in
+    ///         .bottom
+    ///     }
+    ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+    ///         let isPortrait = size.width < size.height
+    ///         tovc.preferredContentSize = isPortrait ? CGSize(width: size.width, height: 300) : CGSize(width: size.width, height: 150)
+    ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算
+    ///         tovc.xxxxxxxx
+    ///     }
+    ///
+    ///     eg: 竖屏是底部弹窗动画, 横屏变成右边弹窗动画
+    ///     ctx.usingEdgePresentation { containerViewSize in
+    ///         return containerViewSize.width < containerViewSize.height ? .bottom : .right
+    ///     }
+    ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+    ///         let isPortrait = size.width < size.height
+    ///         tovc.preferredContentSize = CGSize(width: isPortrait ? size.width : (200 + safeAreaInsets.right), height: isPortrait ? 300 : size.height)
+    ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算。
+    ///         tovc.xxxxxxxx
+    ///     }
+    public var willTransitionSize: WillTransitionSize
 }
 
 @MainActor public extension FJCustomPresentationContext {
@@ -376,9 +421,87 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     
     /// 使用一套从屏幕边缘弹出动画
     /// - Parameter edge: 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
-    func usingEdgePresentation(_ edge: UIRectEdge) {
-        transitionAnimator = `default`.edgeTransitionAnimator(edge)
-        frameOfPresentedViewInContainerView = `default`.edgeFrameOfPresentedView(edge)
+    func usingEdgePresentation(edge: @escaping @MainActor @Sendable (_ containerViewSize: CGSize) -> UIRectEdge) {
+        frameOfPresentedViewInContainerView = { @Sendable bounds, safeAreaInsets, size in
+            let finalEdge = edge(bounds.size)
+            switch finalEdge {
+            case .top:
+                let x = bounds.midX - size.width * 0.5
+                let y: CGFloat = 0
+                return CGRect(origin: CGPoint(x: x, y: y), size: size)
+            case .bottom:
+                let x = bounds.midX - size.width * 0.5
+                let y = bounds.maxY - size.height
+                return CGRect(origin: CGPoint(x: x, y: y), size: size)
+            case .left:
+                let x: CGFloat = 0
+                let y = bounds.midY - size.height * 0.5
+                return CGRect(origin: CGPoint(x: x, y: y), size: size)
+            case .right:
+                let x = bounds.maxX - size.width
+                let y = bounds.midY - size.height * 0.5
+                return CGRect(origin: CGPoint(x: x, y: y), size: size)
+            default:
+                let x = bounds.midX - size.width * 0.5
+                let y = bounds.maxY - size.height
+                return CGRect(origin: CGPoint(x: x, y: y), size: size)
+            }
+        }
+        transitionAnimator = { @Sendable fromView, toView, style, duration, ctx in
+            let finalEdge = edge(ctx.containerView.bounds.size)
+            switch style {
+            case .present(frames: let frames):
+                let f = frames.toFinalFrame
+                switch finalEdge {
+                case .top:
+                    toView.frame = f.offsetBy(dx: 0, dy: -f.height)
+                case .left:
+                    toView.frame = f.offsetBy(dx: -f.width, dy: 0)
+                case .bottom:
+                    toView.frame = f.offsetBy(dx: 0, dy: f.height)
+                case .right:
+                    toView.frame = f.offsetBy(dx: f.width, dy: 0)
+                default:
+                    toView.frame = f.offsetBy(dx: 0, dy: f.height)
+                }
+                if #available(iOS 17.0, *) {
+                    UIView.animate(springDuration: duration, bounce: 0.23, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                        toView.frame = frames.toFinalFrame
+                    } completion: { _ in
+                        let wasCancelled = ctx.transitionWasCancelled
+                        ctx.completeTransition(!wasCancelled)
+                    }
+                } else {
+                    UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.80, initialSpringVelocity: 10, options: .curveEaseInOut) {
+                        toView.frame = frames.toFinalFrame
+                    } completion: { _ in
+                        let wasCancelled = ctx.transitionWasCancelled
+                        ctx.completeTransition(!wasCancelled)
+                    }
+                }
+            case .dismiss(frames: let frames):
+                let f = frames.fromInitialFrame
+                fromView.frame = f
+                UIView.animate(withDuration: duration, animations: {
+                    let f = frames.fromInitialFrame
+                    switch finalEdge {
+                    case .top:
+                        fromView.frame = f.offsetBy(dx: 0, dy: -f.height)
+                    case .bottom:
+                        fromView.frame = f.offsetBy(dx: 0, dy: f.height)
+                    case .left:
+                        fromView.frame = f.offsetBy(dx: -f.width, dy: 0)
+                    case .right:
+                        fromView.frame = f.offsetBy(dx: f.width, dy: 0)
+                    default:
+                        fromView.frame = f.offsetBy(dx: 0, dy: f.height)
+                    }
+                }) { _ in
+                    let wasCancelled = ctx.transitionWasCancelled
+                    ctx.completeTransition(!wasCancelled)
+                }
+            }
+        }
     }
     
     /// 使用一套clear view的显示/隐藏动画
@@ -471,9 +594,9 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,高斯模糊view的动画效果
-        public private(set) var blurBelowCoverViewAnimator: @MainActor @Sendable (UIBlurEffect.Style) -> (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable style in
+        public private(set) var blurBelowCoverViewAnimator: @MainActor @Sendable (UIBlurEffect.Style) -> (Bool) -> AnimatorForBelowCoverView = { @Sendable style in
             return { isPresenting in
-                return { view, coor in
+                return { @Sendable view, coor in
                     guard let bv = view as? UIVisualEffectView else { return }
                     coor.animate(alongsideTransition: { _ in
                         bv.effect = isPresenting ? UIBlurEffect(style: style) : nil
@@ -493,7 +616,7 @@ extension FJCustomPresentationContext {
         
         /// 转场动画present/dismiss时,暗灰色view的动画效果
         public private(set) var dimmingBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> AnimatorForBelowCoverView = { @Sendable isPresenting in
-            return { view, coor in
+            return { @Sendable view, coor in
                 if isPresenting {
                     view.alpha = 0
                 }
@@ -604,41 +727,10 @@ extension FJCustomPresentationContext {
         }
         
         /// 使presentedViewController的view居中显示的frame
-        public private(set) var centerFrameOfPresentedView: FrameOfPresentedViewInContainerView = { @Sendable bounds, size in
+        public private(set) var centerFrameOfPresentedView: FrameOfPresentedViewInContainerView = { @Sendable bounds, safeAreaInsets, size in
             let x = (bounds.width - size.width) * 0.5
             let y = (bounds.height - size.height) * 0.5
             return CGRect(origin: CGPoint(x: x, y: y), size: size)
-        }
-        
-        /// 使presentedViewController的view在屏幕边缘显示的frame
-        ///
-        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
-        public private(set) var edgeFrameOfPresentedView: @Sendable (_ edges: UIRectEdge) -> FrameOfPresentedViewInContainerView = { @Sendable edge in
-            print("layout------x")
-            return { @Sendable bounds, size in
-                switch edge {
-                case .top:
-                    let x = bounds.midX - size.width * 0.5
-                    let y: CGFloat = 0
-                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-                case .bottom:
-                    let x = bounds.midX - size.width * 0.5
-                    let y = bounds.maxY - size.height
-                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-                case .left:
-                    let x: CGFloat = 0
-                    let y = bounds.midY - size.height * 0.5
-                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-                case .right:
-                    let x = bounds.maxX - size.width
-                    let y = bounds.midY - size.height * 0.5
-                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-                default:
-                    let x = bounds.midX - size.width * 0.5
-                    let y = bounds.maxY - size.height
-                    return CGRect(origin: CGPoint(x: x, y: y), size: size)
-                }
-            }
         }
         
         /// 居中弹出presentedViewController的动画效果
@@ -672,66 +764,6 @@ extension FJCustomPresentationContext {
                     let wasCancelled = ctx.transitionWasCancelled
                     ctx.completeTransition(!wasCancelled)
                 })
-            }
-        }
-        
-        /// 从屏幕边缘弹出`presentedViewController`的动画效果;
-        ///
-        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
-        public private(set) var edgeTransitionAnimator: @Sendable (_ edges: UIRectEdge) -> TransitionAnimator = { @Sendable edge in
-            return { @Sendable fromView, toView, style, duration, ctx in
-                switch style {
-                case .present(frames: let frames):
-                    let f = frames.toFinalFrame
-                    switch edge {
-                    case .top:
-                        toView.frame = f.offsetBy(dx: 0, dy: -f.height)
-                    case .left:
-                        toView.frame = f.offsetBy(dx: -f.width, dy: 0)
-                    case .bottom:
-                        toView.frame = f.offsetBy(dx: 0, dy: f.height)
-                    case .right:
-                        toView.frame = f.offsetBy(dx: f.width, dy: 0)
-                    default:
-                        toView.frame = f.offsetBy(dx: 0, dy: f.height)
-                    }
-                    if #available(iOS 17.0, *) {
-                        UIView.animate(springDuration: duration, bounce: 0.23, initialSpringVelocity: 10, options: .curveEaseInOut) {
-                            toView.frame = frames.toFinalFrame
-                        } completion: { _ in
-                            let wasCancelled = ctx.transitionWasCancelled
-                            ctx.completeTransition(!wasCancelled)
-                        }
-                    } else {
-                        UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.80, initialSpringVelocity: 10, options: .curveEaseInOut) {
-                            toView.frame = frames.toFinalFrame
-                        } completion: { _ in
-                            let wasCancelled = ctx.transitionWasCancelled
-                            ctx.completeTransition(!wasCancelled)
-                        }
-                    }
-                case .dismiss(frames: let frames):
-                    let f = frames.fromInitialFrame
-                    fromView.frame = f
-                    UIView.animate(withDuration: duration, animations: {
-                        let f = frames.fromInitialFrame
-                        switch edge {
-                        case .top:
-                            fromView.frame = f.offsetBy(dx: 0, dy: -f.height)
-                        case .bottom:
-                            fromView.frame = f.offsetBy(dx: 0, dy: f.height)
-                        case .left:
-                            fromView.frame = f.offsetBy(dx: -f.width, dy: 0)
-                        case .right:
-                            fromView.frame = f.offsetBy(dx: f.width, dy: 0)
-                        default:
-                            fromView.frame = f.offsetBy(dx: 0, dy: f.height)
-                        }
-                    }) { _ in
-                        let wasCancelled = ctx.transitionWasCancelled
-                        ctx.completeTransition(!wasCancelled)
-                    }
-                }
             }
         }
     }
