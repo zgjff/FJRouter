@@ -87,6 +87,7 @@ extension FJCustomPresentationController {
     }
 }
 
+// MARK: - transitioning lifecycle
 extension FJCustomPresentationController {
     override func presentationTransitionWillBegin() {
         do {
@@ -104,15 +105,14 @@ extension FJCustomPresentationController {
             presentingViewController.beginAppearanceTransition(false, animated: true)
         }
         do {
-            // TODO: - 无belowCoverView时的手势
-            guard let cb = context.belowCoverView,
-            let cv = containerView else { return }
+            guard let cv = containerView else { return }
+            let cb = context.belowCoverView
             let bcv = cb(cv.bounds)
             bcv.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(belowCoverTapped(_:))))
             belowCoverView = bcv
             cv.addSubview(bcv)
             guard let coor = presentingViewController.transitionCoordinator else { return }
-            context.willPresentAnimatorForBelowCoverView?(bcv, coor)
+            context.willPresentAnimatorForBelowCoverView(bcv, coor)
         }
     }
     
@@ -145,7 +145,7 @@ extension FJCustomPresentationController {
         if context.presentingControllerTriggerAppearLifecycle.contains(.appear) {
             presentingViewController.beginAppearanceTransition(true, animated: true)
         }
-        context.willDismissAnimatorForBelowCoverView?(belowView, coordinator)
+        context.willDismissAnimatorForBelowCoverView(belowView, coordinator)
     }
     
     override func dismissalTransitionDidEnd(_ completed: Bool) {
@@ -159,9 +159,11 @@ extension FJCustomPresentationController {
     }
 }
 
+// MARK: - layout
 extension FJCustomPresentationController {
     override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
         super.preferredContentSizeDidChange(forChildContentContainer: container)
+        print("layout------a")
         guard let vc = container as? UIViewController, vc == presentedViewController else {
             return
         }
@@ -192,19 +194,28 @@ extension FJCustomPresentationController {
         guard let cv = containerView else {
             return .zero
         }
+        print("layout------c", cv.bounds.size)
         let s = size(forChildContentContainer: presentedViewController, withParentContainerSize: cv.bounds.size)
-        return context.frameOfPresentedViewInContainerView?(cv.bounds, s) ?? CGRect(origin: .zero, size: s)
+        return context.frameOfPresentedViewInContainerView(cv.bounds, s)
     }
     
     override func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews()
+        print("layout------d")
         if let cv = containerView {
             belowCoverView?.frame = cv.bounds
             presentationWrappingView?.frame = frameOfPresentedViewInContainerView
         }
     }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        print("layout------z", size)
+        // TODO: - 横竖屏切换时先通过block通知vc去设置preferredContentSize
+    }
 }
 
+// MARK: - UIViewControllerTransitioningDelegate
 extension FJCustomPresentationController: UIViewControllerTransitioningDelegate {
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return self
@@ -220,6 +231,7 @@ extension FJCustomPresentationController: UIViewControllerTransitioningDelegate 
     }
 }
 
+// MARK: - UIViewControllerAnimatedTransitioning
 extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning {
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         guard let transitionContext else {
@@ -228,8 +240,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
         if !transitionContext.isAnimated {
            return 0
         }
-        guard let fromVC = transitionContext.viewController(forKey: .from),
-              let toVC = transitionContext.viewController(forKey: .to) else {
+        guard let fromVC = transitionContext.viewController(forKey: .from) else {
             return context.duration(true)
         }
         let isPresenting = presentingViewController == fromVC
@@ -256,9 +267,9 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
         }
         let t  = transitionDuration(using: transitionContext)
         if isPresenting {
-            context.transitionAnimator?(fromView, toView, .present(frames: framesInfo), t, transitionContext)
+            context.transitionAnimator(fromView, toView, .present(frames: framesInfo), t, transitionContext)
         } else {
-            context.transitionAnimator?(fromView, toView, .dismiss(frames: framesInfo), t, transitionContext)
+            context.transitionAnimator(fromView, toView, .dismiss(frames: framesInfo), t, transitionContext)
         }
     }
 }
@@ -267,6 +278,15 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
 // MARK: - FJCustomAlertPresentationContext
 /// 弹窗驱动上下文
 @MainActor final public class FJCustomPresentationContext: @unchecked Sendable {
+    /// 转场动画的具体实现逻辑
+    public typealias TransitionAnimator = @MainActor @Sendable (_ fromView: UIView, _ toView: UIView, _ style: FJCustomPresentationContext.TransitionType, _ duration: TimeInterval, _ ctx: UIViewControllerContextTransitioning) -> ()
+    /// presentingViewController的view修饰view
+    public typealias PresentationWrappingView = @MainActor @Sendable (_ presentedViewControllerView: UIView, _ frameOfPresentedView: CGRect) -> UIView
+    /// 转场动画化过程中, 弹窗底部view的动画
+    public typealias AnimatorForBelowCoverView = (_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ()
+    /// 转场动画中presentingViewController的View的frame
+    public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ preferredContentSize: CGSize) -> (CGRect)
+    
     init() {
         `default` = FJCustomPresentationContext.Default()
         frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
@@ -283,7 +303,9 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     /// 转场动画持续时间---默认0.25s
     public var duration: (_ isPresenting: Bool) -> TimeInterval = { _ in 0.25 }
     
-    /// 源控制器是否触发生命周期(viewWillDisappear/viewDidDisappear/viewWillAppear/viewDidAppear),默认不触发任何
+    /// 源控制器(fromvc)是否触发生命周期(viewWillDisappear/viewDidDisappear/viewWillAppear/viewDidAppear),默认不触发任何.
+    ///
+    /// 因为系统的custom类型的弹窗,并不会触发fromvc的生命周期.不方便处理弹窗present/dismiss时的逻辑处理
     public var presentingControllerTriggerAppearLifecycle = TriggerPresentingControllerLifecycle.none
     
     /// 弹出界面的其余部分点击事件,默认为自动dismiss
@@ -299,10 +321,10 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     public var preferredContentSizeDidChangeAnimationInfo: (duration: TimeInterval, delay: TimeInterval, options: UIView.AnimationOptions)?
     
     /// 转场动画中presentingViewController的View的frame----默认frame可以使presentingView居中
-    public var frameOfPresentedViewInContainerView: (@MainActor @Sendable (_ containerViewBounds: CGRect, _ preferredContentSize: CGSize) -> (CGRect))?
+    public var frameOfPresentedViewInContainerView: FrameOfPresentedViewInContainerView
     
     /// presentingViewController的view修饰view----默认4个圆角带阴影view
-    public var presentationWrappingView: (@MainActor @Sendable (_ presentedViewControllerView: UIView, _ frameOfPresentedView: CGRect) -> UIView)?
+    public var presentationWrappingView: PresentationWrappingView?
     
     /// presentingViewController的view底部封面view,默认是暗灰色view
     ///
@@ -313,10 +335,10 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     ///       并在dismissalTransitionWillBegin动画时间里,将effect设置成nil
     /// - 暗灰色的view:可以在presentationTransitionWillBegin动画时间里,将alpha从0.0,设置成0.5
     ///       并在dismissalTransitionWillBegin动画时间里,将alpha设置成0.0
-    public var belowCoverView: (@MainActor @Sendable (_ frame: CGRect) -> UIView)?
+    public var belowCoverView: @MainActor @Sendable (_ frame: CGRect) -> UIView
     
     /// 转场动画的具体实现----默认是弹出居中view的动画效果
-    public var transitionAnimator: (@MainActor @Sendable (_ fromView: UIView, _ toView: UIView, _ style: FJCustomPresentationContext.TransitionType, _ duration: TimeInterval, _ ctx: UIViewControllerContextTransitioning) -> ())?
+    public var transitionAnimator: TransitionAnimator
     
     /// 转场动画presentationTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
     ///
@@ -329,7 +351,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     ///         }, completion: nil)
     ///     }
     ///
-    public var willPresentAnimatorForBelowCoverView: ((_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ())?
+    public var willPresentAnimatorForBelowCoverView: AnimatorForBelowCoverView
     
     /// 转场动画dismissalTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
     ///
@@ -342,39 +364,39 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     ///         }, completion: nil)
     ///     }
     ///
-    public var willDismissAnimatorForBelowCoverView: ((_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ())?
+    public var willDismissAnimatorForBelowCoverView: AnimatorForBelowCoverView
 }
 
-extension FJCustomPresentationContext {
+@MainActor public extension FJCustomPresentationContext {
     /// 使用一套居中弹出动画
-    @MainActor public func usingCenterPresentation() {
+     func usingCenterPresentation() {
         transitionAnimator = `default`.centerTransitionAnimator
         frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
     }
     
     /// 使用一套从屏幕边缘弹出动画
-    /// - Parameter edge: 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
-    @MainActor public func usingEdgePresentation(_ edge: UIRectEdge) {
+    /// - Parameter edge: 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
+    func usingEdgePresentation(_ edge: UIRectEdge) {
         transitionAnimator = `default`.edgeTransitionAnimator(edge)
         frameOfPresentedViewInContainerView = `default`.edgeFrameOfPresentedView(edge)
     }
     
     /// 使用一套clear view的显示/隐藏动画
-    @MainActor public func usingClearCoverAnimators() {
+    func usingClearCoverAnimators() {
         belowCoverView = `default`.clearBelowCoverView
         willPresentAnimatorForBelowCoverView = `default`.clearBelowCoverViewAnimator(true)
         willDismissAnimatorForBelowCoverView = `default`.clearBelowCoverViewAnimator(false)
     }
     
     /// 使用一套暗灰色 view的显示/隐藏动画
-    @MainActor public func usingDimmingBelowCoverAnimators() {
+    func usingDimmingBelowCoverAnimators() {
         belowCoverView = `default`.dimmingBelowCoverView
         willPresentAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(true)
         willDismissAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(false)
     }
     
     /// 使用一套高斯模糊的显示/隐藏动画
-    @MainActor public func usingBlurBelowCoverAnimators(style: UIBlurEffect.Style) {
+    func usingBlurBelowCoverAnimators(style: UIBlurEffect.Style) {
         belowCoverView = `default`.blurBelowCoverView
         willPresentAnimatorForBelowCoverView = `default`.blurBelowCoverViewAnimator(style)(true)
         willDismissAnimatorForBelowCoverView = `default`.blurBelowCoverViewAnimator(style)(false)
@@ -426,7 +448,7 @@ extension FJCustomPresentationContext {
             return TriggerPresentingControllerLifecycle(rawValue: 1 << 2)
         }
 
-        /// 触发所有
+        /// 触发所有:viewWill+viewDid
         public static var all: TriggerPresentingControllerLifecycle {
             let rvalue = TriggerPresentingControllerLifecycle.disappear.rawValue |
                            TriggerPresentingControllerLifecycle.appear.rawValue
@@ -470,7 +492,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,暗灰色view的动画效果
-        public private(set) var dimmingBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable isPresenting in
+        public private(set) var dimmingBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> AnimatorForBelowCoverView = { @Sendable isPresenting in
             return { view, coor in
                 if isPresenting {
                     view.alpha = 0
@@ -490,7 +512,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 转场动画present/dismiss时,clear色view的动画效果
-        public private(set) var clearBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> ((UIView, UIViewControllerTransitionCoordinator) -> ()) = { @Sendable isPresenting in
+        public private(set) var clearBelowCoverViewAnimator: @MainActor @Sendable (Bool) -> AnimatorForBelowCoverView = { @Sendable isPresenting in
             return { _, _ in }
         }
         
@@ -522,7 +544,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 4个圆角带阴影的presentedViewController view修饰view
-        public private(set) var shadowAllRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+        public private(set) var shadowAllRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> PresentationWrappingView = { @Sendable radius in
             return { @Sendable presentedViewControllerView, frame in
                 let presentationWrapperView = UIView(frame: frame)
                 presentationWrapperView.layer.shadowOpacity = 0.44
@@ -544,7 +566,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 4个圆角不带阴影的presentedViewController view修饰view
-        public private(set) var allRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+        public private(set) var allRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> PresentationWrappingView = { @Sendable radius in
             return { @Sendable presentedViewControllerView, frame in
                     let presentationRoundedCornerView = UIView(frame: frame)
                     presentationRoundedCornerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
@@ -560,7 +582,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 上部圆角圆角不带阴影的presentedViewController view修饰view
-        public private(set) var topRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable radius in
+        public private(set) var topRoundedCornerWrappingView: @MainActor @Sendable (CGFloat) -> PresentationWrappingView = { @Sendable radius in
             return { @Sendable presentedViewControllerView, frame in
                 let presentationRoundedCornerView = UIView(frame: frame)
                 presentationRoundedCornerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
@@ -574,7 +596,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 无效果的presentedViewController view修饰view
-        public private(set) var emptyWrappingView: @MainActor @Sendable (UIView, CGRect) -> (UIView) = { @Sendable presentedViewControllerView, frame in
+        public private(set) var emptyWrappingView: PresentationWrappingView = { @Sendable presentedViewControllerView, frame in
             let presentationWrapperView = UIView(frame: frame)
             presentedViewControllerView.frame = presentationWrapperView.bounds
             presentationWrapperView.addSubview(presentedViewControllerView)
@@ -582,7 +604,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 使presentedViewController的view居中显示的frame
-        public private(set) var centerFrameOfPresentedView: @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable bounds, size in
+        public private(set) var centerFrameOfPresentedView: FrameOfPresentedViewInContainerView = { @Sendable bounds, size in
             let x = (bounds.width - size.width) * 0.5
             let y = (bounds.height - size.height) * 0.5
             return CGRect(origin: CGPoint(x: x, y: y), size: size)
@@ -590,8 +612,9 @@ extension FJCustomPresentationContext {
         
         /// 使presentedViewController的view在屏幕边缘显示的frame
         ///
-        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
-        public private(set) var edgeFrameOfPresentedView: (_ edges: UIRectEdge) -> @MainActor @Sendable (CGRect, CGSize) -> (CGRect) = { @Sendable edge in
+        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
+        public private(set) var edgeFrameOfPresentedView: @Sendable (_ edges: UIRectEdge) -> FrameOfPresentedViewInContainerView = { @Sendable edge in
+            print("layout------x")
             return { @Sendable bounds, size in
                 switch edge {
                 case .top:
@@ -619,7 +642,7 @@ extension FJCustomPresentationContext {
         }
         
         /// 居中弹出presentedViewController的动画效果
-        public private(set) var centerTransitionAnimator: @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable fromView, toView, style, duration, ctx in
+        public private(set) var centerTransitionAnimator: TransitionAnimator = { @Sendable fromView, toView, style, duration, ctx in
             switch style {
             case .present(frames: let frames):
                 toView.frame = frames.toFinalFrame
@@ -654,8 +677,8 @@ extension FJCustomPresentationContext {
         
         /// 从屏幕边缘弹出`presentedViewController`的动画效果;
         ///
-        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;支持其它值均视为`.bottom`; 不要使用`.all`
-        public private(set) var edgeTransitionAnimator: (_ edges: UIRectEdge) -> @MainActor @Sendable (UIView, UIView, FJCustomPresentationContext.TransitionType, TimeInterval, UIViewControllerContextTransitioning) -> () = { @Sendable edge in
+        /// 只支持设置`.top`,`.left`,`.bottom`,`.right`;设置其它值均视为`.bottom`; 不要使用`.all`
+        public private(set) var edgeTransitionAnimator: @Sendable (_ edges: UIRectEdge) -> TransitionAnimator = { @Sendable edge in
             return { @Sendable fromView, toView, style, duration, ctx in
                 switch style {
                 case .present(frames: let frames):
