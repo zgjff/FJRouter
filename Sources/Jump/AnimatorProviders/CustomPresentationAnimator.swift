@@ -215,10 +215,6 @@ extension FJCustomPresentationController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        // TODO: - 横竖屏切换时先通过block通知vc去设置preferredContentSize
-        guard let containerView else {
-            return
-        }
         didTransitionToNewSize = true
         coordinator.animate { _ in
             
