@@ -10,6 +10,13 @@ extension FJRouter {
     }
 }
 
+extension FJ {
+    /// 路由跳转管理中心
+    public static var jump: any FJRouterJumpable {
+        FJRouter.JumpImpl.shared
+    }
+}
+
 /// 路由跳转协议
 /// 
 /// 建议使用go(.name(xxx)), viewController(.(name...))方法进行相关操作。

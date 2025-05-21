@@ -14,6 +14,13 @@ extension FJRouter {
     }
 }
 
+extension FJ {
+    /// 资源中心
+    public static var resource: any FJRouterResourceable {
+        FJRouter.ResourceImpl.shared
+    }
+}
+
 /// 资源中心协议
 ///
 /// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(.name(xxx))等方法进行相关操作。

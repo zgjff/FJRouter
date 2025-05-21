@@ -15,6 +15,13 @@ extension FJRouter {
     }
 }
 
+extension FJ {
+    /// 路由跳转管理中心
+    public static var event: any FJRouterEventable {
+        FJRouter.EventImpl.shared
+    }
+}
+
 /// 事件总线协议
 ///  
 /// 建议使用onReceive(path: "xxx", name: "xxx"), emit(.name(xxx))方法进行相关操作。
