@@ -40,7 +40,7 @@ extension FJRouter.ResourceStore {
     }
     
     func match(url: URL) async throws(FJRouter.GetResourceError) -> FJRouter.ResourceMatchInfo {
-        let fixUrl = url.adjust()
+        let fixUrl = url.fj.adjust()
         for resource in resources {
             if let info = findMatch(url: fixUrl, resource: resource) {
                 return info
@@ -106,6 +106,6 @@ private extension FJRouter.ResourceStore {
         guard let pairs = FJRouter.ResourceMatch.match(resource: resource, byUrl: url) else {
             return nil
         }
-        return .init(url: url, matchedLocation: pairs.match.matchedLocation, resource: pairs.match.resource, pathParameters: pairs.pathParameters, queryParameters: url.queryParams)
+        return .init(url: url, matchedLocation: pairs.match.matchedLocation, resource: pairs.match.resource, pathParameters: pairs.pathParameters, queryParameters: url.fj.queryParams)
     }
 }

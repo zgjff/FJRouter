@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-extension UIViewController {
+extension FJRouter.Wrapper where Object: UIViewController {
     /// 触发路由回调
     ///
     /// 如果`name`为空, 或者路由跳转方法没有使用带有`AnyPublisher`返回值的go方法, 则发送失败
@@ -35,9 +35,9 @@ extension UIViewController {
 }
 
 nonisolated(unsafe) private var fjroute_combine_callback_dispatcher_e5WD25xCn_UygMO5_Key = 0
-extension UIViewController {
+extension FJRouter.Wrapper where Object: UIViewController {
     @discardableResult
-    internal func fjroute_addCallbackTrigger(callback: some FJRouterCallbackable) -> FJRouter.CallbackDispatcher {
+    internal func addCallbackTrigger(callback: some FJRouterCallbackable) -> FJRouter.CallbackDispatcher {
         let obj = FJRouter.CallbackDispatcher(callback: callback)
         objc_setAssociatedObject(self, &fjroute_combine_callback_dispatcher_e5WD25xCn_UygMO5_Key, obj, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return obj

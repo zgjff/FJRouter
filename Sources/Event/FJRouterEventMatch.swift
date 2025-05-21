@@ -19,7 +19,7 @@ extension FJRouter {
 
 extension FJRouter.EventMatch {
     static func match(action: FJRouterEventAction, byUrl url: URL) -> (match: FJRouter.EventMatch, pathParameters: [String: String])? {
-        let remainingLocation = url.versionPath
+        let remainingLocation = url.fj.versionPath
         guard let regExp = action.matchRegExpHasPrefix(remainingLocation) else {
             return nil
         }
@@ -30,7 +30,7 @@ extension FJRouter.EventMatch {
         }
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: pathLoc)
         
-        let matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        let matchSuccess = newMatchedLocation.lowercased() == url.fj.versionPath.lowercased()
         let finalMatchLocation = newMatchedLocation
         if matchSuccess { // 匹配成功
             return (.init(action: action, matchedLocation: finalMatchLocation), currentPathParameter)

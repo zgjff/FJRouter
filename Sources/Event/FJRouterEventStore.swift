@@ -36,7 +36,7 @@ extension FJRouter.EventStore {
     }
     
     func match(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) -> (listener: FJRouter.EventListener, info: FJRouter.EventMatchInfo)? {
-        let fixUrl = url.adjust()
+        let fixUrl = url.fj.adjust()
         for listener in listeners {
             if let info = findMatch(url: fixUrl, extra: extra, action: listener.action) {
                 return (listener, info)
@@ -72,6 +72,6 @@ private extension FJRouter.EventStore {
         guard let pairs = FJRouter.EventMatch.match(action: action, byUrl: url) else {
             return nil
         }
-        return .init(url: url, matchedLocation: pairs.match.matchedLocation, action: pairs.match.action, pathParameters: pairs.pathParameters, queryParameters: url.queryParams, extra: extra())
+        return .init(url: url, matchedLocation: pairs.match.matchedLocation, action: pairs.match.action, pathParameters: pairs.pathParameters, queryParameters: url.fj.queryParams, extra: extra())
     }
 }

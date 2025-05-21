@@ -19,7 +19,7 @@ extension FJRouter {
                 return FJRouterErrorController(state: state)
             }
             apptopController = { @MainActor @Sendable current in
-                UIApplication.shared.topViewController(current)
+                UIApplication.shared.fj.topViewController(current)
             }
         }
     }
@@ -31,7 +31,7 @@ extension FJRouter.JumpCore {
             return nil
         }
         let state = FJRouterState(matches: matchList, match: match)
-        let tvc = apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+        let tvc = apptopController(UIApplication.shared.fj.versionkKeyWindow?.rootViewController)
         return match.route.builder?(FJRoute.BuilderInfo(fromVC: tvc, matchState: state))
     }
     
@@ -66,11 +66,11 @@ extension FJRouter.JumpCore {
                 goError(state: FJRouterState(matches: matchList), sourceController: sourceController)
                 return
             }
-            let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+            let fromController = sourceController ?? apptopController(UIApplication.shared.fj.versionkKeyWindow?.rootViewController)
             let animator = route.animator(FJRoute.AnimatorInfo(fromVC: fromController, matchState: state))
             animator.startAnimated(from: fromController, to: { [fromController] in
                 let vc = route.builder!(FJRoute.BuilderInfo(fromVC: fromController, matchState: state))
-                vc.fjroute_addCallbackTrigger(callback: callback)
+                vc.fj.addCallbackTrigger(callback: callback)
                 return vc
             }, state: state)
         }
@@ -82,10 +82,10 @@ extension FJRouter.JumpCore {
     }
     
     @MainActor private func private_go(to destController: UIViewController, from sourceController: UIViewController?, animated flag: Bool, isError: Bool) {
-        let fromController = sourceController ?? apptopController(UIApplication.shared.versionkKeyWindow?.rootViewController)
+        let fromController = sourceController ?? apptopController(UIApplication.shared.fj.versionkKeyWindow?.rootViewController)
         guard let fromController else {
             // FIXME: 是否需要这样做
-            UIApplication.shared.versionkKeyWindow?.rootViewController = destController
+            UIApplication.shared.fj.versionkKeyWindow?.rootViewController = destController
             return
         }
         if let navi = fromController.navigationController {

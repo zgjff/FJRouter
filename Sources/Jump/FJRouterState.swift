@@ -33,7 +33,7 @@ public struct FJRouterState: Sendable {
     
     init(matches: FJRouteMatchList) {
         url = matches.url
-        matchedLocation = matches.url.versionPath
+        matchedLocation = matches.url.fj.versionPath
         path = nil
         name = nil
         fullPath = matches.fullPath

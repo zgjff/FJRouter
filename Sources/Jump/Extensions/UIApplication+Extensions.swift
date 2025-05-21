@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-extension UIApplication {
+extension FJRouter.Wrapper where Object: UIApplication {
     /// 获取栈顶的控制器
     /// - Parameter top: 对应控制器
     /// - Returns: 结果
@@ -34,8 +34,8 @@ extension UIApplication {
     }
     
     /// 根据系统版本获取`UIApplication`的`keyWindow`, 从`connectedScenes`中获取
-    public var versionkKeyWindow: UIWindow? {
-        let windows = connectedScenes.compactMap { screen -> UIWindow? in
+    @MainActor public var versionkKeyWindow: UIWindow? {
+        let windows = object.connectedScenes.compactMap { screen -> UIWindow? in
             guard let wc = screen as? UIWindowScene, wc.activationState != .unattached else {
                 return nil
             }

@@ -7,18 +7,20 @@
 
 import Foundation
 
-extension URL {
-    var versionPath: String {
+extension URL: FJRouterWrapperValue {}
+
+extension FJRouter.Wrapper where Object == URL {
+    public var versionPath: String {
         if #available(iOS 16.0, *) {
-            return path()
+            return object.path()
         } else {
-            return path
+            return object.path
         }
     }
     
     /// url中携带的query参数
-    var queryParams: [String: String] {
-        guard let cp = URLComponents(string: absoluteString) else {
+    public var queryParams: [String: String] {
+        guard let cp = URLComponents(string: object.absoluteString) else {
             return [:]
         }
         let result = cp.queryItems?.reduce([String: String](), { partialResult, item in
@@ -31,9 +33,9 @@ extension URL {
         return result ?? [:]
     }
     
-    func adjust() -> URL {
-        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: true) else {
-            return self
+    public func adjust() -> URL {
+        guard var components = URLComponents(url: object, resolvingAgainstBaseURL: true) else {
+            return object
         }
         let cp = components.path
         if cp.isEmpty {
@@ -43,7 +45,7 @@ extension URL {
             let endIndex = cp.index(cp.endIndex, offsetBy: -1)
             components.path = String(describing: cp[startIndex..<endIndex])
         }
-        let newUrl = components.url ?? self
+        let newUrl = components.url ?? object
         return newUrl
     }
 }

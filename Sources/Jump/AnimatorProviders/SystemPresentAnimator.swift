@@ -28,7 +28,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
+            let finalFromVC = fromVC.fj.lastPresentedViewController() ?? fromVC
             var destVC = toVC()
             if let useNavigationController {
                 useNavigationController.setViewControllers([toVC()], animated: false)

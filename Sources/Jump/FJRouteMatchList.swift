@@ -21,7 +21,7 @@ internal struct FJRouteMatchList: Sendable {
     
     /// url中携带的query参数
     var queryParams: [String: String] {
-        url.queryParams
+        url.fj.queryParams
     }
     
     /// 是否错误

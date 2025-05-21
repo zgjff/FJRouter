@@ -32,7 +32,7 @@ extension FJRouteMatch {
     ///   - url: 要匹配的url
     /// - Returns: 返回匹配到的路由数组和参数
     static func match(route: FJRoute, byUrl url: URL) -> (matches: [FJRouteMatch], pathParameters: [String: String]) {
-        return match(route: route, remainingLocation: url.versionPath, pathParameters: [:], url: url)
+        return match(route: route, remainingLocation: url.fj.versionPath, pathParameters: [:], url: url)
     }
     
     private static func match(route: FJRoute, matchedPath: String = "", remainingLocation: String, matchedLocation: String = "", pathParameters: [String: String], url: URL) -> (matches: [FJRouteMatch], pathParameters: [String: String]) {
@@ -45,7 +45,7 @@ extension FJRouteMatch {
             return ([], [:])
         }
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: matchedLocation, childPath: pathLoc)
-        let matchSuccess = newMatchedLocation.lowercased() == url.versionPath.lowercased()
+        let matchSuccess = newMatchedLocation.lowercased() == url.fj.versionPath.lowercased()
         let finalMatchLocation = newMatchedLocation
         if matchSuccess { // 匹配成功
             let finalParameters = pathParameters.merging(currentPathParameter) { (_, new) in new }
@@ -56,9 +56,9 @@ extension FJRouteMatch {
         }
         // 匹配子路由
         let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.path)
-        let childLocStartIndex = url.versionPath.index(url.versionPath.startIndex, offsetBy: newMatchedLocation.count + ((newMatchedLocation == "/") ? 0 : 1))
-        let childLocEndIndex = url.versionPath.endIndex
-        let childRestLoc = String(describing: url.versionPath[childLocStartIndex..<childLocEndIndex])
+        let childLocStartIndex = url.fj.versionPath.index(url.fj.versionPath.startIndex, offsetBy: newMatchedLocation.count + ((newMatchedLocation == "/") ? 0 : 1))
+        let childLocEndIndex = url.fj.versionPath.endIndex
+        let childRestLoc = String(describing: url.fj.versionPath[childLocStartIndex..<childLocEndIndex])
         
         var subRouteMatches: [FJRouteMatch] = []
         var subRoutePathParameters: [String: String] = [:]

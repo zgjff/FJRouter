@@ -34,7 +34,7 @@ extension FJRouter.JumpStore {
     /// - Parameter url: 路由url
     /// - Returns: 结果
     func canOpen(url: URL) -> Bool {
-        let matchList = findMatch(url: url.adjust(), extra: nil)
+        let matchList = findMatch(url: url.fj.adjust(), extra: nil)
         return !matchList.isError
     }
     
@@ -45,7 +45,7 @@ extension FJRouter.JumpStore {
     ///   - ignoreError: 是否忽略匹配失败。 true: 当没有匹配到的时候抛出错误, false: 当没有匹配到的时候不抛出错误
     /// - Returns: 匹配结果
     func match(url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> FJRouteMatchList {
-        let result = findMatch(url: url.adjust(), extra: extra)
+        let result = findMatch(url: url.fj.adjust(), extra: extra)
         let final = await redirect(initialMatches: result)
         switch final.result {
         case .success(let ms):

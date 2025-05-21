@@ -24,7 +24,7 @@ extension FJRoute {
                 useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
-            UIApplication.shared.versionkKeyWindow?.rootViewController = destVC
+            UIApplication.shared.fj.versionkKeyWindow?.rootViewController = destVC
         }
     }
 }

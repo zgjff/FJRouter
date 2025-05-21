@@ -27,7 +27,7 @@ extension FJRoute {
             guard let fromVC else {
                 return
             }
-            let finalFromVC = fromVC.lastPresentedViewController() ?? fromVC
+            let finalFromVC = fromVC.fj.lastPresentedViewController() ?? fromVC
             let tvc = toVC()
             if sideslipBack {
                 tvc.fjroute_pNc4BJVZea8ep_ZV9Cgy2_addScreenPanGestureDismiss()

@@ -9,9 +9,9 @@
 import Foundation
 import UIKit
 
-extension UIViewController {
-    func lastPresentedViewController() -> UIViewController? {
-        guard let pted = presentedViewController else {
+extension FJRouter.Wrapper where Object: UIViewController {
+    @MainActor func lastPresentedViewController() -> UIViewController? {
+        guard let pted = object.presentedViewController else {
             return nil
         }
         var lpted = pted
