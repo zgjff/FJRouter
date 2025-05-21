@@ -16,7 +16,7 @@ internal struct FJRouteMatch: Sendable {
 }
 
 extension FJRouteMatch: CustomStringConvertible, CustomDebugStringConvertible {
-    var description: String {
+    nonisolated var description: String {
         return "FJRouteMatch#(route:\(route)),matchedLocation:\(matchedLocation)"
     }
     

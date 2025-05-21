@@ -82,7 +82,7 @@ extension FJRouterState {
 }
 
 extension FJRouterState: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRouterState(url: \(url)"
         if let error {
             result.append(", error: \(error)")

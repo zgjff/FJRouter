@@ -82,7 +82,7 @@ extension FJRouterResource: Hashable {
 }
 
 extension FJRouterResource: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRouterResourceAction(path: \(path)"
         if let name {
             result.append(", name: \(name)")

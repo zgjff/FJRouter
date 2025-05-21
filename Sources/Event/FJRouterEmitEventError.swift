@@ -39,7 +39,7 @@ extension FJRouter.EmitEventError: Equatable {
 }
 
 extension FJRouter.EmitEventError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .errorLocUrl:
             return "传递的查询loc不是正确的URL"

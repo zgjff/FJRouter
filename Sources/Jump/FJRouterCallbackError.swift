@@ -31,7 +31,7 @@ extension FJRouter.EmitCallbackError: Equatable {
 }
 
 extension FJRouter.EmitCallbackError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .emptyName:
             return "send name is empty"

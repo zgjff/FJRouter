@@ -40,7 +40,7 @@ extension FJRouter.ResourceMatch {
 }
 
 extension FJRouter.ResourceMatch: CustomStringConvertible, CustomDebugStringConvertible {
-    var description: String {
+    nonisolated var description: String {
         return "FJRouterResourceMatch#(resource:\(resource)),matchedLocation:\(matchedLocation)"
     }
     

@@ -38,7 +38,7 @@ extension FJRouter {
 }
 
 extension FJRouter.ResourceMatchInfo: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRouter.ResourceMatchInfo(url: \(url), resource: \(resource)"
         if !pathParameters.isEmpty {
             result.append(", pathParameters: \(pathParameters)")

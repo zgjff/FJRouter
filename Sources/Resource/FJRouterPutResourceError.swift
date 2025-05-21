@@ -25,7 +25,7 @@ extension FJRouter.PutResourceError: Equatable {
 }
 
 extension FJRouter.PutResourceError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .exist:
             return "已经存在相同path的资源"

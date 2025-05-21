@@ -80,7 +80,7 @@ internal struct FJRouteMatchList: Sendable {
 }
 
 extension FJRouteMatchList: CustomStringConvertible, CustomDebugStringConvertible {
-    var description: String {
+    nonisolated var description: String {
         switch result {
         case .success(let values):
             return "FJRoute#success-->url:\(url),fullPath:\(fullPath),pathParameters:\(pathParameters),extra:\(String(describing: extra)),matches:\(values)"

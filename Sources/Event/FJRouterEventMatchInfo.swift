@@ -42,7 +42,7 @@ extension FJRouter {
 }
 
 extension FJRouter.EventMatchInfo: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRouter.EventMatchInfo(url: \(url), action: \(action)"
         if !pathParameters.isEmpty {
             result.append(", pathParameters: \(pathParameters)")

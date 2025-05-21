@@ -43,7 +43,7 @@ extension FJRouter.GetResourceError: Equatable {
 }
 
 extension FJRouter.GetResourceError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .errorLocUrl:
             return "传递的查询loc不是正确的URL"

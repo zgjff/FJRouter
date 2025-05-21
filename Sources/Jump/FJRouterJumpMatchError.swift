@@ -55,7 +55,7 @@ extension FJRouter.JumpMatchError: Equatable {
 }
 
 extension FJRouter.JumpMatchError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .errorLocUrl:
             return "Search loc url is correct URL"

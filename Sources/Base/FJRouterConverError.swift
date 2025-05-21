@@ -20,7 +20,7 @@ extension FJRouter {
 }
 
 extension FJRouter.ConvertError: CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-    public var description: String {
+    public nonisolated var description: String {
         switch self {
         case .noExistName:
             return "没有存储此name"

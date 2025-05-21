@@ -68,7 +68,7 @@ extension FJRouterEventAction: Hashable {
 }
 
 extension FJRouterEventAction: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRouterEventAction(path: \(path)"
         if let name {
             result.append(", name: \(name)")
@@ -90,7 +90,7 @@ extension FJRouterEventAction {
         case emptyPath
         case emptyName
         
-        public var description: String {
+        public nonisolated var description: String {
             switch self {
             case .emptyPath:
                 return "EventAction path cannot be empty"
