@@ -48,20 +48,20 @@ extension FJRoute {
 
 // MARK: - UIPresentationController
 /// 弹窗驱动提供器,方便自定义弹窗弹出动画逻辑
-fileprivate final class FJCustomPresentationController: UIPresentationController {
+public final class FJCustomPresentationController: UIPresentationController {
     /// 初始化弹窗驱动提供器
     /// - Parameters:
     ///   - presentedViewController: 跳转源控制器
     ///   - presentingViewController: 跳转目标控制器
     ///   - configContext: 设置context的block
-    init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+    public init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
         self.context = FJCustomPresentationContext()
         super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
         presentedViewController.modalPresentationStyle = .custom
         presentedViewController.transitioningDelegate = self
         configContext?(context)
     }
-    override var presentedView: UIView? {
+    public override var presentedView: UIView? {
         return presentationWrappingView
     }
     private let context: FJCustomPresentationContext
@@ -70,7 +70,7 @@ fileprivate final class FJCustomPresentationController: UIPresentationController
     private var didTransitionToNewSize = false
 }
 
-extension FJCustomPresentationController {
+public extension FJCustomPresentationController {
     /// 更新动画协调器
     func updateContext(_ block: @Sendable (_ ctx: FJCustomPresentationContext) -> ()) {
         block(context)
@@ -80,7 +80,7 @@ extension FJCustomPresentationController {
     /// - Parameters:
     ///   - animated: 动画与否
     ///   - completion: 跳转完成回调
-    func startPresent(animated: Bool = true, completion: (() -> ())?) {
+    @MainActor func startPresent(animated: Bool = true, completion: (() -> ())?) {
         presentingViewController.present(presentedViewController, animated: animated) {
             let _ = self
             completion?()
@@ -90,7 +90,7 @@ extension FJCustomPresentationController {
 
 // MARK: - transitioning lifecycle
 extension FJCustomPresentationController {
-    override func presentationTransitionWillBegin() {
+    public override func presentationTransitionWillBegin() {
         do {
             guard let presentedViewControllerView = super.presentedView else { return }
             presentedViewControllerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -128,7 +128,7 @@ extension FJCustomPresentationController {
         }
     }
     
-    override func presentationTransitionDidEnd(_ completed: Bool) {
+    public override func presentationTransitionDidEnd(_ completed: Bool) {
         if (completed) {
             if context.presentingControllerTriggerAppearLifecycle.contains(.disappear) {
                 presentingViewController.endAppearanceTransition()
@@ -140,7 +140,7 @@ extension FJCustomPresentationController {
         }
     }
     
-    override func dismissalTransitionWillBegin() {
+    public override func dismissalTransitionWillBegin() {
         guard let belowView = belowCoverView,
         let coordinator = presentingViewController.transitionCoordinator else { return }
         if context.presentingControllerTriggerAppearLifecycle.contains(.appear) {
@@ -149,7 +149,7 @@ extension FJCustomPresentationController {
         context.willDismissAnimatorForBelowCoverView(belowView, coordinator)
     }
     
-    override func dismissalTransitionDidEnd(_ completed: Bool) {
+    public override func dismissalTransitionDidEnd(_ completed: Bool) {
         if completed {
             presentationWrappingView = nil
             belowCoverView = nil
@@ -162,7 +162,7 @@ extension FJCustomPresentationController {
 
 // MARK: - layout
 extension FJCustomPresentationController {
-    override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
+    public override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
         super.preferredContentSizeDidChange(forChildContentContainer: container)
         guard let vc = container as? UIViewController, vc == presentedViewController else {
             return
@@ -182,7 +182,7 @@ extension FJCustomPresentationController {
         }
     }
     
-    override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
+    public override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
         if let vc = container as? UIViewController, vc == presentedViewController {
             let s = vc.preferredContentSize
             if s == .zero {
@@ -193,7 +193,7 @@ extension FJCustomPresentationController {
         return super.size(forChildContentContainer: container, withParentContainerSize: parentSize)
     }
     
-    override var frameOfPresentedViewInContainerView: CGRect {
+    public override var frameOfPresentedViewInContainerView: CGRect {
         guard let cv = containerView else {
             return .zero
         }
@@ -201,7 +201,7 @@ extension FJCustomPresentationController {
         return context.frameOfPresentedViewInContainerView(cv.bounds, cv.safeAreaInsets, s)
     }
     
-    override func containerViewWillLayoutSubviews() {
+    public override func containerViewWillLayoutSubviews() {
         super.containerViewWillLayoutSubviews()
         guard let containerView else {
             return
@@ -213,7 +213,7 @@ extension FJCustomPresentationController {
         presentationWrappingView?.frame = frameOfPresentedViewInContainerView
     }
     
-    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+    public override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         didTransitionToNewSize = true
         coordinator.animate { _ in
@@ -226,15 +226,15 @@ extension FJCustomPresentationController {
 
 // MARK: - UIViewControllerTransitioningDelegate
 extension FJCustomPresentationController: UIViewControllerTransitioningDelegate {
-    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return self
     }
     
-    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return self
     }
     
-    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
         assert(presented == presentedViewController, "presentedViewController设置错误")
         return self
     }
@@ -242,7 +242,7 @@ extension FJCustomPresentationController: UIViewControllerTransitioningDelegate 
 
 // MARK: - UIViewControllerAnimatedTransitioning
 extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning {
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+    public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         guard let transitionContext else {
             return context.duration(true)
         }
@@ -256,7 +256,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
         return context.duration(isPresenting)
     }
     
-    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+    public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         guard let fromVC = transitionContext.viewController(forKey: .from),
             let toVC = transitionContext.viewController(forKey: .to) else { return }
         let cv = transitionContext.containerView
