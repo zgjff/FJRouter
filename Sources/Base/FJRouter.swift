@@ -19,27 +19,3 @@ public enum FJRouter {}
 /// 资源中心
 /// FJ.resource 等同于 FJRouter.resource()
 public enum FJ {}
-
-extension FJRouter {
-    public struct Wrapper<Object>: @unchecked Sendable {
-        public let object: Object
-        
-        internal init(_ object: Object) {
-            self.object = object
-        }
-    }
-}
-
-public protocol FJRouterWrapperValue {
-    associatedtype WrapperObject
-    var fj: FJRouter.Wrapper<WrapperObject> { get set }
-}
-
-extension FJRouterWrapperValue {
-        public var fj: FJRouter.Wrapper<Self> {
-            get { FJRouter.Wrapper(self) }
-            set { }
-        }
-}
-
-extension NSObject: FJRouterWrapperValue { }

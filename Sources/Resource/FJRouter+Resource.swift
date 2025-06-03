@@ -22,11 +22,11 @@ extension FJ {
 }
 
 /// 资源中心协议
-///
+///  
 /// 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(.name(xxx))等方法进行相关操作。
-///
+///  
 /// 1: 当资源路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
-///
+///  
 /// 2: 在实际app中, 资源的`URL`格式可能会随着时间而改变, 但是一般资源名称不会去更改
 public protocol FJRouterResourceable {
     /// 存放资源
@@ -101,46 +101,27 @@ public protocol FJRouterResourceable {
     ///   - mainActor: 是否需要在主线程取. true: 强制主线程返回, false: 系统自动线程处理
     /// - Returns: 对应资源
     func get<Value>(_ uri: FJRouter.URI, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
-
-    /// 根据资源路径更新已存放的资源
+    
+    /// 根据资源uri更新已存放的资源
     ///
     /// 更新不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
     ///
     /// - Parameters:
-    ///   - path: 资源路径
+    ///   - name: 资源uri
     ///   - value: 资源的值
     ///
-    ///         try await impl.update(byPath: "/sintvalue1", value: { _ in 39 })
+    ///         try await impl.update(.loc("/sintvalue1"), value: { _ in 39 })
+    ///         try await impl.update(.name("sintvalue1"), value: { _ in 66 })
     ///
-    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
+    func update(_ uri: FJRouter.URI, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
     
-    /// 根据资源名称更新已存放的资源
-    ///
-    /// 更新不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
-    ///
-    /// - Parameters:
-    ///   - name: 资源名称
-    ///   - value: 资源的值
-    ///
-    ///         try await impl.update(byName: "sintvalue1", value: { _ in 66 })
-    ///
-    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
-    
-    /// 根据资源路径删除已存放的资源
+    /// 根据资源uri删除已存放的资源
     ///
     /// 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
     ///
-    ///     try await FJRouter.resource().delete(byPath: "adfasdf")
+    ///     try await FJRouter.resource().delete(.name("adfasdf"))
+    ///     try await FJRouter.resource().delete(.loc("adfasdf"))
     ///
-    /// - Parameter path: 资源路径
-    func delete(byPath path: String) async throws(FJRouter.GetResourceError)
-    
-    /// 根据资源名称删除已存放的资源
-    ///
-    /// 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
-    ///
-    ///     try await FJRouter.resource().delete(byName: "adfasdf")
-    ///
-    /// - Parameter name: 资源名称
-    func delete(byName name: String) async throws(FJRouter.GetResourceError)
+    /// - Parameter uri: 资源uri
+    func delete(_ uri: FJRouter.URI) async throws(FJRouter.GetResourceError)
 }

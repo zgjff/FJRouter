@@ -388,24 +388,19 @@ let aTestable3: BModel = try await FJRouter.resource().get(.name("/protocolATest
 ### 更新资源
 1: 可以通过路径和资源名称更新资源
 ```swift 
-func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws
-
-func update(byName name: String, value: @escaping FJRouterResource.Value) async throws
+func update(_ uri: FJRouter.URI, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
 ```
-
-2: 如果没有存放过相同path的资源, 会抛出`FJRouter.GetResourceError.notFind`错误
 
 3: 事例代码
 ```swift
-try await impl.update(byName: "sintvalue1", value: { _ in 66 })
+try await impl.update(.loc("/sintvalue1"), value: { _ in 39 })
+try await impl.update(.name("sintvalue1"), value: { _ in 66 })
 ```
 
 ### 删除资源
 
 ```swift 
-func delete(byPath path: String) async throws
-
-func delete(byName name: String) async throws
+func delete(_ uri: FJRouter.URI) async throws(FJRouter.GetResourceError)
 ```
 
 1: 必须是已经存放过的资源, 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
@@ -415,8 +410,8 @@ func delete(byName name: String) async throws
 3: 事例代码:
 
 ```swift
-try await FJRouter.resource().delete(byPath: "/intvalue1")
-try await FJRouter.resource().delete(byName: "intOptionalvalue1")
+try await FJRouter.resource().delete(.name("adfasdf"))
+try await FJRouter.resource().delete(.loc("adfasdf"))
 ```
 
 ## 事件总线

@@ -125,16 +125,16 @@ struct FJRouterResourceImplTests {
 
     @Test func deleteNotExist() async throws {
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byName: "")
+            try await impl.delete(.name(""))
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byName: "adfasdf")
+            try await impl.delete(.name("adfasdf"))
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byPath: "")
+            try await impl.delete(.loc(""))
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byPath: "adfasdf")
+            try await impl.delete(.loc("adfasdf"))
         }
     }
     
@@ -143,12 +143,12 @@ struct FJRouterResourceImplTests {
         try await impl.put(r1)
         let intvalue1: Int = try await impl.get(.loc("/intvalue11"), inMainActor: false)
         #expect(intvalue1 == 1)
-        try await impl.delete(byPath: "/intvalue11")
+        try await impl.delete(.loc("/intvalue11"))
         await #expect(throws: FJRouter.GetResourceError.notFind) {
             let _: Int = try await impl.get(.loc("/intvalue11"), inMainActor: false)
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byPath: "/intvalue11")
+            try await impl.delete(.loc("/intvalue11"))
         }
         
         let r2 = try FJRouterResource(path: "/intOptionalvalue11", name: "intOptionalvalue11") { @Sendable info -> Int? in
@@ -158,12 +158,12 @@ struct FJRouterResourceImplTests {
         
         let intOptionalvalue1: Int? = try await impl.get(.name("intOptionalvalue11", params: [:], queryParams: [:]), inMainActor: true)
         #expect(intOptionalvalue1 == 1)
-        try await impl.delete(byName: "intOptionalvalue11")
+        try await impl.delete(.name("intOptionalvalue11"))
         await #expect(throws: FJRouter.GetResourceError.convertNameLoc(.noExistName)) {
             let _: Int? = try await impl.get(.name("intOptionalvalue11", params: [:], queryParams: [:]), inMainActor: true)
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.delete(byName: "intOptionalvalue11")
+            try await impl.delete(.name("intOptionalvalue11"))
         }
     }
     
@@ -212,18 +212,18 @@ struct FJRouterResourceImplTests {
         try await impl.put(r1)
         let sintvalue1: Int = try await impl.get(.loc("/sintvalue1"), inMainActor: false)
         #expect(sintvalue1 == 29)
-        try await impl.update(byPath: "/sintvalue1", value: { _ in 39 })
+        try await impl.update(.loc("/sintvalue1"), value: { _ in 39 })
         let sintvalue2: Int = try await impl.get(.loc("/sintvalue1"), inMainActor: false)
         #expect(sintvalue2 == 39)
-        try await impl.update(byName: "sintvalue1", value: { _ in 66 })
+        try await impl.update(.name("sintvalue1"), value: { _ in 66 })
         let sintvalue3: Int = try await impl.get(.loc("/sintvalue1"), inMainActor: false)
         #expect(sintvalue3 == 66)
         
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.update(byName: "sdfsadfsdaf", value: { _ in 66 })
+            try await impl.update(.name("sdfsadfsdaf"), value: { _ in 66 })
         }
         await #expect(throws: FJRouter.GetResourceError.notFind) {
-            try await impl.update(byPath: "/sdfsdfsadfsdaf", value: { _ in 66 })
+            try await impl.update(.loc("/sdfsdfsadfsdaf"), value: { _ in 66 })
         }
     }
 }

@@ -65,12 +65,28 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
         }
     }
     
-    func update(byPath path: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
-        try await store.updateBy(path: path, name: nil, value: value)
-    }
-    
-    func update(byName name: String, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
-        try await store.updateBy(path: nil, name: name, value: value)
+    func update(_ uri: FJRouter.URI, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
+        do {
+            let loc = try await store.convertLocation(by: uri)
+            guard let url = URL(string: loc) else {
+                throw FJRouter.GetResourceError.notFind
+            }
+            try await store.update(url, value: value)
+        } catch {
+            if let err = error as? FJRouter.ConvertError {
+                if case .noExistName = err {
+                    throw .notFind
+                }
+                if case .urlConvert = err {
+                    throw .notFind
+                }
+                throw FJRouter.GetResourceError.convertNameLoc(err)
+            }
+            if let err = error as? FJRouter.GetResourceError {
+                throw err
+            }
+            throw FJRouter.GetResourceError.notFind
+        }
     }
     
     func delete(byPath path: String) async throws(FJRouter.GetResourceError) {
@@ -79,5 +95,29 @@ extension FJRouter.ResourceImpl: FJRouterResourceable {
     
     func delete(byName name: String) async throws(FJRouter.GetResourceError) {
         try await store.deleteBy(path: nil, name: name)
+    }
+    
+    func delete(_ uri: FJRouter.URI) async throws(FJRouter.GetResourceError) {
+        do {
+            let loc = try await store.convertLocation(by: uri)
+            guard let url = URL(string: loc) else {
+                throw FJRouter.GetResourceError.notFind
+            }
+            try await store.delete(url)
+        } catch {
+            if let err = error as? FJRouter.ConvertError {
+                if case .noExistName = err {
+                    throw .notFind
+                }
+                if case .urlConvert = err {
+                    throw .notFind
+                }
+                throw FJRouter.GetResourceError.convertNameLoc(err)
+            }
+            if let err = error as? FJRouter.GetResourceError {
+                throw err
+            }
+            throw FJRouter.GetResourceError.notFind
+        }
     }
 }

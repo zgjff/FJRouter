@@ -12,7 +12,7 @@ extension FJRouter {
     public enum GetResourceError: Error, @unchecked Sendable {
         /// 错误的查找路径: 不是正确的`URL`
         case errorLocUrl
-        /// 没有发现: 没有监听过此path的事件
+        /// 没有发现: 没有存储过此path的资源
         case notFind
         /// 通过路由名称、路由参数、查询参数组装路由路径错误
         case convertNameLoc(_ error: (FJRouter.ConvertError))

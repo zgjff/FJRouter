@@ -39,7 +39,7 @@ extension FJRouter.ResourceStore {
         beginSaveResourceNamePath(finalResource)
     }
     
-    func match(url: URL) async throws(FJRouter.GetResourceError) -> FJRouter.ResourceMatchInfo {
+    func match(url: URL) throws(FJRouter.GetResourceError) -> FJRouter.ResourceMatchInfo {
         let fixUrl = url.fj.adjust()
         for resource in resources {
             if let info = findMatch(url: fixUrl, resource: resource) {
@@ -53,20 +53,18 @@ extension FJRouter.ResourceStore {
         try uri.finalLocation(in: nameToPath)
     }
     
-    func updateBy(path: String?, name: String?, value: @escaping FJRouterResource.Value) throws(FJRouter.GetResourceError) {
-        let resource: FJRouterResource?
-        if let path {
-            resource = resources.first(where: { $0.path == path })
-        } else if let name {
-            resource = resources.first(where: { $0.name == name })
-        } else {
-            resource = nil
-        }
-        guard let resource else {
-            throw FJRouter.GetResourceError.notFind
-        }
-        let newResource = try! FJRouterResource(path: resource.path, name: resource.name, value: value)
+    func update(_ url: URL, value: @escaping FJRouterResource.Value) throws(FJRouter.GetResourceError) {
+        let oldResource = try match(url: url).resource
+        let newResource = try! FJRouterResource(path: oldResource.path, name: oldResource.name, value: value)
         resources.update(with: newResource)
+    }
+    
+    func delete(_ url: URL) throws(FJRouter.GetResourceError) {
+        let resource = try match(url: url).resource
+        if let name = resource.name {
+            nameToPath.removeValue(forKey: name)
+        }
+        resources.remove(resource)
     }
     
     func deleteBy(path: String?, name: String?) throws(FJRouter.GetResourceError) {
