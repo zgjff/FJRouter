@@ -10,9 +10,11 @@ import Foundation
 import UIKit
 
 extension FJRoute {
-    /// 自定义`custom`的`present`转场动画
+    /// 自定义`custom`类型的`present`转场动画
+    ///
+    ///     modalPresentationStyle = .custom
     public struct CustomPresentationAnimator: FJRouteAnimator {
-        private let config: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())?
+        private let config: (@MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context) -> ())?
         private let useNavigationController: UINavigationController?
         
         /// 初始化
@@ -22,7 +24,7 @@ extension FJRoute {
         /// - Parameters:
         ///   - useNavigationController: 使用导航栏包裹控制器. 注意navigationController必须是新初始化生成的
         ///   - config: 配置
-        public init(navigationController useNavigationController: UINavigationController? = nil, config: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
+        public init(navigationController useNavigationController: UINavigationController? = nil, config: (@MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context) -> ())? = nil) {
             self.useNavigationController = useNavigationController
             self.config = config
         }
@@ -38,7 +40,7 @@ extension FJRoute {
                 useNavigationController.setViewControllers([tvc], animated: false)
                 destVC = useNavigationController
             }
-            let pd = FJCustomPresentationController(show: destVC, from: finalFromVC, config: config)
+            let pd = FJRoute.CustomPresentationAnimator.BehaviorController(show: destVC, from: finalFromVC, config: config)
             finalFromVC.present(destVC, animated: true) {
                 let _ = pd
             }
@@ -47,32 +49,34 @@ extension FJRoute {
 }
 
 // MARK: - UIPresentationController
-/// 弹窗驱动提供器,方便自定义弹窗弹出动画逻辑
-public final class FJCustomPresentationController: UIPresentationController {
-    /// 初始化弹窗驱动提供器
-    /// - Parameters:
-    ///   - presentedViewController: 跳转源控制器
-    ///   - presentingViewController: 跳转目标控制器
-    ///   - configContext: 设置context的block
-    public init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJCustomPresentationContext) -> ())? = nil) {
-        self.context = FJCustomPresentationContext()
-        super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
-        presentedViewController.modalPresentationStyle = .custom
-        presentedViewController.transitioningDelegate = self
-        configContext?(context)
+extension FJRoute.CustomPresentationAnimator {
+    /// 具体实现`custom`类型present的弹窗驱动提供器,方便自定义弹窗弹出动画逻辑控制器
+    public final class BehaviorController: UIPresentationController {
+        /// 初始化弹窗驱动提供器
+        /// - Parameters:
+        ///   - presentedViewController: 跳转源控制器
+        ///   - presentingViewController: 跳转目标控制器
+        ///   - configContext: 设置context的block
+        public init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context) -> ())? = nil) {
+            self.context = FJRoute.CustomPresentationAnimator.BehaviorController.Context()
+            super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
+            presentedViewController.modalPresentationStyle = .custom
+            presentedViewController.transitioningDelegate = self
+            configContext?(context)
+        }
+        public override var presentedView: UIView? {
+            return presentationWrappingView
+        }
+        private let context: FJRoute.CustomPresentationAnimator.BehaviorController.Context
+        private var belowCoverView: UIView?
+        private var presentationWrappingView: UIView?
+        private var didTransitionToNewSize = false
     }
-    public override var presentedView: UIView? {
-        return presentationWrappingView
-    }
-    private let context: FJCustomPresentationContext
-    private var belowCoverView: UIView?
-    private var presentationWrappingView: UIView?
-    private var didTransitionToNewSize = false
 }
 
-public extension FJCustomPresentationController {
+public extension FJRoute.CustomPresentationAnimator.BehaviorController {
     /// 更新动画协调器
-    func updateContext(_ block: @Sendable (_ ctx: FJCustomPresentationContext) -> ()) {
+    func updateContext(_ block: @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context) -> ()) {
         block(context)
     }
     
@@ -89,7 +93,7 @@ public extension FJCustomPresentationController {
 }
 
 // MARK: - transitioning lifecycle
-extension FJCustomPresentationController {
+extension FJRoute.CustomPresentationAnimator.BehaviorController {
     public override func presentationTransitionWillBegin() {
         do {
             guard let presentedViewControllerView = super.presentedView else { return }
@@ -161,7 +165,7 @@ extension FJCustomPresentationController {
 }
 
 // MARK: - layout
-extension FJCustomPresentationController {
+extension FJRoute.CustomPresentationAnimator.BehaviorController {
     public override func preferredContentSizeDidChange(forChildContentContainer container: UIContentContainer) {
         super.preferredContentSizeDidChange(forChildContentContainer: container)
         guard let vc = container as? UIViewController, vc == presentedViewController else {
@@ -225,7 +229,7 @@ extension FJCustomPresentationController {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-extension FJCustomPresentationController: UIViewControllerTransitioningDelegate {
+extension FJRoute.CustomPresentationAnimator.BehaviorController: UIViewControllerTransitioningDelegate {
     public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         return self
     }
@@ -241,7 +245,7 @@ extension FJCustomPresentationController: UIViewControllerTransitioningDelegate 
 }
 
 // MARK: - UIViewControllerAnimatedTransitioning
-extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning {
+extension FJRoute.CustomPresentationAnimator.BehaviorController: UIViewControllerAnimatedTransitioning {
     public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         guard let transitionContext else {
             return context.duration(true)
@@ -269,7 +273,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
         let tinitialFrame = transitionContext.initialFrame(for: toVC)
         let tfinalFrame = transitionContext.finalFrame(for: toVC)
         
-        let framesInfo = FJCustomPresentationContext.TransitionContextFrames.init(fromInitialFrame: finitialFrame, fromFinalFrame: ffinalFrame, toInitialFrame: tinitialFrame, toFinalFrame: tfinalFrame)
+        let framesInfo = FJRoute.CustomPresentationAnimator.BehaviorController.Context.TransitionContextFrames.init(fromInitialFrame: finitialFrame, fromFinalFrame: ffinalFrame, toInitialFrame: tinitialFrame, toFinalFrame: tfinalFrame)
         
         if isPresenting {
             cv.addSubview(toView)
@@ -285,130 +289,132 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
 
 
 // MARK: - FJCustomAlertPresentationContext
-/// 弹窗驱动上下文
-@MainActor final public class FJCustomPresentationContext: @unchecked Sendable {
-    /// 转场动画的具体实现逻辑
-    public typealias TransitionAnimator = @MainActor @Sendable (_ fromView: UIView, _ toView: UIView, _ style: FJCustomPresentationContext.TransitionType, _ duration: TimeInterval, _ ctx: UIViewControllerContextTransitioning) -> ()
-    /// presentingViewController的view修饰view
-    public typealias PresentationWrappingView = @MainActor @Sendable (_ presentedViewControllerView: UIView, _ frameOfPresentedView: CGRect) -> UIView
-    /// 转场动画化过程中, 弹窗底部view的动画
-    public typealias AnimatorForBelowCoverView = @MainActor @Sendable (_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ()
-    /// 转场动画中presentingViewController的View的frame
-    public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ containerViewSafeAreaInsets: UIEdgeInsets, _ preferredContentSize: CGSize) -> (CGRect)
-    /// 横竖屏切换回调
-    public typealias WillTransitionSize = @MainActor @Sendable (_ ctx: FJCustomPresentationContext, _ containerViewSize: CGSize, _ containerViewSafeAreaInsets: UIEdgeInsets, _ tovc: UIViewController) -> ()
-    
-    init() {
-        `default` = FJCustomPresentationContext.Default()
-        frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
-        presentationWrappingView = `default`.shadowAllRoundedCornerWrappingView(10)
-        belowCoverView = `default`.dimmingBelowCoverView
-        transitionAnimator = `default`.centerTransitionAnimator
-        willPresentAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(true)
-        willDismissAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(false)
-        willTransitionSize = {  @Sendable ctx, size, safeAreaInsets, tovc in
-            
+extension FJRoute.CustomPresentationAnimator.BehaviorController {
+    /// 弹窗驱动上下文
+    @MainActor final public class Context: @unchecked Sendable {
+        /// 转场动画的具体实现逻辑
+        public typealias TransitionAnimator = @MainActor @Sendable (_ fromView: UIView, _ toView: UIView, _ style: FJRoute.CustomPresentationAnimator.BehaviorController.Context.TransitionType, _ duration: TimeInterval, _ ctx: UIViewControllerContextTransitioning) -> ()
+        /// presentingViewController的view修饰view
+        public typealias PresentationWrappingView = @MainActor @Sendable (_ presentedViewControllerView: UIView, _ frameOfPresentedView: CGRect) -> UIView
+        /// 转场动画化过程中, 弹窗底部view的动画
+        public typealias AnimatorForBelowCoverView = @MainActor @Sendable (_ belowCoverView: UIView, _ coordinator: UIViewControllerTransitionCoordinator) -> ()
+        /// 转场动画中presentingViewController的View的frame
+        public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ containerViewSafeAreaInsets: UIEdgeInsets, _ preferredContentSize: CGSize) -> (CGRect)
+        /// 横竖屏切换回调
+        public typealias WillTransitionSize = @MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context, _ containerViewSize: CGSize, _ containerViewSafeAreaInsets: UIEdgeInsets, _ tovc: UIViewController) -> ()
+        
+        init() {
+            `default` = FJRoute.CustomPresentationAnimator.BehaviorController.Context.Default()
+            frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
+            presentationWrappingView = `default`.shadowAllRoundedCornerWrappingView(10)
+            belowCoverView = `default`.dimmingBelowCoverView
+            transitionAnimator = `default`.centerTransitionAnimator
+            willPresentAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(true)
+            willDismissAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(false)
+            willTransitionSize = {  @Sendable ctx, size, safeAreaInsets, tovc in
+                
+            }
         }
+        
+        /// 默认配置
+        public let `default`: FJRoute.CustomPresentationAnimator.BehaviorController.Context.Default
+        
+        /// 转场动画持续时间---默认0.25s
+        public var duration: (_ isPresenting: Bool) -> TimeInterval = { _ in 0.25 }
+        
+        /// 源控制器(fromvc)是否触发生命周期(viewWillDisappear/viewDidDisappear/viewWillAppear/viewDidAppear),默认不触发任何.
+        ///
+        /// 因为系统的custom类型的弹窗,并不会触发fromvc的生命周期.不方便处理弹窗present/dismiss时的逻辑处理
+        public var presentingControllerTriggerAppearLifecycle = TriggerPresentingControllerLifecycle.none
+        
+        /// 弹出界面的其余部分点击事件,默认为自动dismiss
+        ///
+        /// 可以在弹窗出现之后通过`AlertPresentationController`的`updateContext`方法随时更改此属性
+        ///
+        /// eg:可以在弹窗展示的时候为`.autodismiss(false)`,然后,在页面事件处理完成之后改为`.autodismiss(true)`
+        ///
+        /// 同时,默认的点击空白消失是带动画的.如果不想带动画,请设置为`.customize`,在block内部手动调用dismiss
+        public var belowCoverAction = FJRoute.CustomPresentationAnimator.BehaviorController.Context.BelowCoverAction.autodismiss(true)
+        
+        /// preferredContentSize 改变时的动画配置, 默认为nil
+        public var preferredContentSizeDidChangeAnimationInfo: (duration: TimeInterval, delay: TimeInterval, options: UIView.AnimationOptions)?
+        
+        /// 转场动画中presentingViewController的View的frame----默认frame可以使presentingView居中
+        public var frameOfPresentedViewInContainerView: FrameOfPresentedViewInContainerView
+        
+        /// presentingViewController的view修饰view----默认4个圆角带阴影view
+        public var presentationWrappingView: PresentationWrappingView?
+        
+        /// presentingViewController的view底部封面view,默认是暗灰色view
+        ///
+        /// 一般是暗灰色的view或者UIVisualEffectView,同时将autoresizingMask设置成[.flexibleWidth, .flexibleHeight];
+        ///
+        ///  在转场动画时,可以做动画效果
+        /// - 例如:UIVisualEffectView可以在presentationTransitionWillBegin动画时间里,将effect从nil,设置成UIBlurEffect(style: .extraLight)
+        ///       并在dismissalTransitionWillBegin动画时间里,将effect设置成nil
+        /// - 暗灰色的view:可以在presentationTransitionWillBegin动画时间里,将alpha从0.0,设置成0.5
+        ///       并在dismissalTransitionWillBegin动画时间里,将alpha设置成0.0
+        public var belowCoverView: @MainActor @Sendable (_ frame: CGRect) -> UIView
+        
+        /// 转场动画的具体实现----默认是弹出居中view的动画效果
+        public var transitionAnimator: TransitionAnimator
+        
+        /// 转场动画presentationTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
+        ///
+        /// 例如:
+        ///
+        ///     context.belowCorverBeginPresentAnimator = { view, coordinator in
+        ///          guard let blurView = view as? UIVisualEffectView else { return }
+        ///          coordinator.animate(alongsideTransition: { _ in
+        ///             blurView.effect = UIBlurEffect(style: .extraLight)
+        ///         }, completion: nil)
+        ///     }
+        ///
+        public var willPresentAnimatorForBelowCoverView: AnimatorForBelowCoverView
+        
+        /// 转场动画dismissalTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
+        ///
+        /// 例如:
+        ///
+        ///     context.belowCorverBeginPresentAnimator = { view, coordinator in
+        ///          guard let blurView = view as? UIVisualEffectView else { return }
+        ///          coordinator.animate(alongsideTransition: { _ in
+        ///             blurView.effect = nil
+        ///         }, completion: nil)
+        ///     }
+        ///
+        public var willDismissAnimatorForBelowCoverView: AnimatorForBelowCoverView
+        
+        /// 切换横竖屏逻辑, 默认什么都不做
+        ///
+        /// 如果弹窗需要在横竖屏展示和动画不一致的时候, 请在这里更新配置;
+        ///
+        ///     eg: 横竖屏都是底部弹窗, 但是横竖屏高度不同, 且横竖屏切换之后, 弹窗宽度均跟随屏幕宽度
+        ///     ctx.usingEdgePresentation { @Sendable containerViewSize in
+        ///         .bottom
+        ///     }
+        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+        ///         let isPortrait = size.width < size.height
+        ///         tovc.preferredContentSize = isPortrait ? CGSize(width: size.width, height: 300) : CGSize(width: size.width, height: 150)
+        ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算
+        ///         tovc.xxxxxxxx
+        ///     }
+        ///
+        ///     eg: 竖屏是底部弹窗动画, 横屏变成右边弹窗动画
+        ///     ctx.usingEdgePresentation { containerViewSize in
+        ///         return containerViewSize.width < containerViewSize.height ? .bottom : .right
+        ///     }
+        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+        ///         let isPortrait = size.width < size.height
+        ///         tovc.preferredContentSize = CGSize(width: isPortrait ? size.width : (200 + safeAreaInsets.right), height: isPortrait ? 300 : size.height)
+        ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算。
+        ///         tovc.xxxxxxxx
+        ///     }
+        public var willTransitionSize: WillTransitionSize
     }
-    
-    /// 默认配置
-    public let `default`: FJCustomPresentationContext.Default
-    
-    /// 转场动画持续时间---默认0.25s
-    public var duration: (_ isPresenting: Bool) -> TimeInterval = { _ in 0.25 }
-    
-    /// 源控制器(fromvc)是否触发生命周期(viewWillDisappear/viewDidDisappear/viewWillAppear/viewDidAppear),默认不触发任何.
-    ///
-    /// 因为系统的custom类型的弹窗,并不会触发fromvc的生命周期.不方便处理弹窗present/dismiss时的逻辑处理
-    public var presentingControllerTriggerAppearLifecycle = TriggerPresentingControllerLifecycle.none
-    
-    /// 弹出界面的其余部分点击事件,默认为自动dismiss
-    ///
-    /// 可以在弹窗出现之后通过`AlertPresentationController`的`updateContext`方法随时更改此属性
-    ///
-    /// eg:可以在弹窗展示的时候为`.autodismiss(false)`,然后,在页面事件处理完成之后改为`.autodismiss(true)`
-    ///
-    /// 同时,默认的点击空白消失是带动画的.如果不想带动画,请设置为`.customize`,在block内部手动调用dismiss
-    public var belowCoverAction = FJCustomPresentationContext.BelowCoverAction.autodismiss(true)
-    
-    /// preferredContentSize 改变时的动画配置, 默认为nil
-    public var preferredContentSizeDidChangeAnimationInfo: (duration: TimeInterval, delay: TimeInterval, options: UIView.AnimationOptions)?
-    
-    /// 转场动画中presentingViewController的View的frame----默认frame可以使presentingView居中
-    public var frameOfPresentedViewInContainerView: FrameOfPresentedViewInContainerView
-    
-    /// presentingViewController的view修饰view----默认4个圆角带阴影view
-    public var presentationWrappingView: PresentationWrappingView?
-    
-    /// presentingViewController的view底部封面view,默认是暗灰色view
-    ///
-    /// 一般是暗灰色的view或者UIVisualEffectView,同时将autoresizingMask设置成[.flexibleWidth, .flexibleHeight];
-    ///
-    ///  在转场动画时,可以做动画效果
-    /// - 例如:UIVisualEffectView可以在presentationTransitionWillBegin动画时间里,将effect从nil,设置成UIBlurEffect(style: .extraLight)
-    ///       并在dismissalTransitionWillBegin动画时间里,将effect设置成nil
-    /// - 暗灰色的view:可以在presentationTransitionWillBegin动画时间里,将alpha从0.0,设置成0.5
-    ///       并在dismissalTransitionWillBegin动画时间里,将alpha设置成0.0
-    public var belowCoverView: @MainActor @Sendable (_ frame: CGRect) -> UIView
-    
-    /// 转场动画的具体实现----默认是弹出居中view的动画效果
-    public var transitionAnimator: TransitionAnimator
-    
-    /// 转场动画presentationTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
-    ///
-    /// 例如:
-    ///
-    ///     context.belowCorverBeginPresentAnimator = { view, coordinator in
-    ///          guard let blurView = view as? UIVisualEffectView else { return }
-    ///          coordinator.animate(alongsideTransition: { _ in
-    ///             blurView.effect = UIBlurEffect(style: .extraLight)
-    ///         }, completion: nil)
-    ///     }
-    ///
-    public var willPresentAnimatorForBelowCoverView: AnimatorForBelowCoverView
-    
-    /// 转场动画dismissalTransitionWillBegin时,belowCoverView要展示的动画效果,默认是暗灰色view的动画效果
-    ///
-    /// 例如:
-    ///
-    ///     context.belowCorverBeginPresentAnimator = { view, coordinator in
-    ///          guard let blurView = view as? UIVisualEffectView else { return }
-    ///          coordinator.animate(alongsideTransition: { _ in
-    ///             blurView.effect = nil
-    ///         }, completion: nil)
-    ///     }
-    ///
-    public var willDismissAnimatorForBelowCoverView: AnimatorForBelowCoverView
-    
-    /// 切换横竖屏逻辑, 默认什么都不做
-    ///
-    /// 如果弹窗需要在横竖屏展示和动画不一致的时候, 请在这里更新配置;
-    ///
-    ///     eg: 横竖屏都是底部弹窗, 但是横竖屏高度不同, 且横竖屏切换之后, 弹窗宽度均跟随屏幕宽度
-    ///     ctx.usingEdgePresentation { @Sendable containerViewSize in
-    ///         .bottom
-    ///     }
-    ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
-    ///         let isPortrait = size.width < size.height
-    ///         tovc.preferredContentSize = isPortrait ? CGSize(width: size.width, height: 300) : CGSize(width: size.width, height: 150)
-    ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算
-    ///         tovc.xxxxxxxx
-    ///     }
-    ///
-    ///     eg: 竖屏是底部弹窗动画, 横屏变成右边弹窗动画
-    ///     ctx.usingEdgePresentation { containerViewSize in
-    ///         return containerViewSize.width < containerViewSize.height ? .bottom : .right
-    ///     }
-    ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
-    ///         let isPortrait = size.width < size.height
-    ///         tovc.preferredContentSize = CGSize(width: isPortrait ? size.width : (200 + safeAreaInsets.right), height: isPortrait ? 300 : size.height)
-    ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算。
-    ///         tovc.xxxxxxxx
-    ///     }
-    public var willTransitionSize: WillTransitionSize
 }
 
-@MainActor public extension FJCustomPresentationContext {
+@MainActor public extension FJRoute.CustomPresentationAnimator.BehaviorController.Context {
     /// 使用一套居中弹出动画
      func usingCenterPresentation() {
         transitionAnimator = `default`.centerTransitionAnimator
@@ -522,7 +528,7 @@ extension FJCustomPresentationController: UIViewControllerAnimatedTransitioning 
     }
 }
 
-extension FJCustomPresentationContext {
+extension FJRoute.CustomPresentationAnimator.BehaviorController.Context {
     /// 转场动画的过渡类型
     public enum TransitionType: @unchecked Sendable {
         case present(frames: TransitionContextFrames)
@@ -578,7 +584,7 @@ extension FJCustomPresentationContext {
 
 
 // MARK: - FJCustomAlertPresentationContext Default
-extension FJCustomPresentationContext {
+extension FJRoute.CustomPresentationAnimator.BehaviorController.Context {
     /// 提供GenericPresentationContext的一些基本默认设置
     public struct Default: @unchecked Sendable {
         /// 转场动画时,高斯模糊view作为presentedViewController view的背景
