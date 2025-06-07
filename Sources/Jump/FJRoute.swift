@@ -30,22 +30,9 @@ public struct FJRoute: Sendable {
     ///
     /// 框架内部提供了多种内置实现: FJRoute.XXXXAnimator
     public typealias Animator = @MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator
-    
-    /// 路由的名称
-    ///
-    /// 如果赋值, 必须提供唯一的字符串名称, 且不能为空
-    public let name: String?
-    
-    /// 路由匹配路径
-    ///
-    /// 注意: 如果是起始父路由, 其`path`必须以`/`为前缀
-    ///
-    /// 该路径还支持路径参数. eg:
-    ///
-    ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
-    ///
-    /// 路由参数将被解析并储存在`JJRouterState`中, 用于`builder`和`redirect`
-    public let path: String
+
+    /// 资源标志
+    public let uri: any FJRouterRegisterURI
     
     /// 构建路由方式
     public let builder: FJRoute.Builder?
@@ -79,16 +66,20 @@ public struct FJRoute: Sendable {
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
     public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
-        let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
-        if p.isEmpty {
-            throw CreateError.emptyPath
-        }
-        let n = name?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let n, n.isEmpty {
-            throw CreateError.emptyName
-        }
         if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
+        }
+        let uri = FJRouterCommonRegisterURI(path: path, name: name)
+        do {
+            let (regExp, pathParameters) =  try uri.resolve()
+            self.uri = uri
+            self.regExp = regExp
+            self.pathParameters = pathParameters
+            self.builder = builder
+            self.animator = animator ?? { @MainActor @Sendable _ in AutomaticAnimator() }
+            self.redirect = redirect
+        } catch {
+            throw FJRoute.CreateError.uri(error)
         }
         do {
             self.routes = try routes()
@@ -98,12 +89,38 @@ public struct FJRoute: Sendable {
             }
             self.routes = []
         }
-        self.path = p
-        self.name = n
-        self.builder = builder
-        self.animator = animator ?? { @MainActor @Sendable _ in AutomaticAnimator() }
-        self.redirect = redirect
-        (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
+    }
+    
+    /// 初始化. 注意:`builder`和`redirect`必须至少提供一项, 否则初始化失败
+    /// - Parameters:
+    ///   - uri: 路由注册资源
+    ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
+    ///   - animator: 显示匹配路由控制器的方式。
+    ///   - redirect: 路由重定向
+    ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
+    public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
+        if builder == nil && redirect().isEmpty {
+            throw CreateError.noPageBuilder
+        }
+        do {
+            let (regExp, pathParameters) =  try uri.resolve()
+            self.uri = uri
+            self.regExp = regExp
+            self.pathParameters = pathParameters
+            self.builder = builder
+            self.animator = animator ?? { @MainActor @Sendable _ in AutomaticAnimator() }
+            self.redirect = redirect
+        } catch {
+            throw FJRoute.CreateError.uri(error)
+        }
+        do {
+            self.routes = try routes()
+        } catch {
+            if let err = error as? CreateError {
+                throw err
+            }
+            self.routes = []
+        }
     }
     
     internal func matchRegExpHasPrefix(_ loc: String) -> NSRegularExpression? {
@@ -131,7 +148,7 @@ extension FJRoute: Hashable {
             hasher.combine(lp)
             return
         }
-        hasher.combine(path)
+        hasher.combine(uri.path)
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -140,16 +157,13 @@ extension FJRoute: Hashable {
                 return true
             }
         }
-        return lhs.path == rhs.path
+        return lhs.uri.path == rhs.uri.path
     }
 }
 
 extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
     public var description: String {
-        var result = "FJRoute(path: \(path)"
-        if let name {
-            result.append(", name: \(name)")
-        }
+        var result = "FJRoute(uri: \(uri)"
         if !pathParameters.isEmpty {
             result.append(", pathParameters: \(pathParameters)")
         }
@@ -164,18 +178,15 @@ extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
 
 extension FJRoute {
     public enum CreateError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-        case emptyPath
-        case emptyName
+        case uri(FJRouter.RegisterURIError)
         case noPageBuilder
         
         public var description: String {
             switch self {
-            case .emptyPath:
-                return "FJRoute path cannot be empty"
-            case .emptyName:
-                return "FJRoute name cannot be empty"
+            case .uri(let err):
+                return err.localizedDescription
             case .noPageBuilder:
-                return "FJRoute builder or redirect must be provided"
+                return "builder or redirect必须提供一个"
             }
         }
         

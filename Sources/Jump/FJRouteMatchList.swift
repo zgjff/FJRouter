@@ -51,7 +51,7 @@ internal struct FJRouteMatchList: Sendable {
         
         var fullPath = ""
         for match in success {
-            let pathSegment = match.route.path
+            let pathSegment = match.route.uri.path
             fullPath = FJPathUtils.default.concatenatePaths(parentPath: fullPath, childPath: pathSegment)
         }
         self.fullPath = fullPath

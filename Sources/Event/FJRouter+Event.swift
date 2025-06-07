@@ -33,24 +33,23 @@ public protocol FJRouterEventable: Sendable {
     /// 监听事件: 通过系统`Combine`框架进行响应, 不持有监听者
     ///
     ///     无参
-    ///     let seekSuccess = try await FJRouter.event().onReceive(path: "/seek/success", name: "onSeekSuccess")
+    ///     let seekSuccess = try await FJRouter.event().onReceive(uri: FJRouterCommonRegisterURI(path: "/seek/success", name: "onSeekSuccess"))
     ///     seekSuccess.receive(on: OperationQueue.main)
     ///     .sink(receiveValue: { info in
     ///         print("onSeekSuccess=>", info)
     ///     }).store(in: &self.cancels)
     ///
     ///     有参
-    ///     let seekProgress = try await FJRouter.event().onReceive(path: "/seek/:progress", name: "onSeekProgress")
+    ///     let seekProgress = try await FJRouter.event().onReceive(uri: FJRouterCommonRegisterURI(path: "/seek/:progress", name: "onSeekProgress"))
     ///     seekProgress.receive(on: OperationQueue.main)
     ///     .sink(receiveValue: { info in
     ///         print("onSeekProgress=>", info)
     ///     }).store(in: &self.cancels)
     ///
     /// - Parameters:
-    ///   - path: 事件路径path
-    ///   - name: 事件名称
+    ///   - uri: 事件资源
     /// - Returns: 监听事件响应
-    func onReceive(path: String, name: String?) async throws(FJRouterEventAction.CreateError) -> AnyPublisher<FJRouter.EventMatchInfo, Never>
+    func onReceive(uri: any FJRouterRegisterURI) async throws(FJRouter.RegisterURIError) -> AnyPublisher<FJRouter.EventMatchInfo, Never>
     
     /// async 通过事件uri触发事件参数
     /// - Parameters:
@@ -89,15 +88,15 @@ extension FJRouterEventable {
     ///   - path: 事件路径path
     ///   - name: 事件名称
     /// - Returns: 监听事件响应
-    public func onReceive(path: String, name: String? = nil) -> AnyPublisher<FJRouter.EventMatchInfo, FJRouterEventAction.CreateError> {
-        return Future<AnyPublisher<FJRouter.EventMatchInfo, Never>, FJRouterEventAction.CreateError>({ promise in
+    public func onReceive(path: String, name: String? = nil) -> AnyPublisher<FJRouter.EventMatchInfo, FJRouter.RegisterURIError> {
+        return Future<AnyPublisher<FJRouter.EventMatchInfo, Never>, FJRouter.RegisterURIError>({ promise in
             nonisolated(unsafe) let promise = promise
             Task { @Sendable in
                 do {
-                    let call = try await self.onReceive(path: path, name: name)
+                    let call = try await self.onReceive(uri: FJRouterCommonRegisterURI(path: path, name: name))
                     promise(.success(call))
                 } catch {
-                    if let err = error as? FJRouterEventAction.CreateError {
+                    if let err = error as? FJRouter.RegisterURIError {
                         promise(.failure(err))
                     } else {
                         promise(.failure(.emptyName))
@@ -105,7 +104,7 @@ extension FJRouterEventable {
                 }
             }
         }).flatMap({ obj in
-            return obj.setFailureType(to: FJRouterEventAction.CreateError.self)
+            return obj.setFailureType(to: FJRouter.RegisterURIError.self)
         }).eraseToAnyPublisher()
     }
     

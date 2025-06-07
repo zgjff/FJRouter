@@ -11,13 +11,13 @@ struct FJRouterEventStoreMatchTests {
     @Test func testSameActionCount() async throws {
         let store = try await createStore()
         await #expect(store.numbers() == 5)
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a")))
         await #expect(store.numbers() == 5)
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "a"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "a")))
         await #expect(store.numbers() == 6)
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "a/"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "a/")))
         await #expect(store.numbers() == 7)
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a/"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a/")))
         await #expect(store.numbers() == 8)
     }
     
@@ -32,8 +32,8 @@ struct FJRouterEventStoreMatchTests {
     
     @Test func testMatchNoParameters() async throws {
         let store = try await createStore { store in
-            await store.saveOrCreateListener(action: try FJRouterEventAction(path: "sendSuccess"))
-            await store.saveOrCreateListener(action: try FJRouterEventAction(path: "sendFailure"))
+            await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "sendSuccess")))
+            await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "sendFailure")))
         }
         
         let pairs1 = await store.match(url: URL(string: "/details")!, extra: nil)
@@ -57,19 +57,19 @@ struct FJRouterEventStoreMatchTests {
     
     @Test func testMatchWithParameters() async throws {
         let store = try await createStore { store in
-            await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/books/:bid/details/:page"))
+            await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/books/:bid/details/:page")))
         }
         
         let pairs1 = await store.match(url: URL(string: "/pages/123")!, extra: nil)
         #expect(pairs1?.info.pathParameters == ["id": "123"])
         
         let pairs2 = await store.match(url: URL(string: "/books/123/details/100")!, extra: nil)
-        #expect(pairs2?.listener.action.path == "/books/:bid/details/:page")
+        #expect(pairs2?.listener.action.uri.path == "/books/:bid/details/:page")
         #expect(pairs2?.info.pathParameters["bid"] == "123")
         #expect(pairs2?.info.pathParameters["page"] == "100")
         
         let pairs3 = await store.match(url: URL(string: "/books/123/details/100?q=p&u=i")!, extra: nil)
-        #expect(pairs3?.listener.action.path == "/books/:bid/details/:page")
+        #expect(pairs3?.listener.action.uri.path == "/books/:bid/details/:page")
         #expect(pairs3?.info.pathParameters["bid"] == "123")
         #expect(pairs3?.info.pathParameters["page"] == "100")
         #expect(pairs3?.info.queryParameters["q"] == "p")
@@ -80,11 +80,11 @@ struct FJRouterEventStoreMatchTests {
 extension FJRouterEventStoreMatchTests {
     fileprivate func createStore(action: ((_ store: FJRouter.EventStore) async throws -> ())? = nil) async throws -> FJRouter.EventStore {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/details"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/pages/:id"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/user/:id"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/details")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/pages/:id")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/user/:id")))
         try await action?(store)
         return store
     }

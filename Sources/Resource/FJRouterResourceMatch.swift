@@ -25,7 +25,7 @@ extension FJRouter.ResourceMatch {
         }
         let encodedParams = resource.extractPathParameters(inString: remainingLocation, useRegExp: regExp)
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
-        guard let pathLoc = try? FJPathUtils.default.patternToPath(pattern: resource.path, pathParameters: encodedParams) else {
+        guard let pathLoc = try? FJPathUtils.default.patternToPath(pattern: resource.uri.path, pathParameters: encodedParams) else {
             return nil
         }
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: pathLoc)

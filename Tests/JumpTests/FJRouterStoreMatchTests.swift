@@ -15,7 +15,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.extra() as? Int == 123)
         #expect(result.lastMatch != nil)
         #expect(result.lastMatch!.matchedLocation == "/details")
-        #expect(result.lastMatch!.route.path == "/details")
+        #expect(result.lastMatch!.route.uri.path == "/details")
         #expect(result.queryParams == ["p": "1"])
     }
     
@@ -44,7 +44,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.extra() as? Int == 123)
         #expect(result.pathParameters == ["id": "123"])
         #expect(result.lastMatch?.matchedLocation == "/show/123")
-        #expect(result.lastMatch?.route.path == "/show/:id")
+        #expect(result.lastMatch?.route.uri.path == "/show/:id")
         #expect(result.queryParams == ["name": "haha", "age": "18"])
     }
     
@@ -63,7 +63,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.extra() == nil)
         #expect(result.pathParameters == ["id": "78"])
         #expect(result.lastMatch?.matchedLocation == rurl)
-        #expect(result.lastMatch?.route.path == rp)
+        #expect(result.lastMatch?.route.uri.path == rp)
         #expect(result.queryParams.isEmpty)
     }
     
@@ -78,7 +78,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.fullPath == rp)
         #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
-        #expect(result.lastMatch?.route.path == rp)
+        #expect(result.lastMatch?.route.uri.path == rp)
         #expect(result.queryParams.isEmpty)
     }
     
@@ -101,7 +101,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.fullPath == rp)
         #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
-        #expect(result.lastMatch?.route.path == "c")
+        #expect(result.lastMatch?.route.uri.path == "c")
     }
     
     @Test func testErrorHasChildsHasRedirect() async throws {
@@ -146,7 +146,7 @@ struct FJRouterStoreMatchTests {
         #expect(result.fullPath == rp)
         #expect(result.extra() == nil)
         #expect(result.lastMatch?.matchedLocation == rp)
-        #expect(result.lastMatch?.route.path == rp)
+        #expect(result.lastMatch?.route.uri.path == rp)
     }
     
     @Test func testErrorMultipleRedirects() async throws {

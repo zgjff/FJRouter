@@ -4,7 +4,7 @@ import Foundation
 
 struct FJPathUtilsTests {
     @Test func patternToRegExpWithoutParameter() async throws {
-        let (reg, pathParameter) = FJPathUtils.default.patternToRegExp(pattern: "/settings/detail")
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: "/settings/detail")
         #expect(pathParameter.isEmpty)
         #expect(matchPathSuccess(regExp: reg, string: "/settings/detail"))
         #expect(!matchPathSuccess(regExp: reg, string: "/settings/"))
@@ -15,13 +15,13 @@ struct FJPathUtilsTests {
     }
     
     @Test func patternToRegExpWithParameter() async throws {
-        let (reg, pathParameter) = FJPathUtils.default.patternToRegExp(pattern: "/user/:id/book/:bookId")
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: "/user/:id/book/:bookId")
         #expect(pathParameter.count == 2)
         #expect(pathParameter[0] == "id")
         #expect(pathParameter[1] == "bookId")
         
         let string = "/user/123/book/456/18"
-        let match = reg?.firstMatch(in: string, range: NSRange(location: 0, length: string.count))
+        let match = reg.firstMatch(in: string, range: NSRange(location: 0, length: string.count))
         #expect(match != nil)
         let parameterValues = FJPathUtils.default.extractPathParameters(pathParameter, inString: string, useRegExp: reg)
         #expect(parameterValues.count == 2)
@@ -36,10 +36,10 @@ struct FJPathUtilsTests {
     
     @Test func patternToPathWithoutParameter() async throws {
         let pattern = "/settings/detail"
-        let (reg, pathParameter) = FJPathUtils.default.patternToRegExp(pattern: pattern)
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: pattern)
         
         let url = "/settings/detail"
-        let match = reg?.firstMatch(in: url, range: NSRange(location: 0, length: url.count))
+        let match = reg.firstMatch(in: url, range: NSRange(location: 0, length: url.count))
         #expect(match != nil)
         
         let parameterValues = FJPathUtils.default.extractPathParameters(pathParameter, inString: url, useRegExp: reg)
@@ -49,10 +49,10 @@ struct FJPathUtilsTests {
     
     @Test func patternToPathWithParameter() async throws {
         let pattern = "/user/:id/book/:bookId"
-        let (reg, pathParameter) = FJPathUtils.default.patternToRegExp(pattern: pattern)
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: pattern)
         
         let url = "/user/123/book/456"
-        let match = reg?.firstMatch(in: url, range: NSRange(location: 0, length: url.count))
+        let match = reg.firstMatch(in: url, range: NSRange(location: 0, length: url.count))
         #expect(match != nil)
         
         let parameterValues = FJPathUtils.default.extractPathParameters(pathParameter, inString: url, useRegExp: reg)

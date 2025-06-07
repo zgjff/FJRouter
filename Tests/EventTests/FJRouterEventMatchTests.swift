@@ -4,7 +4,7 @@ import Foundation
 
 struct FJRouterEventMatchTests {
     @Test func testEmptyParamters() throws {
-        let a1 = try FJRouterEventAction(path: "/sendSuccess")
+        let a1 = try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/sendSuccess"))
         let p1 = "/sendSuccess"
         let u1 = URL(string: p1)!
         let pairs1 = FJRouter.EventMatch.match(action: a1, byUrl: u1)
@@ -17,7 +17,7 @@ struct FJRouterEventMatchTests {
         let pairs2 = FJRouter.EventMatch.match(action: a1, byUrl: u2)
         #expect(pairs2 == nil)
         
-        let a2 = try FJRouterEventAction(path: "sendSuccess")
+        let a2 = try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "sendSuccess"))
         let p3 = "/sendSuccess"
         let u3 = URL(string: p3)!
         let pairs3 = FJRouter.EventMatch.match(action: a2, byUrl: u3)
@@ -30,7 +30,7 @@ struct FJRouterEventMatchTests {
     }
     
     @Test func testParamters() throws {
-        let a = try FJRouterEventAction(path: "/users/:userId/")
+        let a = try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/users/:userId/"))
         let p = "/users/123/"
         let u = URL(string: p)!
         let pairs = FJRouter.EventMatch.match(action: a, byUrl: u)
@@ -65,7 +65,7 @@ struct FJRouterEventMatchTests {
     }
     
     @Test func testNoLastSlashParamters() throws {
-        let a = try FJRouterEventAction(path: "/users/:userId")
+        let a = try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/users/:userId"))
         
         let p = "/users/123/"
         let u = URL(string: p)!
@@ -103,7 +103,7 @@ struct FJRouterEventMatchTests {
     }
     
     @Test func testMultipleParamters() throws {
-        let a = try FJRouterEventAction(path: "/users/:userId/play/games/:pid")
+        let a = try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/users/:userId/play/games/:pid"))
         
         let p1 = "/users/123/play/games/7648"
         let u1 = URL(string: p1)!

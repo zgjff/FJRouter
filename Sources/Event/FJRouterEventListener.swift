@@ -28,7 +28,8 @@ extension FJRouter.EventListener {
     }
     
     func updateActionName(_ name: String) {
-        guard let newAction = try? FJRouterEventAction(path: action.path, name: name) else {
+        let newUri = action.uri.chang(name: name)
+        guard let newAction = try? FJRouterEventAction(uri: newUri) else {
             return
         }
         action = newAction

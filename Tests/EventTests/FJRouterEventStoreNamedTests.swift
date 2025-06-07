@@ -5,39 +5,39 @@ import Foundation
 struct FJRouterEventStoreNamedTests {
     @Test func testSaveName() async throws {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/b", name: "findb"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/c", name: nil))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/d", name: "findd"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/b", name: "findb")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: nil)))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/d", name: "findd")))
         
         await #expect(store.numbers() == 4)
         
-        let findA = await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
-        #expect(findA.action == (try! FJRouterEventAction(path: "/a", name: "finda")))
+        let findA = await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
+        #expect(findA.action == (try! FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda"))))
         
-        let findc = await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/c", name: "findc"))
+        let findc = await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc")))
         await #expect(store.numbers() == 4)
-        #expect(findc.action == (try! FJRouterEventAction(path: "/c", name: "findc")))
+        #expect(findc.action == (try! FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc"))))
         
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/f", name: "findf"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/f", name: "findf")))
         await #expect(store.numbers() == 5)
     }
     
     @Test func testSaveSameNameDifferentPath() async throws {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
         // 将下面注释打开, 会触发 "不能添加名称相同但path却不同的事件xxxxxx"的崩溃, 不用怀疑, 是正确的
 //        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/c", name: "finda"))
     }
     
     @Test func testConvertWithNoParamsName() async throws {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/b", name: nil))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "c", name: "findc"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/d/", name: "findd"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "e/", name: "finde"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/b", name: nil)))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "c", name: "findc")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/d/", name: "findd")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "e/", name: "finde")))
         
         let urla = try await store.convertLocation(by: .name("finda"))
         #expect(urla == "/a")
@@ -64,9 +64,9 @@ struct FJRouterEventStoreNamedTests {
     
     @Test func testConvertWithParamsName() async throws {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a/:id", name: "finda"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "c/:id", name: "findc"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/d/:id/", name: "findd"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a/:id", name: "finda")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "c/:id", name: "findc")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/d/:id/", name: "findd")))
         
         let urla1 = try await store.convertLocation(by: .name("finda", params: ["id": "1"]))
         #expect(urla1 == "/a/1")
@@ -101,17 +101,17 @@ struct FJRouterEventStoreNamedTests {
     
     @Test func testConvertWithQueryParamsName() async throws {
         let store = FJRouter.EventStore()
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/a", name: "finda"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/b", name: nil))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "c", name: "findc"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/d/", name: "findd"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "e/", name: "finde"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/b", name: nil)))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "c", name: "findc")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/d/", name: "findd")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "e/", name: "finde")))
         
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/user/:id", name: "finduser"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/books/:id/", name: "findbooks"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "pages/:id", name: "findpages"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "players/:id/", name: "findplayers"))
-        await store.saveOrCreateListener(action: try FJRouterEventAction(path: "/tvs/:id/", name: "findtvs"))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/user/:id", name: "finduser")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/books/:id/", name: "findbooks")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "pages/:id", name: "findpages")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "players/:id/", name: "findplayers")))
+        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/tvs/:id/", name: "findtvs")))
         
         let users1 = try await store.convertLocation(by: .name("finduser", params: ["id": "1"], queryParams: ["age": "22"]))
         #expect(users1 == "/user/1?age=22")

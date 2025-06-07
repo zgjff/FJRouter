@@ -16,7 +16,7 @@ internal struct FJPathUtils: Sendable {
 }
 
 extension FJPathUtils {
-    internal func patternToRegExp(pattern: String) -> (reg: NSRegularExpression?, parameters: [String]) {
+    internal func patternToRegExp(pattern: String) throws -> (reg: NSRegularExpression, parameters: [String]) {
         let matchs = parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
         let pstart = pattern.startIndex
         var start = 0
@@ -49,7 +49,7 @@ extension FJPathUtils {
         if !pattern.hasSuffix("/") {
             buffer.append("(?=/|$)")
         }
-        let exp = try? NSRegularExpression(pattern: buffer, options: [])
+        let exp = try NSRegularExpression(pattern: buffer, options: [])
         return (exp, parameters)
     }
     

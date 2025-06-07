@@ -11,15 +11,9 @@ import Foundation
 public struct FJRouterResource: Sendable {
     /// 资源构造器
     public typealias Value = (@Sendable (_ info: FJRouter.ResourceMatchInfo) -> (any Sendable))
-    /// 资源名称
-    public let name: String?
-    
-    /// 资源url匹配路径
-    ///
-    /// 该路径还支持路径参数. eg:
-    ///
-    ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
-    public let path: String
+
+    /// 资源uri
+    public let uri: any FJRouterRegisterURI
     
     /// 资源path解析出来的参数名称数组
     public let pathParameters: [String]
@@ -38,19 +32,22 @@ public struct FJRouterResource: Sendable {
     ///         let a = try FJRouterResource(path: "/amodel", name: "xxxx", value: { @Sendable info -> AModel? in
     ///             return info.xxxx ? AModel() : nil
     ///         })
-    public init(path: String, name: String? = nil, value: @escaping Value) throws(FJRouterResource.CreateError) {
-        let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
-        if p.isEmpty {
-            throw CreateError.emptyPath
-        }
-        let n = name?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let n, n.isEmpty {
-            throw CreateError.emptyName
-        }
-        self.path = p
-        self.name = n
+    public init(path: String, name: String? = nil, value: @escaping Value) throws(FJRouter.RegisterURIError) {
+        try self.init(uri: FJRouterCommonRegisterURI(path: path, name: name), value: value)
+    }
+    
+    /// 初始化
+    /// - Parameters:
+    ///   - uri: 资源uri
+    ///   - value: 构建资源的指向
+    ///
+    ///         let a = try FJRouterResource(uri: xxxxx, value: { @Sendable info -> AModel? in
+    ///             return info.xxxx ? AModel() : nil
+    ///         })
+    public init(uri: any FJRouterRegisterURI, value: @escaping Value) throws(FJRouter.RegisterURIError) {
+        (regExp, pathParameters) = try uri.resolve()
+        self.uri = uri
         self.value = value
-        (regExp, pathParameters) = FJPathUtils.default.patternToRegExp(pattern: p)
     }
     
     internal func matchRegExpHasPrefix(_ loc: String) -> NSRegularExpression? {
@@ -68,7 +65,7 @@ extension FJRouterResource: Hashable {
             hasher.combine(lp)
             return
         }
-        hasher.combine(path)
+        hasher.combine(uri.path)
     }
     
     public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -77,16 +74,13 @@ extension FJRouterResource: Hashable {
                 return true
             }
         }
-        return lhs.path == rhs.path
+        return lhs.uri.path == rhs.uri.path
     }
 }
 
 extension FJRouterResource: CustomStringConvertible, CustomDebugStringConvertible {
     public nonisolated var description: String {
-        var result = "FJRouterResourceAction(path: \(path)"
-        if let name {
-            result.append(", name: \(name)")
-        }
+        var result = "FJRouterResourceAction(uri: \(uri)"
         if !pathParameters.isEmpty {
             result.append(", pathParameters: \(pathParameters)")
         }
@@ -96,33 +90,5 @@ extension FJRouterResource: CustomStringConvertible, CustomDebugStringConvertibl
     
     public var debugDescription: String {
         description
-    }
-}
-
-extension FJRouterResource {
-    public enum CreateError: Error, @unchecked Sendable, Equatable, CustomStringConvertible, CustomDebugStringConvertible, LocalizedError {
-        case emptyPath
-        case emptyName
-        
-        public var description: String {
-            switch self {
-            case .emptyPath:
-                return "ResourceAction path cannot be empty"
-            case .emptyName:
-                return "ResourceAction name cannot be empty"
-            }
-        }
-        
-        public var debugDescription: String {
-            description
-        }
-        
-        public var errorDescription: String? {
-            description
-        }
-        
-        public var localizedDescription: String {
-            description
-        }
     }
 }

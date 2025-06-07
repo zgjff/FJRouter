@@ -4,14 +4,14 @@ import Foundation
 
 struct FJRouterResourceActionTests {
     @Test func emptyPath() {
-        #expect(throws: FJRouterResource.CreateError.emptyPath) {
-            let _ = try FJRouterResource(path: "", value: { _ in 1 })
+        #expect(throws: FJRouter.RegisterURIError.emptyPath) {
+            let _ = try FJRouterResource(uri: FJRouterCommonRegisterURI(path: ""), value: { _ in 1 })
         }
     }
     
     @Test func emptyName() {
-        #expect(throws: FJRouterResource.CreateError.emptyName) {
-            let _ = try FJRouterResource(path: "/", name: "", value: { _ in 1})
+        #expect(throws: FJRouter.RegisterURIError.emptyName) {
+            let _ = try FJRouterResource(uri: FJRouterCommonRegisterURI(path: "/", name: ""), value: { _ in 1})
         }
     }
     

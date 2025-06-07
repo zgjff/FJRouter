@@ -14,10 +14,8 @@ public struct FJRouterState: Sendable {
     public let url: URL
     /// 匹配到的内容字符串
     public let matchedLocation: String
-    /// 匹配到的路由path, eg: family/:fid
-    public let path: String?
-    /// 匹配到的路由名称
-    public let name: String?
+    /// 匹配到的注册uri
+    public let uri: (any FJRouterRegisterURI)?
     /// 路由的全路径
     public let fullPath: String
     /// 匹配到的参数
@@ -34,8 +32,7 @@ public struct FJRouterState: Sendable {
     init(matches: FJRouteMatchList) {
         url = matches.url
         matchedLocation = matches.url.fj.versionPath
-        path = nil
-        name = nil
+        uri = nil
         fullPath = matches.fullPath
         pathParameters = matches.pathParameters
         queryParameters = matches.queryParams
@@ -54,8 +51,7 @@ public struct FJRouterState: Sendable {
         fullPath = matches.fullPath
         pathParameters = matches.pathParameters
         queryParameters = matches.queryParams
-        name = match.route.name
-        path = match.route.path
+        uri = match.route.uri
         extra = matches.extra()
         route = matches.lastMatch?.route
         error = nil

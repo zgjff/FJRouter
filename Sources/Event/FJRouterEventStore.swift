@@ -23,10 +23,10 @@ extension FJRouter.EventStore {
             beginSaveActionNamePath(action: action)
             return listener
         }
-        guard let name = action.name else {
+        guard let name = action.uri.name else {
             return obj
         }
-        guard obj.action.name != nil else {
+        guard obj.action.uri.name != nil else {
             beginSaveActionNamePath(action: action)
             obj.updateActionName(name)
             return obj
@@ -56,10 +56,10 @@ extension FJRouter.EventStore {
 
 private extension FJRouter.EventStore {
     func beginSaveActionNamePath(action: FJRouterEventAction) {
-        guard let name = action.name else {
+        guard let name = action.uri.name else {
             return
         }
-        let fullPath = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: action.path)
+        let fullPath = FJPathUtils.default.concatenatePaths(parentPath: "", childPath: action.uri.path)
         if nameToPath.keys.contains(name) {
             let prefullpath = nameToPath[name]
             /// 提前崩溃, 防止这种错误出现

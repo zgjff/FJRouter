@@ -41,7 +41,7 @@ extension FJRouteMatch {
         }
         let encodedParams = route.extractPathParameters(inString: remainingLocation, useRegExp: regExp)
         let currentPathParameter = encodedParams.reduce([String: String](), { $0.merging([$1.key: $1.value.removingPercentEncoding ?? $1.value], uniquingKeysWith: { (_, new) in new })})
-        guard let pathLoc = try? FJPathUtils.default.patternToPath(pattern: route.path, pathParameters: encodedParams) else {
+        guard let pathLoc = try? FJPathUtils.default.patternToPath(pattern: route.uri.path, pathParameters: encodedParams) else {
             return ([], [:])
         }
         let newMatchedLocation = FJPathUtils.default.concatenatePaths(parentPath: matchedLocation, childPath: pathLoc)
@@ -55,7 +55,7 @@ extension FJRouteMatch {
             return ([], [:])
         }
         // 匹配子路由
-        let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.path)
+        let newMatchedPath = FJPathUtils.default.concatenatePaths(parentPath: matchedPath, childPath: route.uri.path)
         let childLocStartIndex = url.fj.versionPath.index(url.fj.versionPath.startIndex, offsetBy: newMatchedLocation.count + ((newMatchedLocation == "/") ? 0 : 1))
         let childLocEndIndex = url.fj.versionPath.endIndex
         let childRestLoc = String(describing: url.fj.versionPath[childLocStartIndex..<childLocEndIndex])

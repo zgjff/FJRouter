@@ -5,7 +5,7 @@ import UIKit
 
 struct FJRouteTests {
     @Test func emptyPath() {
-        #expect(throws: FJRoute.CreateError.emptyPath) {
+        #expect(throws: FJRoute.CreateError.uri(.emptyPath)) {
             let _ = try FJRoute(path: "", builder: { _ in
                 return UIViewController()
             })
@@ -13,7 +13,7 @@ struct FJRouteTests {
     }
     
     @Test func emptyName() {
-        #expect(throws: FJRoute.CreateError.emptyName) {
+        #expect(throws: FJRoute.CreateError.uri(.emptyName)) {
             let _ = try FJRoute(path: "/", name: "", builder: { _ in
                 return UIViewController()
             })

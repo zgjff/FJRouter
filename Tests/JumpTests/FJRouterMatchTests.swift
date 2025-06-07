@@ -44,11 +44,11 @@ struct FJRouterMatchTests {
         let (matches, pathParameters) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c/d")!)
         #expect(pathParameters.isEmpty)
         #expect(matches.count == 5)
-        #expect(matches[0].route.path == "/")
-        #expect(matches[1].route.path == "a")
-        #expect(matches[2].route.path == "b")
-        #expect(matches[3].route.path == "c")
-        #expect(matches[4].route.path == "/d")
+        #expect(matches[0].route.uri.path == "/")
+        #expect(matches[1].route.uri.path == "a")
+        #expect(matches[2].route.uri.path == "b")
+        #expect(matches[3].route.uri.path == "c")
+        #expect(matches[4].route.uri.path == "/d")
     }
     
     @Test func matchWithChildRouteWithParameter() async throws {
@@ -61,10 +61,10 @@ struct FJRouterMatchTests {
         ])
         let (matches, pathParameters) = FJRouteMatch.match(route: route, byUrl: URL(string: "/user/123/book/456/detail/show/789")!)
         #expect(matches.count == 4)
-        #expect(matches[0].route.path == "/user/:id")
-        #expect(matches[1].route.path == "book/:bookId")
-        #expect(matches[2].route.path == "detail")
-        #expect(matches[3].route.path == "show/:page")
+        #expect(matches[0].route.uri.path == "/user/:id")
+        #expect(matches[1].route.uri.path == "book/:bookId")
+        #expect(matches[2].route.uri.path == "detail")
+        #expect(matches[3].route.uri.path == "show/:page")
         
         #expect(pathParameters.count == 3)
         #expect(pathParameters["id"] == "123")

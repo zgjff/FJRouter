@@ -78,8 +78,8 @@ extension FJRouter.JumpStore {
 private extension FJRouter.JumpStore {
     func beginSaveRouteNamePath(parentFullPath: String, childRoutes: [FJRoute]) {
         for route in childRoutes {
-            let fullPath = FJPathUtils.default.concatenatePaths(parentPath: parentFullPath, childPath: route.path)
-            if let name = route.name {
+            let fullPath = FJPathUtils.default.concatenatePaths(parentPath: parentFullPath, childPath: route.uri.path)
+            if let name = route.uri.name {
                 if nameToPath.keys.contains(name) {
                     let prefullpath = nameToPath[name]
                     assert(prefullpath == fullPath, "不能添加相同的路由名称: name: \(name), newfullpath: \(fullPath), oldfullpath: \(String(describing: prefullpath))")
