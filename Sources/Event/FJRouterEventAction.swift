@@ -18,8 +18,8 @@ public struct FJRouterEventAction: Sendable {
     /// 对应正则表达式
     private let regExp: NSRegularExpression?
     
-    public init(uri: any FJRouterRegisterURI) throws(FJRouter.RegisterURIError) {
-        (regExp, pathParameters) = try uri.resolve()
+    public init(uri: any FJRouterRegisterURI) async throws(FJRouter.RegisterURIError) {
+        (regExp, pathParameters) = try await uri.resolve()
         self.uri = uri
     }
     

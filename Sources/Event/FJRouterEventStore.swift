@@ -16,7 +16,7 @@ extension FJRouter {
 
 extension FJRouter.EventStore {
     @discardableResult
-    func saveOrCreateListener(action: FJRouterEventAction) -> FJRouter.EventListener {
+    func saveOrCreateListener(action: FJRouterEventAction) async -> FJRouter.EventListener {
         guard let obj = listeners.first(where: { $0.action == action }) else {
             let listener = FJRouter.EventListener(action: action)
             listeners.insert(listener)
@@ -28,7 +28,7 @@ extension FJRouter.EventStore {
         }
         guard obj.action.uri.name != nil else {
             beginSaveActionNamePath(action: action)
-            obj.updateActionName(name)
+            await obj.updateActionName(name)
             return obj
         }
         beginSaveActionNamePath(action: action)

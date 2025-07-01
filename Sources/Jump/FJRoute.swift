@@ -63,14 +63,14 @@ public struct FJRoute: Sendable {
     ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///   - animator: 显示匹配路由控制器的方式。不传的时候使用, `FJRoute.AutomaticAnimator`
     ///   - redirect: 路由重定向
-    ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
+    ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
+    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
         }
         let uri = FJRouterCommonRegisterURI(path: path, name: name)
         do {
-            let (regExp, pathParameters) =  try uri.resolve()
+            let (regExp, pathParameters) = try await uri.resolve()
             self.uri = uri
             self.regExp = regExp
             self.pathParameters = pathParameters
@@ -80,14 +80,7 @@ public struct FJRoute: Sendable {
         } catch {
             throw FJRoute.CreateError.uri(error)
         }
-        do {
-            self.routes = try routes()
-        } catch {
-            if let err = error as? CreateError {
-                throw err
-            }
-            self.routes = []
-        }
+        self.routes = try await routes()
     }
     
     /// 初始化. 注意:`builder`和`redirect`必须至少提供一项, 否则初始化失败
@@ -96,13 +89,13 @@ public struct FJRoute: Sendable {
     ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由重定向
-    ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-    public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {
+    ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
+    public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
         }
         do {
-            let (regExp, pathParameters) =  try uri.resolve()
+            let (regExp, pathParameters) = try await uri.resolve()
             self.uri = uri
             self.regExp = regExp
             self.pathParameters = pathParameters
@@ -112,14 +105,7 @@ public struct FJRoute: Sendable {
         } catch {
             throw FJRoute.CreateError.uri(error)
         }
-        do {
-            self.routes = try routes()
-        } catch {
-            if let err = error as? CreateError {
-                throw err
-            }
-            self.routes = []
-        }
+        self.routes = try await routes()
     }
     
     internal func matchRegExpHasPrefix(_ loc: String) -> NSRegularExpression? {
@@ -161,7 +147,7 @@ extension FJRoute: Hashable {
 }
 
 extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
-    public var description: String {
+    public nonisolated var description: String {
         var result = "FJRoute(uri: \(uri)"
         if !pathParameters.isEmpty {
             result.append(", pathParameters: \(pathParameters)")
@@ -170,7 +156,7 @@ extension FJRoute: CustomStringConvertible, CustomDebugStringConvertible {
         return result
     }
     
-    public var debugDescription: String {
+    public nonisolated var debugDescription: String {
         description
     }
 }

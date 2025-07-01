@@ -21,7 +21,7 @@ extension FJRouter {
 
 extension FJRouter.EventImpl {
     func onReceive(uri: any FJRouterRegisterURI) async throws(FJRouter.RegisterURIError) -> AnyPublisher<FJRouter.EventMatchInfo, Never> {
-        let action = try FJRouterEventAction(uri: uri)
+        let action = try await FJRouterEventAction(uri: uri)
         let listener = await store.saveOrCreateListener(action: action)
         return listener.publisher()
     }

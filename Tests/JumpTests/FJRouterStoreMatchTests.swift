@@ -84,10 +84,10 @@ struct FJRouterStoreMatchTests {
     
     @Test func testSuccessHasChildsHasRedirect() async throws {
         let config = await createConfig(action: { config in
-            let r = try! FJRoute(path: "/w", builder: _builder, routes: [
-                try! FJRoute(path: "x", builder: _builder, routes: [
-                    try! FJRoute(path: "y", builder: _builder, routes: [
-                        try! FJRoute(path: "z", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/a/b/c") })])
+            let r = try! await FJRoute(path: "/w", builder: _builder, routes: await [
+                FJRoute(path: "x", builder: _builder, routes: await [
+                    FJRoute(path: "y", builder: _builder, routes: await [
+                        FJRoute(path: "z", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/a/b/c") })])
                     ])
                 ])
             ])
@@ -106,10 +106,10 @@ struct FJRouterStoreMatchTests {
     
     @Test func testErrorHasChildsHasRedirect() async throws {
         let config = await createConfig(action: { config in
-            let r = try! FJRoute(path: "/w", builder: _builder, routes: [
-                try! FJRoute(path: "x", builder: _builder, routes: [
-                    try! FJRoute(path: "y", builder: _builder, routes: [
-                        try! FJRoute(path: "z", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/a/b/f") })])
+            let r = try! await FJRoute(path: "/w", builder: _builder, routes: await [
+                FJRoute(path: "x", builder: _builder, routes: await [
+                    FJRoute(path: "y", builder: _builder, routes: await [
+                        FJRoute(path: "z", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/a/b/f") })])
                     ])
                 ])
             ])
@@ -126,17 +126,17 @@ struct FJRouterStoreMatchTests {
     
     @Test func testSuccessMultipleRedirects() async throws {
         let config = await createConfig(action: { config in
-            let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
-                FJRoute(path: "settings", builder: self._builder, routes: [
+            let r1 = try! await FJRoute(path: "/user", builder: self._builder, routes: await [
+                FJRoute(path: "settings", builder: self._builder, routes: await [
                     FJRoute(path: "reset", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
             await config.addRoute(r1)
-            let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
+            let r2 = try! await FJRoute(path: "/info", builder: self._builder, routes: await [
                 FJRoute(path: "display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/login") })])
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/login", builder: self._builder)
+            let r3 = try! await FJRoute(path: "/login", builder: self._builder)
             await config.addRoute(r3)
         })
         let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
@@ -151,17 +151,17 @@ struct FJRouterStoreMatchTests {
     
     @Test func testErrorMultipleRedirects() async throws {
         let config = await createConfig(action: { config in
-            let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
-                FJRoute(path: "settings", builder: self._builder, routes: [
+            let r1 = try! await FJRoute(path: "/user", builder: self._builder, routes: await [
+                FJRoute(path: "settings", builder: self._builder, routes: await [
                     FJRoute(path: "reset", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
             await config.addRoute(r1)
-            let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
+            let r2 = try! await FJRoute(path: "/info", builder: self._builder, routes: await [
                 FJRoute(path: "display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/logine") })])
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/login", builder: self._builder)
+            let r3 = try! await FJRoute(path: "/login", builder: self._builder)
             await config.addRoute(r3)
         })
         let result = try await config.match(url: URL(string: "/user/settings/reset")!, extra: 123, ignoreError: false)
@@ -174,13 +174,13 @@ struct FJRouterStoreMatchTests {
     
     @Test func testLoopRedirect() async throws {
         let config = await createConfig(action: { config in
-            let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
-                FJRoute(path: "settings", builder: self._builder, routes: [
+            let r1 = try! await FJRoute(path: "/user", builder: self._builder, routes: await [
+                FJRoute(path: "settings", builder: self._builder, routes: await [
                     FJRoute(path: "reset", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
             await config.addRoute(r1)
-            let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
+            let r2 = try! await FJRoute(path: "/info", builder: self._builder, routes: await [
                 FJRoute(path: "display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/user/settings/reset") })])
             ])
             await config.addRoute(r2)
@@ -193,22 +193,22 @@ struct FJRouterStoreMatchTests {
     
     @Test func testLoopRedirects() async throws {
         let config = await createConfig(action: { config in
-            let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
-                FJRoute(path: "settings", builder: self._builder, routes: [
+            let r1 = try! await FJRoute(path: "/user", builder: self._builder, routes: await [
+                FJRoute(path: "settings", builder: self._builder, routes: await [
                     FJRoute(path: "reset", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
             await config.addRoute(r1)
-            let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
+            let r2 = try! await FJRoute(path: "/info", builder: self._builder, routes: await [
                 FJRoute(path: "display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/details") })])
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/display") })])
+            let r3 = try! await FJRoute(path: "/pkuser/details", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/display") })])
             await config.addRoute(r3)
-            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/pages/detail") })])
+            let r4 = try! await FJRoute(path: "/pkuser/display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/pages/detail") })])
             await config.addRoute(r4)
-            let r5 = try! FJRoute(path: "/pkuser", builder: self._builder, routes: [
-                FJRoute(path: "pages", builder: self._builder, routes: [
+            let r5 = try! await FJRoute(path: "/pkuser", builder: self._builder, routes: await [
+                FJRoute(path: "pages", builder: self._builder, routes: await [
                     FJRoute(path: "detail", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
@@ -223,22 +223,22 @@ struct FJRouterStoreMatchTests {
     
     @Test func testRedirectLimit() async throws {
         let config = await createConfig(action: { config in
-            let r1 = try! FJRoute(path: "/user", builder: self._builder, routes: [
-                FJRoute(path: "settings", builder: self._builder, routes: [
+            let r1 = try! await FJRoute(path: "/user", builder: self._builder, routes: await [
+                FJRoute(path: "settings", builder: self._builder, routes: await [
                     FJRoute(path: "reset", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
             await config.addRoute(r1)
-            let r2 = try! FJRoute(path: "/info", builder: self._builder, routes: [
+            let r2 = try! await FJRoute(path: "/info", builder: self._builder, routes: await [
                 FJRoute(path: "display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/details") })])
             ])
             await config.addRoute(r2)
-            let r3 = try! FJRoute(path: "/pkuser/details", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/display") })])
+            let r3 = try! await FJRoute(path: "/pkuser/details", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/display") })])
             await config.addRoute(r3)
-            let r4 = try! FJRoute(path: "/pkuser/display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/pages/detail") })])
+            let r4 = try! await FJRoute(path: "/pkuser/display", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/pkuser/pages/detail") })])
             await config.addRoute(r4)
-            let r5 = try! FJRoute(path: "/pkuser", builder: self._builder, routes: [
-                FJRoute(path: "pages", builder: self._builder, routes: [
+            let r5 = try! await FJRoute(path: "/pkuser", builder: self._builder, routes: await [
+                FJRoute(path: "pages", builder: self._builder, routes: await [
                     FJRoute(path: "detail", builder: self._builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/info/display") })])
                 ])
             ])
@@ -259,23 +259,23 @@ struct FJRouterStoreMatchTests {
 extension FJRouterStoreMatchTests {
     fileprivate func createConfig(action: ((_ config: FJRouter.JumpStore) async -> ())? = nil) async -> FJRouter.JumpStore {
         let config = FJRouter.JumpStore()
-        let r1 = try! FJRoute(path: "/", builder: _builder, routes: [
+        let r1 = try! await FJRoute(path: "/", builder: _builder, routes: await [
             try! FJRoute(path: "home", builder: _builder)
         ])
         await config.addRoute(r1)
-        let r2 = try! FJRoute(path: "/a", builder: _builder, routes: [
-            try! FJRoute(path: "b", builder: _builder, routes: [
-                try! FJRoute(path: "c", builder: _builder, routes: [
-                    try! FJRoute(path: "/d", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/details") })])
+        let r2 = try! await FJRoute(path: "/a", builder: _builder, routes: await [
+            FJRoute(path: "b", builder: _builder, routes: await [
+                FJRoute(path: "c", builder: _builder, routes: await [
+                    FJRoute(path: "/d", builder: _builder, redirect: [FJRouteCommonRedirector(redirect: { _ in .new("/details") })])
                 ])
             ])
         ])
         await config.addRoute(r2)
-        let r3 = try! FJRoute(path: "/details", builder: _builder)
+        let r3 = try! await FJRoute(path: "/details", builder: _builder)
         await config.addRoute(r3)
-        let r4 = try! FJRoute(path: "/pages/:id", builder: _builder)
+        let r4 = try! await FJRoute(path: "/pages/:id", builder: _builder)
         await config.addRoute(r4)
-        let r5 = try! FJRoute(path: "/user/:id", builder: _builder)
+        let r5 = try! await FJRoute(path: "/user/:id", builder: _builder)
         await config.addRoute(r5)
         await config.addRoute(try! FJRoute(path: "/pages/:id", builder: self._builder))
         await action?(config)

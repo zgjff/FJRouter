@@ -43,7 +43,7 @@ extension FJRouterRegisterURI {
     ///  多个参数:
     ///
     ///     path为"/user/:id/book/:bookId", 则解析出的正则为: "^\/user\/(?<id>[^/]+)\/book\/(?<bookId>[^/]+)(?=/|$)", 参数数组为["id", "bookId"]
-    public func resolve() throws(FJRouter.RegisterURIError) -> (regExp: NSRegularExpression, parameters: [String]) {
+    public func resolve() async throws(FJRouter.RegisterURIError) -> (regExp: NSRegularExpression, parameters: [String]) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
             throw FJRouter.RegisterURIError.emptyPath
@@ -53,7 +53,7 @@ extension FJRouterRegisterURI {
             throw FJRouter.RegisterURIError.emptyName
         }
         do {
-            let (regExp, pathParameters) = try FJPathUtils.default.patternToRegExp(pattern: p)
+            let (regExp, pathParameters) = try await FJPathUtils.default.patternToRegExp(pattern: p)
             return (regExp, pathParameters)
         } catch {
             throw FJRouter.RegisterURIError.regExp(error)

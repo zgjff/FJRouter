@@ -16,41 +16,47 @@ internal struct FJPathUtils: Sendable {
 }
 
 extension FJPathUtils {
-    internal func patternToRegExp(pattern: String) throws -> (reg: NSRegularExpression, parameters: [String]) {
-        let matchs = parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
-        let pstart = pattern.startIndex
-        var start = 0
-        var buffer: String
-        if #available(iOS 14.0, *) {
-            buffer = String(unsafeUninitializedCapacity: pattern.count + 1, initializingUTF8With: { _ in 0 })
-        } else {
-            buffer = ""
-        }
-        buffer += "^"
-        var parameters: [String] = []
-        for match in matchs {
-            if match.range.location > start {
+    internal func patternToRegExp(pattern: String) async throws -> (reg: NSRegularExpression, parameters: [String]) {
+        try await withCheckedThrowingContinuation { continuation in
+            let matchs = FJPathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
+            let pstart = pattern.startIndex
+            var start = 0
+            var buffer: String
+            if #available(iOS 14.0, *) {
+                buffer = String(unsafeUninitializedCapacity: pattern.count + 1, initializingUTF8With: { _ in 0 })
+            } else {
+                buffer = ""
+            }
+            buffer += "^"
+            var parameters: [String] = []
+            for match in matchs {
+                if match.range.location > start {
+                    let startIdx = pattern.index(pstart, offsetBy: start)
+                    let endIdx = pattern.index(startIdx, offsetBy: match.range.location - start)
+                    buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
+                }
+                let startIdx = pattern.index(pstart, offsetBy: match.range.location + 1)
+                let endIdx = pattern.index(startIdx, offsetBy: match.range.length - 1)
+                let name = String(describing: pattern[startIdx..<endIdx])
+                parameters.append(name)
+                buffer += "(?<\(name)>[^/]+)"
+                start = match.range.location + match.range.length
+            }
+            if start < pattern.count {
                 let startIdx = pattern.index(pstart, offsetBy: start)
-                let endIdx = pattern.index(startIdx, offsetBy: match.range.location - start)
+                let endIdx = pattern.index(startIdx, offsetBy: pattern.count - start)
                 buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
             }
-            let startIdx = pattern.index(pstart, offsetBy: match.range.location + 1)
-            let endIdx = pattern.index(startIdx, offsetBy: match.range.length - 1)
-            let name = String(describing: pattern[startIdx..<endIdx])
-            parameters.append(name)
-            buffer += "(?<\(name)>[^/]+)"
-            start = match.range.location + match.range.length
+            if !pattern.hasSuffix("/") {
+                buffer.append("(?=/|$)")
+            }
+            do {
+                let exp = try NSRegularExpression(pattern: buffer, options: [])
+                continuation.resume(returning: (exp, parameters))
+            } catch {
+                continuation.resume(throwing: error)
+            }
         }
-        if start < pattern.count {
-            let startIdx = pattern.index(pstart, offsetBy: start)
-            let endIdx = pattern.index(startIdx, offsetBy: pattern.count - start)
-            buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
-        }
-        if !pattern.hasSuffix("/") {
-            buffer.append("(?=/|$)")
-        }
-        let exp = try NSRegularExpression(pattern: buffer, options: [])
-        return (exp, parameters)
     }
     
     internal func matchRegExpHasPrefix(_ loc: String, regExp: NSRegularExpression?) -> NSRegularExpression? {

@@ -13,13 +13,13 @@ struct FJRouterEventStoreNamedTests {
         await #expect(store.numbers() == 4)
         
         let findA = await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda")))
-        #expect(findA.action == (try! FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda"))))
+        #expect(findA.action == (try await FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/a", name: "finda"))))
         
-        let findc = await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc")))
+        let findc = await store.saveOrCreateListener(action: try await FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc")))
         await #expect(store.numbers() == 4)
-        #expect(findc.action == (try! FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc"))))
+        #expect(findc.action == (try await FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/c", name: "findc"))))
         
-        await store.saveOrCreateListener(action: try FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/f", name: "findf")))
+        await store.saveOrCreateListener(action: try await FJRouterEventAction(uri: FJRouterCommonRegisterURI(path: "/f", name: "findf")))
         await #expect(store.numbers() == 5)
     }
     

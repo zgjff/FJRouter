@@ -6,10 +6,10 @@ import UIKit
 struct FJRouterStoreNameTests {
     @Test func noParamsNames() async throws {
         let store = await createStore { store in
-            let route = try! FJRoute(path: "/", name: "home", builder: _builder, routes: [
-                try! FJRoute(path: "a", name: "namea", builder: _builder),
-                try! FJRoute(path: "b", name: "nameb", builder: _builder),
-                try! FJRoute(path: "c", name: "namec", builder: _builder),
+            let route = try! await FJRoute(path: "/", name: "home", builder: _builder, routes: await [
+                FJRoute(path: "a", name: "namea", builder: _builder),
+                FJRoute(path: "b", name: "nameb", builder: _builder),
+                FJRoute(path: "c", name: "namec", builder: _builder),
             ])
             await store.addRoute(route)
         }
@@ -34,8 +34,8 @@ struct FJRouterStoreNameTests {
     
     @Test func paramsNames() async throws {
         let store = await createStore { store in
-            let route = try! FJRoute(path: "/", name: "home", builder: _builder, routes: [
-                try! FJRoute(path: "settings/f1/:id", name: "settingsf1", builder: _builder),
+            let route = try! await FJRoute(path: "/", name: "home", builder: _builder, routes: await [
+                FJRoute(path: "settings/f1/:id", name: "settingsf1", builder: _builder),
             ])
             await store.addRoute(route)
         }
@@ -49,9 +49,9 @@ struct FJRouterStoreNameTests {
     
     @Test func childParamsNames() async throws {
         let store = await createStore { store in
-            let route = try! FJRoute(path: "/user/:id", name: "userInfo", builder: _builder, routes: [
-                try! FJRoute(path: "books", name: "userBooks", builder: _builder, routes: [
-                    try! FJRoute(path: ":bookId", name: "userBookInfo", builder: _builder)
+            let route = try! await FJRoute(path: "/user/:id", name: "userInfo", builder: _builder, routes: await [
+                FJRoute(path: "books", name: "userBooks", builder: _builder, routes: await [
+                    FJRoute(path: ":bookId", name: "userBookInfo", builder: _builder)
                 ]),
             ])
             await store.addRoute(route)
@@ -72,9 +72,9 @@ struct FJRouterStoreNameTests {
     
     @Test func sensitiveNames() async throws {
         let store = await createStore { store in
-            let route = try! FJRoute(path: "/", builder: _builder, routes: [
-                try! FJRoute(path: "a", name: "namea", builder: _builder),
-                try! FJRoute(path: "b", name: "nameA", builder: _builder)
+            let route = try! await FJRoute(path: "/", builder: _builder, routes: await [
+                FJRoute(path: "a", name: "namea", builder: _builder),
+                FJRoute(path: "b", name: "nameA", builder: _builder)
             ])
             await store.addRoute(route)
         }

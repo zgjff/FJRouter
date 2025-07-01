@@ -23,7 +23,7 @@ extension FJRouter.ResourceStore {
         beginSaveResourceNamePath(resource)
     }
     
-    func add(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) {
+    func add(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async {
         guard let oldResource = resources.first(where: { $0 == resource }) else {
             resources.insert(resource)
             beginSaveResourceNamePath(resource)
@@ -35,7 +35,7 @@ extension FJRouter.ResourceStore {
         // 存在
         let finalValue = combine(oldResource.value, resource.value)
         let newUri = resource.uri.chang(name: resource.uri.name ?? oldResource.uri.name)
-        let finalResource = try! FJRouterResource(uri: newUri, value: finalValue)
+        let finalResource = try! await FJRouterResource(uri: newUri, value: finalValue)
         resources.update(with: finalResource)
         beginSaveResourceNamePath(finalResource)
     }
@@ -54,9 +54,9 @@ extension FJRouter.ResourceStore {
         try uri.finalLocation(in: nameToPath)
     }
     
-    func update(_ url: URL, value: @escaping FJRouterResource.Value) throws(FJRouter.GetResourceError) {
+    func update(_ url: URL, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError) {
         let oldResource = try match(url: url).resource
-        let newResource = try! FJRouterResource(uri: oldResource.uri, value: value)
+        let newResource = try! await FJRouterResource(uri: oldResource.uri, value: value)
         resources.update(with: newResource)
     }
     

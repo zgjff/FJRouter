@@ -32,8 +32,8 @@ public struct FJRouterResource: Sendable {
     ///         let a = try FJRouterResource(path: "/amodel", name: "xxxx", value: { @Sendable info -> AModel? in
     ///             return info.xxxx ? AModel() : nil
     ///         })
-    public init(path: String, name: String? = nil, value: @escaping Value) throws(FJRouter.RegisterURIError) {
-        try self.init(uri: FJRouterCommonRegisterURI(path: path, name: name), value: value)
+    public init(path: String, name: String? = nil, value: @escaping Value) async throws(FJRouter.RegisterURIError) {
+        try await self.init(uri: FJRouterCommonRegisterURI(path: path, name: name), value: value)
     }
     
     /// 初始化
@@ -44,8 +44,8 @@ public struct FJRouterResource: Sendable {
     ///         let a = try FJRouterResource(uri: xxxxx, value: { @Sendable info -> AModel? in
     ///             return info.xxxx ? AModel() : nil
     ///         })
-    public init(uri: any FJRouterRegisterURI, value: @escaping Value) throws(FJRouter.RegisterURIError) {
-        (regExp, pathParameters) = try uri.resolve()
+    public init(uri: any FJRouterRegisterURI, value: @escaping Value) async throws(FJRouter.RegisterURIError) {
+        (regExp, pathParameters) = try await uri.resolve()
         self.uri = uri
         self.value = value
     }

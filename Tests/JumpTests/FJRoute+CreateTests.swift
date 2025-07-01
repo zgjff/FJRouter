@@ -4,31 +4,31 @@ import UIKit
 @testable import FJRouter
 
 struct FJRouteTests {
-    @Test func emptyPath() {
-        #expect(throws: FJRoute.CreateError.uri(.emptyPath)) {
-            let _ = try FJRoute(path: "", builder: { _ in
+    @Test func emptyPath() async {
+        await #expect(throws: FJRoute.CreateError.uri(.emptyPath)) {
+            let _ = try await FJRoute(path: "", builder: { _ in
                 return UIViewController()
             })
         }
     }
     
-    @Test func emptyName() {
-        #expect(throws: FJRoute.CreateError.uri(.emptyName)) {
-            let _ = try FJRoute(path: "/", name: "", builder: { _ in
+    @Test func emptyName() async {
+        await #expect(throws: FJRoute.CreateError.uri(.emptyName)) {
+            let _ = try await FJRoute(path: "/", name: "", builder: { _ in
                 return UIViewController()
             })
         }
     }
     
-    @Test func noPageBuilder() {
-        #expect(throws: FJRoute.CreateError.noPageBuilder) {
-            let _ = try FJRoute(path: "/", builder: nil)
+    @Test func noPageBuilder() async {
+        await #expect(throws: FJRoute.CreateError.noPageBuilder) {
+            let _ = try await FJRoute(path: "/", builder: nil)
         }
     }
     
-    @Test func matchRegExpAsPrefixWithoutParameter() {
+    @Test func matchRegExpAsPrefixWithoutParameter() async throws {
         let pattern = "/settings/detail"
-        let route = try! FJRoute(path: pattern, builder: { _ in
+        let route = try await FJRoute(path: pattern, builder: { _ in
             return UIViewController()
         })
         

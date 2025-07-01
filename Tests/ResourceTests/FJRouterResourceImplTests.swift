@@ -6,24 +6,24 @@ struct FJRouterResourceImplTests {
     let impl: FJRouterResourceable
     init() async throws {
         impl = FJRouter.ResourceImpl.clone()
-        let r1 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
+        let r1 = try await FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
         try await impl.put(r1)
-        let r2 = try FJRouterResource(path: "/intOptionalvalue1", name: "intOptionalvalue1") { @Sendable info -> Int? in
+        let r2 = try await FJRouterResource(path: "/intOptionalvalue1", name: "intOptionalvalue1") { @Sendable info -> Int? in
             return 1
         }
         try await impl.put(r2)
-        let r3 = try FJRouterResource(path: "/intOptionalvalue2", name: "intOptionalvalue2") { @Sendable info -> Int? in
+        let r3 = try await FJRouterResource(path: "/intOptionalvalue2", name: "intOptionalvalue2") { @Sendable info -> Int? in
             return nil
         }
         try await impl.put(r3)
-        let r4 = try FJRouterResource(path: "/stringvalue1", name: "stringvalue1", value: { _ in "haha" })
+        let r4 = try await FJRouterResource(path: "/stringvalue1", name: "stringvalue1", value: { _ in "haha" })
         try await impl.put(r4)
-        let r5 = try FJRouterResource(path: "/intOptionalvalue3/:optional", name: "intOptionalvalue3", value: { @Sendable info -> Int? in
+        let r5 = try await FJRouterResource(path: "/intOptionalvalue3/:optional", name: "intOptionalvalue3", value: { @Sendable info -> Int? in
             let isOptional = info.pathParameters["optional"] == "1"
             return isOptional ? nil : 1
         })
         try await impl.put(r5)
-        let r6 = try FJRouterResource(path: "/protocolATest/:isA", name: "protocolATest", value: { @Sendable info -> ATestable in
+        let r6 = try await FJRouterResource(path: "/protocolATest/:isA", name: "protocolATest", value: { @Sendable info -> ATestable in
             let isA = info.pathParameters["isA"] == "1"
             return isA ? AModel() : BModel()
         })
@@ -32,11 +32,11 @@ struct FJRouterResourceImplTests {
     
     @Test func putExist() async throws {
         await #expect(throws: FJRouter.PutResourceError.exist) {
-            let r1 = try FJRouterResource(path: "/intvalue1", value: { _ in "haha" })
+            let r1 = try await FJRouterResource(path: "/intvalue1", value: { _ in "haha" })
             try await impl.put(r1)
         }
         await #expect(throws: FJRouter.PutResourceError.exist) {
-            let r2 = try FJRouterResource(path: "/intvalue1", name: "success", value: { _ in [1] })
+            let r2 = try await FJRouterResource(path: "/intvalue1", name: "success", value: { _ in [1] })
             try await impl.put(r2)
         }
     }
@@ -139,7 +139,7 @@ struct FJRouterResourceImplTests {
     }
     
     @Test func deleteExist() async throws {
-        let r1 = try FJRouterResource(path: "/intvalue11", name: "intvalue11", value: { _ in 1 })
+        let r1 = try await FJRouterResource(path: "/intvalue11", name: "intvalue11", value: { _ in 1 })
         try await impl.put(r1)
         let intvalue1: Int = try await impl.get(.loc("/intvalue11"), inMainActor: false)
         #expect(intvalue1 == 1)
@@ -151,7 +151,7 @@ struct FJRouterResourceImplTests {
             try await impl.delete(.loc("/intvalue11"))
         }
         
-        let r2 = try FJRouterResource(path: "/intOptionalvalue11", name: "intOptionalvalue11") { @Sendable info -> Int? in
+        let r2 = try await FJRouterResource(path: "/intOptionalvalue11", name: "intOptionalvalue11") { @Sendable info -> Int? in
             return 1
         }
         try await impl.put(r2)
@@ -171,44 +171,44 @@ struct FJRouterResourceImplTests {
         let intvalue1: Int = try await impl.get(.loc("/intvalue1"), inMainActor: false)
         #expect(intvalue1 == 1)
         
-        let r2 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 2 })
+        let r2 = try await FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 2 })
         await impl.put(r2) { (_, new) in new }
         let intvalue11: Int = try await impl.get(.loc("/intvalue1"), inMainActor: false)
         #expect(intvalue11 == 2)
         
-        let r3 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 11 })
+        let r3 = try await FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 11 })
         await impl.put(r3) { (current, _) in current }
         let intvalue111: Int = try await impl.get(.loc("/intvalue1"), inMainActor: false)
         #expect(intvalue111 == 2)
         
-        let r4 = try FJRouterResource(path: "/intvalue/first", name: nil, value: { _ in 12 })
+        let r4 = try await FJRouterResource(path: "/intvalue/first", name: nil, value: { _ in 12 })
         await impl.put(r4) { (_, new) in new }
         let intvaluefirst: Int = try await impl.get(.loc("/intvalue/first"), inMainActor: false)
         #expect(intvaluefirst == 12)
         
-        let r5 = try FJRouterResource(path: "/intvalue/second", name: nil, value: { _ in -2 })
+        let r5 = try await FJRouterResource(path: "/intvalue/second", name: nil, value: { _ in -2 })
         await impl.put(r5) { (currnet, _) in currnet }
         let intvaluesecond: Int = try await impl.get(.loc("/intvalue/second"), inMainActor: false)
         #expect(intvaluesecond == -2)
         
-        let r6 = try FJRouterResource(path: "/intvalue/second", name: "intvaluesecond", value: { _ in -12 })
+        let r6 = try await FJRouterResource(path: "/intvalue/second", name: "intvaluesecond", value: { _ in -12 })
         await impl.put(r6) { (currnet, _) in currnet }
         let intvaluesecond1: Int = try await impl.get(.name("intvaluesecond", params: [:], queryParams: [:]), inMainActor: true)
         #expect(intvaluesecond1 == -2)
         
-        let r7 = try FJRouterResource(path: "/intvalue/second", name: "intvaluesecond2", value: { _ in -12 })
+        let r7 = try await FJRouterResource(path: "/intvalue/second", name: "intvaluesecond2", value: { _ in -12 })
         await impl.put(r7) { (currnet, _) in currnet }
         let intvaluesecond2: Int = try await impl.get(.name("intvaluesecond2", params: [:], queryParams: [:]), inMainActor: true)
         #expect(intvaluesecond2 == -2)
         
-        let r8 = try FJRouterResource(path: "/intvalue/second", name: "intvaluesecond3", value: { _ in -18 })
+        let r8 = try await FJRouterResource(path: "/intvalue/second", name: "intvaluesecond3", value: { _ in -18 })
         await impl.put(r8) { (_, new) in new }
         let intvaluesecond3: Int = try await impl.get(.name("intvaluesecond3", params: [:], queryParams: [:]), inMainActor: true)
         #expect(intvaluesecond3 == -18)
     }
     
     @Test func update() async throws {
-        let r1 = try FJRouterResource(path: "/sintvalue1", name: "sintvalue1", value: { _ in 29 })
+        let r1 = try await FJRouterResource(path: "/sintvalue1", name: "sintvalue1", value: { _ in 29 })
         try await impl.put(r1)
         let sintvalue1: Int = try await impl.get(.loc("/sintvalue1"), inMainActor: false)
         #expect(sintvalue1 == 29)

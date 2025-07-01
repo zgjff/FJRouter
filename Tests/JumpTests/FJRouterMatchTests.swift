@@ -5,7 +5,7 @@ import UIKit
 
 struct FJRouterMatchTests {
     @Test func matchWithoutParameter() async throws {
-        let route = try! FJRoute(path: "/settings/detail", builder: _builder)
+        let route = try await FJRoute(path: "/settings/detail", builder: _builder)
         let (matches1, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "settings/detail")!)
         #expect(matches1.isEmpty)
         
@@ -17,7 +17,7 @@ struct FJRouterMatchTests {
     }
     
     @Test func matchWithParameter() async throws {
-        let route = try! FJRoute(path: "/users/:userId", builder: _builder)
+        let route = try await FJRoute(path: "/users/:userId", builder: _builder)
         let (matches1, pathParameters1) = FJRouteMatch.match(route: route, byUrl: URL(string: "/users/123")!)
         #expect(matches1.count == 1)
         #expect(matches1[0].route == route)
@@ -32,11 +32,11 @@ struct FJRouterMatchTests {
     }
     
     @Test func matchWithChildRouteNoParameter() async throws {
-        let route = try! FJRoute(path: "/", builder: _builder, routes: [
-            try! FJRoute(path: "a", builder: _builder, routes: [
-                try! FJRoute(path: "b", builder: _builder, routes: [
-                    try! FJRoute(path: "c", builder: _builder, routes: [
-                        try! FJRoute(path: "/d", builder: _builder)
+        let route = try await FJRoute(path: "/", builder: _builder, routes: await [
+            FJRoute(path: "a", builder: _builder, routes: await [
+                FJRoute(path: "b", builder: _builder, routes: await [
+                    FJRoute(path: "c", builder: _builder, routes: await [
+                        FJRoute(path: "/d", builder: _builder)
                     ])
                 ])
             ])
@@ -52,10 +52,10 @@ struct FJRouterMatchTests {
     }
     
     @Test func matchWithChildRouteWithParameter() async throws {
-        let route = try! FJRoute(path: "/user/:id", builder: _builder, routes: [
-            try! FJRoute(path: "book/:bookId", builder: _builder, routes: [
-                try! FJRoute(path: "detail", builder: _builder, routes: [
-                    try! FJRoute(path: "show/:page", builder: _builder)
+        let route = try await FJRoute(path: "/user/:id", builder: _builder, routes: await [
+            FJRoute(path: "book/:bookId", builder: _builder, routes: await [
+                FJRoute(path: "detail", builder: _builder, routes: await [
+                    FJRoute(path: "show/:page", builder: _builder)
                 ])
             ])
         ])
@@ -73,10 +73,10 @@ struct FJRouterMatchTests {
     }
     
     @Test func matchParentMushStartWithSlash1() async throws {
-        let route = try! FJRoute(path: "/a", builder: _builder, routes: [
-            try! FJRoute(path: "b", builder: _builder, routes: [
-                try! FJRoute(path: "c", builder: _builder, routes: [
-                    try! FJRoute(path: "d", builder: _builder, routes: [
+        let route = try await FJRoute(path: "/a", builder: _builder, routes: await [
+            FJRoute(path: "b", builder: _builder, routes: await [
+                FJRoute(path: "c", builder: _builder, routes: await [
+                    FJRoute(path: "d", builder: _builder, routes: [
                     ])
                 ])
             ])
@@ -95,10 +95,10 @@ struct FJRouterMatchTests {
     }
     
     @Test func matchParentMushStartWithSlash2() async throws {
-        let route = try! FJRoute(path: "a", builder: _builder, routes: [
-            try! FJRoute(path: "b", builder: _builder, routes: [
-                try! FJRoute(path: "c", builder: _builder, routes: [
-                    try! FJRoute(path: "d", builder: _builder, routes: [
+        let route = try await FJRoute(path: "a", builder: _builder, routes: await [
+            FJRoute(path: "b", builder: _builder, routes: await [
+                FJRoute(path: "c", builder: _builder, routes: await [
+                    FJRoute(path: "d", builder: _builder, routes: [
                     ])
                 ])
             ])
@@ -116,18 +116,18 @@ struct FJRouterMatchTests {
         #expect(matches4.count == 0)
     }
     
-    @Test func matchParameterWithURlDecode() {
-        let route1 = try! FJRoute(path: "/user/:name", builder: _builder)
+    @Test func matchParameterWithURlDecode() async throws {
+        let route1 = try await FJRoute(path: "/user/:name", builder: _builder)
         let (matches1, pathParameters1) = FJRouteMatch.match(route: route1, byUrl: URL(string: "/user/%e5%90%8d%e5%ad%97")!)
         #expect(!matches1.isEmpty)
         #expect(pathParameters1["name"] == "名字")
         
-        let route2 = try! FJRoute(path: "/web/:url/next", builder: _builder)
+        let route2 = try await FJRoute(path: "/web/:url/next", builder: _builder)
         let (matches2, pathParameters2) = FJRouteMatch.match(route: route2, byUrl: URL(string: "/web/https%3a%2f%2fcn.bing.com%2fsearch%3fq%3d%e5%a4%a9%e6%b0%94%26cvid%3ddf4490e4326d4fbeb/next")!)
         #expect(!matches2.isEmpty)
         #expect(pathParameters2["url"] == "https://cn.bing.com/search?q=天气&cvid=df4490e4326d4fbeb")
         
-        let route3 = try! FJRoute(path: "/web/:url", builder: _builder)
+        let route3 = try await FJRoute(path: "/web/:url", builder: _builder)
         let (matches3, pathParameters3) = FJRouteMatch.match(route: route3, byUrl: URL(string: "/web/https%3a%2f%2fcn.bing.com%2fsearch%3fq%3d%e5%a4%a9%e6%b0%94%26cvid%3ddf4490e4326d4fbeb?tab=10")!)
         #expect(!matches3.isEmpty)
         #expect(pathParameters3["url"] == "https://cn.bing.com/search?q=天气&cvid=df4490e4326d4fbeb")
