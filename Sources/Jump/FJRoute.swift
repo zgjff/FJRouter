@@ -17,7 +17,7 @@ import UIKit
 ///     - uri: 资源标志
 ///     - builder: 构建路由的`controller`指向
 ///     - animator: 显示匹配路由控制器的方式
-///     - redirect: 路由重定向
+///     - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
 ///     - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
 public struct FJRoute: Sendable {
     /// 构建路由控制器
@@ -62,7 +62,7 @@ public struct FJRoute: Sendable {
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
     ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///   - animator: 显示匹配路由控制器的方式。不传的时候使用, `FJRoute.AutomaticAnimator`
-    ///   - redirect: 路由重定向
+    ///   - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
     public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
@@ -88,7 +88,7 @@ public struct FJRoute: Sendable {
     ///   - uri: 路由注册资源
     ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///   - animator: 显示匹配路由控制器的方式。
-    ///   - redirect: 路由重定向
+    ///   - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
     public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
