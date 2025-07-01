@@ -14,8 +14,7 @@ import UIKit
 ///     注意:初始化的`builder`和`redirect`参数必须至少提供一项, 否则初始化失败
 ///
 ///     参数:
-///     - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
-///     - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
+///     - uri: 资源标志
 ///     - builder: 构建路由的`controller`指向
 ///     - animator: 显示匹配路由控制器的方式
 ///     - redirect: 路由重定向
@@ -62,7 +61,7 @@ public struct FJRoute: Sendable {
     ///   - path: 路由路径: 如果是起始父路由, 其`path`必须以`/`为前缀
     ///   - name: 路由的名称: 如果赋值, 必须提供唯一的字符串名称, 且不能为空
     ///   - builder: 构建路由的`controller`指向, 数组, 可以添加多个, 按顺序检查.比如:登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
-    ///   - animator: 显示匹配路由控制器的方式。
+    ///   - animator: 显示匹配路由控制器的方式。不传的时候使用, `FJRoute.AutomaticAnimator`
     ///   - redirect: 路由重定向
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
     public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () throws -> [FJRoute] = []) throws(FJRoute.CreateError) {

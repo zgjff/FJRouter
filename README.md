@@ -5,7 +5,7 @@
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 
 ## 简介
-> 理解中的路由应该包含路由页面跳转管理、通过url获取对应位置的资源
+> 路由包含路由页面跳转管理、通过url获取对应位置的资源
 
 框架包含三大模块:
 
