@@ -10,9 +10,13 @@ import Foundation
 
 extension FJRouter {
     internal actor JumpStore {
-        private var routes: [FJRoute] = []
+        private var routes: [FJRoute]
         private var redirectLimit: UInt = 5
         private var nameToPath: [String: String] = [:]
+        
+        init() {
+            routes = Array(unsafeUninitializedCapacity: 50, initializingWith: { _, _ in })
+        }
     }
 }
 

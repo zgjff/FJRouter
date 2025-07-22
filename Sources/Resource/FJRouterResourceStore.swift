@@ -10,7 +10,11 @@ import Foundation
 extension FJRouter {
     internal actor ResourceStore {
         private var nameToPath: [String: String] = [:]
-        private var resources: Set<FJRouterResource> = []
+        private var resources: Set<FJRouterResource>
+        
+        init() {
+            resources = Set(minimumCapacity: 10)
+        }
     }
 }
 

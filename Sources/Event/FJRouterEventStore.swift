@@ -9,8 +9,12 @@ import Foundation
 
 extension FJRouter {
     internal actor EventStore {
-        private var listeners: Set<EventListener> = []
+        private var listeners: Set<EventListener>
         private var nameToPath: [String: String] = [:]
+        
+        init() {
+            listeners = Set(minimumCapacity: 10)
+        }
     }
 }
 

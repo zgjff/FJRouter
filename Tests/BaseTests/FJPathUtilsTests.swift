@@ -7,6 +7,9 @@ struct FJPathUtilsTests {
         let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: "/settings/detail")
         #expect(pathParameter.isEmpty)
         #expect(matchPathSuccess(regExp: reg, string: "/settings/detail"))
+        #expect(matchPathSuccess(regExp: reg, string: "/settings/detail/"))
+        #expect(matchPathSuccess(regExp: reg, string: "/settings/detail/sdf"))
+        #expect(matchPathSuccess(regExp: reg, string: "/settings/detail/search?id=3"))
         #expect(!matchPathSuccess(regExp: reg, string: "/settings/"))
         #expect(!matchPathSuccess(regExp: reg, string: "/settings"))
         #expect(!matchPathSuccess(regExp: reg, string: "/"))
@@ -16,9 +19,7 @@ struct FJPathUtilsTests {
     
     @Test func patternToRegExpWithParameter() async throws {
         let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: "/user/:id/book/:bookId")
-        #expect(pathParameter.count == 2)
-        #expect(pathParameter[0] == "id")
-        #expect(pathParameter[1] == "bookId")
+        #expect(pathParameter == ["id", "bookId"])
         
         let string = "/user/123/book/456/18"
         let match = reg.firstMatch(in: string, range: NSRange(location: 0, length: string.count))

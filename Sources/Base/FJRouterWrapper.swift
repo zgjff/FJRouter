@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouter {
     public struct Wrapper<Object>: @unchecked Sendable {
-        public let object: Object
+        public private(set) var object: Object
         
         internal init(_ object: Object) {
             self.object = object
