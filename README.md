@@ -7,9 +7,11 @@
 ## 简介
 > 路由包含路由页面跳转管理、通过url获取对应位置的资源
 
-框架包含如下模块:
+框架包含三大模块:
 
 - [路由页面跳转管理](#路由页面跳转管理)
+
+- [资源管理中心](#资源管理中心)
 
 - [事件总线](#事件总线)
 
@@ -291,6 +293,126 @@ callback.sink(receiveCompletion: { cop in
 FJRouter.jump().go(.loc("/six"))
 ```
 
+## 资源管理中心
+
+### 资源管理`FJRouterResourceable`协议:
+
+1: 资源管理是定义为`FJRouterResourceable`的协议, 可以通过`FJRouter.resource()`获取框架资源管理中心对象.
+
+2: 建议使用try FJRouterResource(path: "/xxx", name: "xxx", value: xxx), get(name: xxx)方法进行相关操作。
+
+> 当资源路径比较复杂,且含有参数的时候, 如果通过硬编码的方法直接手写路径, 可能会造成拼写错误,参数位置错误等错误
+
+> 在实际app中, 资源的`URL`格式可能会随着时间而改变, 但是一般资源名称不会去更改
+
+### 存放资源:
+
+```swift 
+func put(_ resource: FJRouterResource) async throws
+```
+
+1: 资源可以是int, string, enum, uiview, uiviewcontroller, protocol...
+
+2: 资源必须是`Sendable`修饰的对象
+
+3: 存放资源的时候可以携带参数
+
+4: 适用于全局只会存放一次的资源: 如单例中或者`application:didFinishLaunchingWithOptions`中, 或者存放的资源内部具体的值是个固定值, 不会随着时间/操作更改
+
+5: 如果每次存放资源可能会更改, 建议使用`put(_ resource: FJRouterResource, uniquingPathWith: xxx)`方法
+
+6: 事例代码:
+
+```swift 
+let r1 = try FJRouterResource(path: "/intvalue1", name: "intvalue1", value: { _ in 1 })
+try await FJRouter.resource().put(r1)
+
+let r3 = try FJRouterResource(path: "/intOptionalvalue2", name: "intOptionalvalue2") { @Sendable info -> Int? in
+    return nil
+}
+try await FJRouter.resource().put(r3)
+
+let r5 = try FJRouterResource(path: "/intOptionalvalue3/:optional", name: "intOptionalvalue3", value: { @Sendable info -> Int? in
+    let isOptional = info.pathParameters["optional"] == "1"
+    return isOptional ? nil : 1
+})
+try await FJRouter.resource().put(r5)
+
+存放协议
+let r6 = try FJRouterResource(path: "/protocolATest/:isA", name: "protocolATest", value: { @Sendable info -> ATestable in
+    let isA = info.pathParameters["isA"] == "1"
+    return isA ? AModel() : BModel()
+})
+try await FJRouter.resource().put(r6)
+```
+
+### 根据策略存放资源
+
+```swift 
+func put(_ resource: FJRouterResource, uniquingPathWith combine: @Sendable (_ current: @escaping FJRouterResource.Value, _ new: @escaping FJRouterResource.Value) -> FJRouterResource.Value) async
+```
+
+1: 如果已经存放过相同`path`的资源, 不会抛出`FJRouter.PutResourceError.exist`错误, 会按照`combine`策略进行合并
+
+2: 适用于可能多处/多处存放: 如某个viewController, 出现的时候才去存储资源, 但是因为viewController可能会多次进入, 而且每次存放的资源的具体值均不相同, 使用此方法可以有效的存储, 不会抛出`FJRouter.PutResourceError.exist`错误
+
+3: 资源的名称会优先使用新的资源name, 如果新的资源name为nil, 才会使用旧资源name
+
+4: 事例代码
+```swift 
+// 使用旧值
+await FJRouter.resource().put(r) { (currnet, _) in currnet }
+// 使用新值
+await FJRouter.resource().put(r) { (_, new) in new }
+```
+
+### 获取资源
+
+1: 可以通过路径和资源名称获取资源
+
+```swift 
+func get<Value>(_ uri: FJRouter.URI, inMainActor mainActor: Bool) async throws(FJRouter.GetResourceError) -> Value where Value: Sendable
+```
+
+2: 事例代码
+```swift
+let intvalue1: Int = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: false)
+let intvalue3: Int? = try await FJRouter.resource().get(.loc("/intvalue1"), inMainActor: true)
+let intOptionalvalue3: Int? = try await FJRouter.resource().get(.loc("/intOptionalvalue2"), inMainActor: false)
+let stringvalue1: String = try await FJRouter.resource().get(.name("intvalue1"), inMainActor: false)
+let aTestable1: ATestable = try await FJRouter.resource().get(.loc("/protocolATest/1"), inMainActor: false)
+let aTestable2: ATestable = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: true)
+let aTestable3: BModel = try await FJRouter.resource().get(.name("/protocolATest/0"), inMainActor: false)
+```
+
+### 更新资源
+1: 可以通过路径和资源名称更新资源
+```swift 
+func update(_ uri: FJRouter.URI, value: @escaping FJRouterResource.Value) async throws(FJRouter.GetResourceError)
+```
+
+3: 事例代码
+```swift
+try await impl.update(.loc("/sintvalue1"), value: { _ in 39 })
+try await impl.update(.name("sintvalue1"), value: { _ in 66 })
+```
+
+### 删除资源
+
+```swift 
+func delete(_ uri: FJRouter.URI) async throws(FJRouter.GetResourceError)
+```
+
+1: 必须是已经存放过的资源, 删除不存在的资源会抛出`FJRouter.GetResourceError.notFind`错误
+
+2: 可以根据名称或者路由删除
+
+3: 事例代码:
+
+```swift
+try await FJRouter.resource().delete(.name("adfasdf"))
+try await FJRouter.resource().delete(.loc("adfasdf"))
+```
 
 ## 事件总线
 
