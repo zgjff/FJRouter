@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 extension FJRouteJumpProvider {
     internal actor Impl: FJRouteJumpProviderable {
-        private var routes: [FJRouteInnerTarget]
+        private var routes: [FJRouteTarget.InnerTarget]
         private var redirectLimit: UInt = 5
         init() {
             routes = Array(unsafeUninitializedCapacity: 50, initializingWith: { _, _ in })
@@ -20,15 +20,8 @@ extension FJRouteJumpProvider {
 // MARK: - register
 extension FJRouteJumpProvider.Impl {
     func registerRoute(_ target: any FJRouteTargetType) async {
-        addRoute(target, parentInnerTarget: nil)
-    }
-    
-    private func addRoute(_ target: any FJRouteTargetType, parentInnerTarget: FJRouteInnerTarget?) {
-        let currentIt = FJRouteInnerTarget(target: target, paretnTarget: parentInnerTarget)
+        let currentIt = FJRouteTarget.InnerTarget(target: target, paretnTarget: nil)
         routes.append(currentIt)
-        for subTarget in target.subTargets {
-            addRoute(subTarget, parentInnerTarget: currentIt)
-        }
     }
 }
 
