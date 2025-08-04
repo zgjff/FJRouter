@@ -10,64 +10,59 @@ import Foundation
 extension FJRouteTarget {
     internal final class InnerTarget: @unchecked Sendable {
         let target: any FJRouteTargetType
-        let paretnTarget: FJRouteTarget.InnerTarget?
+        let parentTarget: FJRouteTarget.InnerTarget?
+        private let subDepth: Int
+        private var pchildrenTargets: [FJRouteTarget.InnerTarget]?
         private var pathParameters: [String] = []
         private var regExp: NSRegularExpression? = nil
-        init(target: any FJRouteTargetType, paretnTarget: FJRouteTarget.InnerTarget?) {
+        init(target: any FJRouteTargetType) {
             self.target = target
-            self.paretnTarget = paretnTarget
+            self.parentTarget = nil
+            subDepth = 0
+        }
+        
+        private init(target: any FJRouteTargetType, parentTarget: InnerTarget?, subDepth: Int) {
+            self.target = target
+            self.parentTarget = parentTarget
+            self.subDepth = subDepth
         }
     }
 }
 
 extension FJRouteTarget.InnerTarget {
-    func resolve() async throws(FJRouter.RegisterURIError) -> (regExp: NSRegularExpression, pathParameters: [String]) {
+    func resolve() async throws(FJRouter.RegisterURIError) -> (regExp: NSRegularExpression, pathParameters: [String], exsits: Bool) {
         if let regExp {
-            return (regExp, pathParameters)
+            return (regExp, pathParameters, true)
         }
         let pairs = try await target.resolve()
         self.regExp = pairs.regExp
         self.pathParameters = pairs.pathParameters
-        return (pairs.regExp, pairs.pathParameters)
+        return (pairs.regExp, pairs.pathParameters, false)
     }
     
     func fullpath() -> String {
         // TODO: - 一直查找parentPath
-        let parentPath = paretnTarget?.target.path ?? ""
+        let parentPath = parentTarget?.target.path ?? ""
         let fp = FJPathUtils.default.concatenatePaths(parentPath: parentPath.trimmingCharacters(in: .whitespacesAndNewlines), childPath: target.path)
         return fp
     }
     
-    static func allRoutes(for target: any FJRouteTargetType) async -> [FJRouteTarget.InnerTarget] {
-        return await withCheckedContinuation { continuation in
-            let rs = FJRouteTarget.InnerTarget.routes(target, parentInnerTarget: nil, subRouteDepth: 1)
-            let fs = rs.enumerated().filter({ (index, ele1) in
-                return rs.firstIndex(where: { ele2 in
-                    return ele1.target.path == ele2.target.path && ele1.target.name == ele2.target.name
-                }) == index
-            }).map { $0.element }
-            continuation.resume(returning: fs)
+    func childrenTargets() -> [FJRouteTarget.InnerTarget] {
+        if let pchildrenTargets {
+            return pchildrenTargets
         }
+        let cts = target.subTargets.map { FJRouteTarget.InnerTarget(target: $0, parentTarget: self, subDepth: subDepth + 1) }
+        self.pchildrenTargets = cts
+        return cts
     }
-
-    private static func routes(_ target: any FJRouteTargetType, parentInnerTarget: FJRouteTarget.InnerTarget?, subRouteDepth: Int) -> [FJRouteTarget.InnerTarget] {
-        if subRouteDepth >= 66 {
-            return []
-        }
-        let currentIt = FJRouteTarget.InnerTarget(target: target, paretnTarget: parentInnerTarget)
-        var allTargets = [currentIt]
-        for subTarget in target.subTargets {
-            let srs = routes(subTarget, parentInnerTarget: currentIt, subRouteDepth: subRouteDepth + 1)
-            if !srs.isEmpty {
-                allTargets.append(contentsOf: srs)
-            }
-        }
-        return allTargets
+    
+    func routeDepth() -> Int {
+        subDepth
     }
 }
 
 extension FJRouteTarget.InnerTarget: Equatable {
     static func == (lhs: FJRouteTarget.InnerTarget, rhs: FJRouteTarget.InnerTarget) -> Bool {
-        return lhs.target.path == rhs.target.path
+        return lhs.target.path == rhs.target.path && lhs.target.name == rhs.target.name
     }
 }

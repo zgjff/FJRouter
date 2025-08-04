@@ -20,7 +20,7 @@ public protocol FJRouteTargetType: Sendable {
     /// 而且要保证`name`的唯一性, 否则在注册的时候会触发断言assert
     var name: String? { get }
     
-    /// 路由参数. eg:
+    /// 路由参数, 如果提供的与path中需要的不一致, 或者缺少, 则后续在匹配的时候抛出错误. eg:
     ///
     ///     如path为`/family/:fid`, 则必须提供fid, ["fid": "xxx"]
     ///     如path为`/user/:uid/books/:bid`, 则必须提供uid和bid, ["uid": "xxx", "bid": "xxx"]

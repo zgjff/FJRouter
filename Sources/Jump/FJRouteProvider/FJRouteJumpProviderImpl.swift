@@ -20,7 +20,7 @@ extension FJRouteJumpProvider {
 // MARK: - register
 extension FJRouteJumpProvider.Impl {
     func registerRoute(_ target: any FJRouteTargetType) async {
-        let currentIt = FJRouteTarget.InnerTarget(target: target, paretnTarget: nil)
+        let currentIt = FJRouteTarget.InnerTarget(target: target)
         routes.append(currentIt)
     }
 }
