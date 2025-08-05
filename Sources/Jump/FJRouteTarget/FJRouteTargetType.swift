@@ -9,7 +9,7 @@ import Foundation
 
 /// 路由对象协议
 public protocol FJRouteTargetType: Sendable {
-    /// 路由路径
+    /// 路由路径: 强烈建议子路由的`path`不要以`/`为开头
     ///
     /// 该路径还支持路径参数. eg:
     ///
