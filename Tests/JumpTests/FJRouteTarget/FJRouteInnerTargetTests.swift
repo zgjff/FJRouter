@@ -32,6 +32,16 @@ struct FJRouteInnerTargetTests {
         let innerTarget3 = FJRouteTarget.InnerTarget(target: target3)
         let (_, pathParameters31, _) = try await innerTarget3.resolve()
         #expect(pathParameters31 == ["uid", "sid"])
+        
+        let target4 = SettingsPageRoute.app
+        let innerTarget4 = FJRouteTarget.InnerTarget(target: target4)
+        let (_, pathParameters41, _) = try await innerTarget4.resolve()
+        #expect(pathParameters41.isEmpty)
+        
+        let target5 = SettingsPageRoute.user(id: "1")
+        let innerTarget5 = FJRouteTarget.InnerTarget(target: target5)
+        let (_, pathParameters51, _) = try await innerTarget5.resolve()
+        #expect(pathParameters51 == ["id"])
     }
 
     @Test func testNoChildrenRouteFullPath() async {
@@ -54,15 +64,6 @@ struct FJRouteInnerTargetTests {
         let (_, pathParameters1, _) = try await innerTarget1.resolve()
         #expect(pathParameters1.isEmpty)
         
-        let target2 = SettingsPageRoute.app
-        let innerTarget2 = FJRouteTarget.InnerTarget(target: target2)
-        let (_, pathParameters2, _) = try await innerTarget2.resolve()
-        #expect(pathParameters2.isEmpty)
-        
-        let target3 = SettingsPageRoute.user(id: "1")
-        let innerTarget3 = FJRouteTarget.InnerTarget(target: target3)
-        let (_, pathParameters3, _) = try await innerTarget3.resolve()
-        #expect(pathParameters3 == ["id"])
     }
 }
 

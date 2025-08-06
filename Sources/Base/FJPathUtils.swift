@@ -169,23 +169,7 @@ extension FJPathUtils {
     }
     
     internal func concatenatePaths(parentPath: String, childPath: String) -> String {
-        var result = parentPath.split(separator: "/")
-        result += childPath.split(separator: "/")
-        var joinPath = result.filter { !$0.isEmpty }.joined(separator: "/")
-        if joinPath.isEmpty {
-            return "/"
-        }
-        if joinPath == "/" {
-            return joinPath
-        }
-        let hasPrefixSlash = parentPath.hasPrefix("/") || childPath.hasPrefix("/")
-        let hasSuffixSlash = ((parentPath != "/") || (parentPath != "/")) && (parentPath.hasSuffix("/") || childPath.hasSuffix("/"))
-        if hasPrefixSlash && !joinPath.hasPrefix("/") {
-            joinPath = "/" + joinPath
-        }
-        if hasSuffixSlash && !joinPath.hasSuffix("/") {
-            joinPath = joinPath + "/"
-        }
-        return joinPath
+        let paths = parentPath.split(separator: "/") + childPath.split(separator: "/")
+        return "/" + paths.filter({ !$0.isEmpty }).joined(separator: "/")
     }
 }

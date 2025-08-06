@@ -62,10 +62,18 @@ struct FJPathUtilsTests {
     }
     
     @Test func concatenatePaths() async throws {
-        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "b/c") == "/a/b/c")
         #expect(FJPathUtils.default.concatenatePaths(parentPath: "/", childPath: "b") == "/b")
-        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "/b/c/") == "/a/b/c/")
-        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "b/c/") == "/a/b/c/")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/", childPath: "/b") == "/b")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "b/c") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "/b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "/a", childPath: "/b/c") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "a", childPath: "b/c") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "a", childPath: "b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "a", childPath: "/b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "a", childPath: "b/c/") == "/a/b/c")
+        #expect(FJPathUtils.default.concatenatePaths(parentPath: "a", childPath: "/b/c") == "/a/b/c")
         #expect(FJPathUtils.default.concatenatePaths(parentPath: "/", childPath: "/") == "/")
         #expect(FJPathUtils.default.concatenatePaths(parentPath: "", childPath: "") == "/")
     }

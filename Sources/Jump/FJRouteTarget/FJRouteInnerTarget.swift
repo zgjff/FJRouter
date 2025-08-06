@@ -22,7 +22,7 @@ extension FJRouteTarget {
             subDepth = 0
         }
         
-        private init(target: any FJRouteTargetType, parentTarget: InnerTarget?, subDepth: Int) {
+        init(target: any FJRouteTargetType, parentTarget: InnerTarget?, subDepth: Int) {
             self.target = target
             self.parentTarget = parentTarget
             self.subDepth = subDepth
