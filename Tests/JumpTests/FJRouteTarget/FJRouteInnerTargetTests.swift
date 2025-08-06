@@ -64,6 +64,13 @@ struct FJRouteInnerTargetTests {
         let (_, pathParameters1, _) = try await innerTarget1.resolve()
         #expect(pathParameters1.isEmpty)
         
+        let target1SubTargets = innerTarget1.childrenTargets()
+        #expect(target1SubTargets.count == 2)
+        let (_, target1SubTargetsPathParameters1, _) = try await target1SubTargets[0].resolve()
+        #expect(target1SubTargetsPathParameters1.isEmpty)
+        
+        let (_, target1SubTargetsPathParameters2, _) = try await target1SubTargets[1].resolve()
+        #expect(target1SubTargetsPathParameters2 == ["id"])
     }
 }
 
