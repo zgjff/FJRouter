@@ -82,7 +82,7 @@ public struct FJRouterCommonRegisterURI: FJRouterRegisterURI, CustomStringConver
             result += ", name: \(name)"
         }
         result += ")"
-        return "RegisterURI"
+        return result
     }
     
     public var debugDescription: String {

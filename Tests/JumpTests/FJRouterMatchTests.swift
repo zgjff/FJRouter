@@ -87,11 +87,20 @@ struct FJRouterMatchTests {
         let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b")!)
         #expect(matches2.count == 2)
         
-        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
-        #expect(matches3.count == 0)
+        let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/c")!)
+        #expect(matches3.count == 3)
         
-        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
+        let (matches4, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
         #expect(matches4.count == 0)
+        
+        let (matches5, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/c")!)
+        #expect(matches5.count == 0)
+        
+        let (matches6, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/d")!)
+        #expect(matches6.count == 0)
+        
+        let (matches7, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/c/d")!)
+        #expect(matches7.count == 0)
     }
     
     @Test func matchParentMushStartWithSlash2() async throws {
@@ -107,7 +116,7 @@ struct FJRouterMatchTests {
         #expect(matches1.count == 0)
         
         let (matches2, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "a/b/c/d")!)
-        #expect(matches2.count == 4)
+        #expect(matches2.count == 0)
 
         let (matches3, _) = FJRouteMatch.match(route: route, byUrl: URL(string: "/a/b/d")!)
         #expect(matches3.count == 0)
