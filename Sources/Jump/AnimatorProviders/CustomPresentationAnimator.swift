@@ -70,7 +70,6 @@ extension FJRoute.CustomPresentationAnimator {
         private var context: FJRoute.CustomPresentationAnimator.BehaviorController.Context!
         private var belowCoverView: UIView?
         private var presentationWrappingView: UIView?
-        private var didTransitionToNewSize = false
     }
 }
 
@@ -210,21 +209,18 @@ extension FJRoute.CustomPresentationAnimator.BehaviorController {
         guard let containerView else {
             return
         }
-        if didTransitionToNewSize {
-            context.willTransitionSize(context, containerView.bounds.size, containerView.safeAreaInsets)
-        }
         belowCoverView?.frame = containerView.bounds
         presentationWrappingView?.frame = frameOfPresentedViewInContainerView
     }
     
     public override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        didTransitionToNewSize = true
-        coordinator.animate { _ in
-            
-        } completion: { [weak self] _ in
-            self?.didTransitionToNewSize = false
-        }
+        coordinator.animate { [weak self] _ in
+            guard let self, let cv = self.containerView else {
+                return
+            }
+            self.context.willTransitionSize(self.context, cv.bounds.size, cv.safeAreaInsets)
+        } completion: { _ in }
     }
 }
 
