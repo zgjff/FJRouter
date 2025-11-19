@@ -58,16 +58,16 @@ extension FJRoute.CustomPresentationAnimator {
         ///   - presentingViewController: 跳转目标控制器
         ///   - configContext: 设置context的block
         public init(show presentedViewController: UIViewController, from presentingViewController: UIViewController?, config configContext: (@MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context) -> ())? = nil) {
-            self.context = FJRoute.CustomPresentationAnimator.BehaviorController.Context()
             super.init(presentedViewController: presentedViewController, presenting: presentingViewController)
             presentedViewController.modalPresentationStyle = .custom
             presentedViewController.transitioningDelegate = self
+            self.context = FJRoute.CustomPresentationAnimator.BehaviorController.Context(presentedViewController: self.presentedViewController, presenting: self.presentingViewController)
             configContext?(context)
         }
         public override var presentedView: UIView? {
             return presentationWrappingView
         }
-        private let context: FJRoute.CustomPresentationAnimator.BehaviorController.Context
+        private var context: FJRoute.CustomPresentationAnimator.BehaviorController.Context!
         private var belowCoverView: UIView?
         private var presentationWrappingView: UIView?
         private var didTransitionToNewSize = false
@@ -211,7 +211,7 @@ extension FJRoute.CustomPresentationAnimator.BehaviorController {
             return
         }
         if didTransitionToNewSize {
-            context.willTransitionSize(context, containerView.bounds.size, containerView.safeAreaInsets, presentedViewController)
+            context.willTransitionSize(context, containerView.bounds.size, containerView.safeAreaInsets)
         }
         belowCoverView?.frame = containerView.bounds
         presentationWrappingView?.frame = frameOfPresentedViewInContainerView
@@ -301,17 +301,22 @@ extension FJRoute.CustomPresentationAnimator.BehaviorController {
         /// 转场动画中presentingViewController的View的frame
         public typealias FrameOfPresentedViewInContainerView = @MainActor @Sendable (_ containerViewBounds: CGRect, _ containerViewSafeAreaInsets: UIEdgeInsets, _ preferredContentSize: CGSize) -> (CGRect)
         /// 横竖屏切换回调
-        public typealias WillTransitionSize = @MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context, _ containerViewSize: CGSize, _ containerViewSafeAreaInsets: UIEdgeInsets, _ tovc: UIViewController) -> ()
-        
-        init() {
+        public typealias WillTransitionSize = @MainActor @Sendable (_ ctx: FJRoute.CustomPresentationAnimator.BehaviorController.Context, _ containerViewSize: CGSize, _ containerViewSafeAreaInsets: UIEdgeInsets) -> ()
+        /// The view controller that is the starting point for the presentation.
+        public fileprivate(set) unowned var presentingViewController: UIViewController
+        /// The view controller being presented.
+        public fileprivate(set) unowned var presentedViewController: UIViewController
+        init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController) {
             `default` = FJRoute.CustomPresentationAnimator.BehaviorController.Context.Default()
+            self.presentingViewController = presentingViewController
+            self.presentedViewController = presentedViewController
             frameOfPresentedViewInContainerView = `default`.centerFrameOfPresentedView
             presentationWrappingView = `default`.shadowAllRoundedCornerWrappingView(10)
             belowCoverView = `default`.dimmingBelowCoverView
             transitionAnimator = `default`.centerTransitionAnimator
             willPresentAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(true)
             willDismissAnimatorForBelowCoverView = `default`.dimmingBelowCoverViewAnimator(false)
-            willTransitionSize = {  @Sendable ctx, size, safeAreaInsets, tovc in
+            willTransitionSize = {  @Sendable ctx, size, safeAreaInsets in
                 
             }
         }
@@ -393,22 +398,22 @@ extension FJRoute.CustomPresentationAnimator.BehaviorController {
         ///     ctx.usingEdgePresentation { @Sendable containerViewSize in
         ///         .bottom
         ///     }
-        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets in
         ///         let isPortrait = size.width < size.height
-        ///         tovc.preferredContentSize = isPortrait ? CGSize(width: size.width, height: 300) : CGSize(width: size.width, height: 150)
-        ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算
-        ///         tovc.xxxxxxxx
+        ///         ctx.presentedViewController.preferredContentSize = isPortrait ? CGSize(width: size.width, height: 300) : CGSize(width: size.width, height: 150)
+        ///         或者在ctx.presentedViewController内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算
+        ///         ctx.presentedViewController.xxxxxxxx
         ///     }
         ///
         ///     eg: 竖屏是底部弹窗动画, 横屏变成右边弹窗动画
         ///     ctx.usingEdgePresentation { containerViewSize in
         ///         return containerViewSize.width < containerViewSize.height ? .bottom : .right
         ///     }
-        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets, tovc in
+        ///     ctx.willTransitionSize = { @Sendable ctx, size, safeAreaInsets in
         ///         let isPortrait = size.width < size.height
-        ///         tovc.preferredContentSize = CGSize(width: isPortrait ? size.width : (200 + safeAreaInsets.right), height: isPortrait ? 300 : size.height)
-        ///         或者在tovc内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算。
-        ///         tovc.xxxxxxxx
+        ///         ctx.presentedViewController.preferredContentSize = CGSize(width: isPortrait ? size.width : (200 + safeAreaInsets.right), height: isPortrait ? 300 : size.height)
+        ///         或者在ctx.presentedViewController内部处理, 因为可以同时判断处理弹窗刚出来时屏幕所处横竖屏情况, 以及可能参与的计算。
+        ///         ctx.presentedViewController.xxxxxxxx
         ///     }
         public var willTransitionSize: WillTransitionSize
     }
