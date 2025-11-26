@@ -19,7 +19,7 @@ import UIKit
 ///     - animator: 显示匹配路由控制器的方式
 ///     - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
 ///     - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头
-public struct FJRoute: Sendable {
+public struct FJRoute: @unchecked Sendable {
     /// 构建路由控制器
     ///
     /// 可以根据路由信息`BuilderInfo`返回对应的控制器
@@ -45,7 +45,7 @@ public struct FJRoute: Sendable {
     /// 登录检查, 用户权限检查......多个条件重定向逻辑可以分开写.
     ///
     /// 职能单一, 方便测试
-    public let redirect: @Sendable () -> [any FJRouteRedirector]
+    public let redirect: () -> [any FJRouteRedirector]
     
     /// 路由`path`中解析出来的参数名称数组
     public let pathParameters: [String]
@@ -64,7 +64,7 @@ public struct FJRoute: Sendable {
     ///   - animator: 显示匹配路由控制器的方式。不传的时候使用, `FJRoute.AutomaticAnimator`
     ///   - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
-    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
+    public init(path: String, name: String? = nil, builder: Builder?, animator: Animator? = nil, redirect: sending @escaping @autoclosure () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
         }
@@ -90,7 +90,7 @@ public struct FJRoute: Sendable {
     ///   - animator: 显示匹配路由控制器的方式。
     ///   - redirect: 路由拦截器: 数组, 可以添加多个, 按顺序检查
     ///   - routes: 关联的子路由: 强烈建议子路由的`path`不要以`/`为开头。直接在数组前面`await`即可
-    public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: @escaping @autoclosure @Sendable () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
+    public init(uri: any FJRouterRegisterURI, builder: Builder?, animator: Animator? = nil, redirect: sending @escaping @autoclosure () -> [any FJRouteRedirector] = [], routes: @autoclosure () async throws(FJRoute.CreateError) -> [FJRoute] = []) async throws(FJRoute.CreateError) {
         if builder == nil && redirect().isEmpty {
             throw CreateError.noPageBuilder
         }

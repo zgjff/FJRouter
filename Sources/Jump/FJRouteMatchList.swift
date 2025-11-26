@@ -7,7 +7,7 @@
 
 #if canImport(UIKit)
 import Foundation
-internal struct FJRouteMatchList: Sendable {
+internal struct FJRouteMatchList: @unchecked Sendable {
     /// 匹配结果
     let result: MatchResult
     /// 匹配的原始url
@@ -15,7 +15,7 @@ internal struct FJRouteMatchList: Sendable {
     /// 匹配到的参数
     let pathParameters: [String: String]
     /// 携带的额外内容
-    let extra: @Sendable () -> (any Sendable)?
+    let extra: () -> Any?
     /// 与`url`匹配的完整路径
     let fullPath: String
     
@@ -43,7 +43,7 @@ internal struct FJRouteMatchList: Sendable {
         }
     }
     
-    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) {
+    init(success: [FJRouteMatch], url: URL, pathParameters: [String : String], extra: sending @autoclosure @escaping () -> Any?) {
         result = .success(success)
         self.url = url
         self.pathParameters = pathParameters
@@ -57,7 +57,7 @@ internal struct FJRouteMatchList: Sendable {
         self.fullPath = fullPath
     }
     
-    init(error: MatchError, url: URL, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) {
+    init(error: MatchError, url: URL, extra: sending @autoclosure @escaping () -> Any?) {
         result = .error(error)
         self.url = url
         self.extra = extra

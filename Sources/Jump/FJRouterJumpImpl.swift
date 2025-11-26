@@ -54,7 +54,7 @@ extension FJRouter.JumpImpl {
 
 // MARK: - get
 extension FJRouter.JumpImpl {
-    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController {
+    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> Any?) async throws(FJRouter.JumpMatchError) -> UIViewController {
         do {
             let loc = try await store.convertLocation(by: uri)
             guard let url = URL(string: loc) else {
@@ -86,7 +86,7 @@ extension FJRouter.JumpImpl {
 // MARK: - go
 extension FJRouter.JumpImpl {
     @discardableResult
-    func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
+    func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> Any?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never> {
         do {
             let loc = try await store.convertLocation(by: uri)
             let result = try await go_trigger(location: loc, extra: extra, from: fromVC, ignoreError: ignoreError, callback: FJRouter.JumpPassthroughSubjectCallback())
@@ -108,7 +108,7 @@ extension FJRouter.JumpImpl {
         try await store.convertLocation(by: uri)
     }
     
-    private func go_trigger<T>(location: String, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws(FJRouter.JumpMatchError) -> T where T: FJRouterCallbackable {
+    private func go_trigger<T>(location: String, extra: @autoclosure @escaping @Sendable () -> Any?, from fromVC: UIViewController?, ignoreError: Bool, callback: @escaping @autoclosure () -> T) async throws(FJRouter.JumpMatchError) -> T where T: FJRouterCallbackable {
         guard let url = URL(string: location) else {
             throw FJRouter.JumpMatchError.errorLocUrl
         }

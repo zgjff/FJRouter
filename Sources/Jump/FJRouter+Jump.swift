@@ -90,7 +90,7 @@ public protocol FJRouterJumpable: Sendable {
     ///   - uri: 路由定位
     ///   - extra: 携带的参数
     /// - Returns: 对应路由控制器
-    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?) async throws(FJRouter.JumpMatchError) -> UIViewController
+    func viewController(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> Any?) async throws(FJRouter.JumpMatchError) -> UIViewController
     
     /// 导航至uri对应路由控制器: 此方法支持通过`Combine`框架进行路由回调
     /// - Parameters:
@@ -123,7 +123,7 @@ public protocol FJRouterJumpable: Sendable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never>
+    func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> Any?, from fromVC: UIViewController?, ignoreError: Bool) async throws(FJRouter.JumpMatchError) -> AnyPublisher<FJRouter.CallbackItem, Never>
 }
 
 extension FJRouterJumpable {
@@ -158,7 +158,7 @@ extension FJRouterJumpable {
     ///         try? self?.dispatchFJRouterCallBack(name: "completion", value: 123)
     ///     })
     @discardableResult
-    public func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> (any Sendable)? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = true) -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
+    public func go(_ uri: FJRouter.URI, extra: @autoclosure @escaping @Sendable () -> Any? = nil, from fromVC: UIViewController? = nil, ignoreError: Bool = true) -> AnyPublisher<FJRouter.CallbackItem, FJRouter.JumpMatchError> {
         return Future<AnyPublisher<FJRouter.CallbackItem, Never>, FJRouter.JumpMatchError>({ promise in
             nonisolated(unsafe) let promise = promise
             Task { @Sendable [weak fromVC] in

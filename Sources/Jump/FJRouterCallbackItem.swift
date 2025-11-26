@@ -9,13 +9,13 @@ import Foundation
 
 extension FJRouter {
     /// 路由回调`name-value`
-    public struct CallbackItem: Sendable {
+    public struct CallbackItem: @unchecked Sendable {
         /// 名称
         public let name: String
         /// 内容
-        public let value: (any Sendable)?
+        public let value: Any?
 
-        public init?(name: String, value: (any Sendable)?) {
+        public init?(name: String, value: Any?) {
             let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
             if n.isEmpty {
                 return nil
