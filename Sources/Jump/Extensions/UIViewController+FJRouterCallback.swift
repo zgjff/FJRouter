@@ -16,7 +16,7 @@ extension FJRouter.Wrapper where Object: UIViewController {
     /// - Parameters:
     ///   - name: 名称
     ///   - value: 对应的值: 默认为()
-    public func dispatchFJRouterCallBack(name: String, value: (any Sendable)? = ()) throws(FJRouter.EmitCallbackError) {
+    public func dispatchFJRouterCallBack(name: String, value: Any? = ()) throws(FJRouter.EmitCallbackError) {
         guard let item = FJRouter.CallbackItem(name: name, value: value) else {
             throw FJRouter.EmitCallbackError.emptyName
         }
