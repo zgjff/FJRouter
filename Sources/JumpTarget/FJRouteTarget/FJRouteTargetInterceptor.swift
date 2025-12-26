@@ -12,7 +12,5 @@ public protocol FJRouteTargetInterceptor: Sendable {
     
     func willMath()
     
-    
-    
     func didMatch()
 }
