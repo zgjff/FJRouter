@@ -14,11 +14,7 @@ public protocol FJRouteTargetType: Sendable {
     /// 该路径还支持路径参数. eg:
     ///
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
-    var path: String { get }
-    
-    /// 路由名称: 此参数可以为`nil`, 但是如果一旦设置了不为`nil`, 必须不能为空, 否则会抛出`FJRouter.RegisterURIError.emptyName`错误;
-    /// 而且要保证`name`的唯一性, 否则在注册的时候会触发断言assert
-    var name: String? { get }
+    var path: any FJRouteTargetPath { get }
     
     /// 路由参数, 如果提供的与path中需要的不一致, 或者缺少, 则后续在匹配的时候抛出错误. eg:
     ///
@@ -41,5 +37,21 @@ public protocol FJRouteTargetType: Sendable {
     var interceptors: [any FJRouteTargetInterceptor] { get }
     
     /// 关联的子路由: ⚠️注意循环问题
-    var subTargets: [FJRouteTargetType] { get }
+    var subTargets: [any FJRouteTargetType] { get }
+}
+
+extension FJRouteTargetType {
+    public var interceptors: [any FJRouteTargetInterceptor] {
+        return []
+    }
+    
+    public var subTargets: [any FJRouteTargetType] {
+        return []
+    }
+}
+
+extension FJRouteTargetType {
+    public func show() async {
+        await FJRouter.jumpa().go(self)
+    }
 }

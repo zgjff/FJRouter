@@ -59,6 +59,47 @@ extension FJPathUtils {
         }
     }
     
+    internal func patternToRegExpSync(pattern: String, caseSensitive: Bool) throws -> (reg: NSRegularExpression, parameters: [String]) {
+        let matchs = FJPathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
+        let pstart = pattern.startIndex
+        var start = 0
+        var buffer: String
+        if #available(iOS 14.0, *) {
+            buffer = String(unsafeUninitializedCapacity: pattern.count + 1, initializingUTF8With: { _ in 0 })
+        } else {
+            buffer = ""
+        }
+        buffer += "^"
+        var parameters: [String] = []
+        for match in matchs {
+            if match.range.location > start {
+                let startIdx = pattern.index(pstart, offsetBy: start)
+                let endIdx = pattern.index(startIdx, offsetBy: match.range.location - start)
+                buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
+            }
+            let startIdx = pattern.index(pstart, offsetBy: match.range.location + 1)
+            let endIdx = pattern.index(startIdx, offsetBy: match.range.length - 1)
+            let name = String(describing: pattern[startIdx..<endIdx])
+            parameters.append(name)
+            buffer += "(?<\(name)>[^/]+)"
+            start = match.range.location + match.range.length
+        }
+        if start < pattern.count {
+            let startIdx = pattern.index(pstart, offsetBy: start)
+            let endIdx = pattern.index(startIdx, offsetBy: pattern.count - start)
+            buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
+        }
+        if !pattern.hasSuffix("/") {
+            buffer.append("(?=/|$)")
+        }
+        var opt: NSRegularExpression.Options = []
+        if caseSensitive {
+            opt = [.caseInsensitive]
+        }
+        let exp = try NSRegularExpression(pattern: buffer, options: opt)
+        return (exp, parameters)
+    }
+    
     internal func matchRegExpHasPrefix(_ loc: String, regExp: NSRegularExpression?) -> NSRegularExpression? {
         guard let regExp else {
             return nil
