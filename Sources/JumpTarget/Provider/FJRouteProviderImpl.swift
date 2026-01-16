@@ -9,9 +9,9 @@ import Foundation
 
 final class FJRouteProviderImpl: FJRouteProvider, @unchecked Sendable {
     static let shared = FJRouteProviderImpl()
-    fileprivate let store: FJRouteProviderStore
+    fileprivate let store: FJRouteProviderRouteStore
     init() {
-        store = FJRouteProviderStore()
+        store = FJRouteProviderRouteStore()
     }
 }
 

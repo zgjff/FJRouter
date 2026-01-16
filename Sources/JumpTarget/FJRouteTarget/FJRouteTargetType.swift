@@ -28,7 +28,7 @@ public protocol FJRouteTargetType: Sendable {
     /// 显示匹配路由控制器的方式
     var animator: FJRouteTarget.Animator { get }
     
-    /// 路由拦截器: 数组, 可以添加多个, 按顺序检查
+    /// 路由拦截器: 数组, 可以添加多个, 按顺序检查; 会影响路由下的所有关联子路由
     ///
     /// 比如:
     /// 登录检查, 用户权限检查......多个条件拦截器逻辑可以分开写.
@@ -37,6 +37,8 @@ public protocol FJRouteTargetType: Sendable {
     var interceptors: [any FJRouteTargetInterceptor] { get }
     
     /// 关联的子路由: ⚠️注意循环问题
+    ///
+    /// 匹配子路由/直接使用子路由时, 会查找父路由的拦截器规则.
     var subTargets: [any FJRouteTargetType] { get }
 }
 

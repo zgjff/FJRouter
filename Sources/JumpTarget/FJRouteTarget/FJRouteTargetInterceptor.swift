@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// 路由拦截器协议
 public protocol FJRouteTargetInterceptor: Sendable {
     func prepare()
     
