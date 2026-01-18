@@ -8,7 +8,13 @@
 import Foundation
 
 extension FJRouteTarget {
-    public struct Match: Sendable {
+    public struct Match: @unchecked Sendable {
+        
+    }
+}
+
+extension FJRouteTarget.Match {
+    static func match() {
         
     }
 }

@@ -20,15 +20,26 @@ final actor FJRouteProviderRouteStore {
 
 extension FJRouteProviderRouteStore {
     func addRoute(_ route: any FJRouteTargetType) {
-//        checkRoutePath([route])
-//        checkNoDuplicatePathParameter([route], usedPathParams: [:])
-//        routes.append(route)
         do {
             let ir = try FJRouteTarget.InnerTargetType(originalTarget: route)
             routes.append(ir)
         } catch {
             // TODO: - throws
         }
+    }
+    
+    func matchRoute(_ route: any FJRouteTargetType) {
+        var findInnerTarget: FJRouteTarget.InnerTargetType?
+        for r in routes {
+            if let frt = r.find(target: route) {
+                findInnerTarget = frt
+                break
+            }
+        }
+        guard let findInnerTarget else {
+            return
+        }
+        
     }
 }
 

@@ -15,7 +15,7 @@ extension FJRouteTarget {
         /// 父路由
         private let parentTarget: InnerTargetType?
         /// 子路由
-        private var subTargets: [InnerTargetType] = []
+        private var subInnerTargets: [InnerTargetType] = []
         /// 路由链中的位置
         private let chainDepth: Int
         /// 路由对应正则表达式
@@ -37,7 +37,7 @@ extension FJRouteTarget {
                 cp.insert(parameter)
             }
             
-            subTargets = originalTarget.subTargets.compactMap({ try? FJRouteTarget.InnerTargetType(originalTarget: $0, parentTarget: self, chainDepth: chainDepth + 1) })
+            subInnerTargets = originalTarget.subTargets.compactMap({ try? FJRouteTarget.InnerTargetType(originalTarget: $0, parentTarget: self, chainDepth: chainDepth + 1) })
         }
         
         private init(originalTarget: any FJRouteTargetType, parentTarget: InnerTargetType, chainDepth: Int) throws {
@@ -75,11 +75,31 @@ extension FJRouteTarget {
                     st.append(srt)
                 }
             }
-            subTargets = st
+            subInnerTargets = st
         }
     }
 }
 
 extension FJRouteTarget.InnerTargetType {
+    func find(target: any FJRouteTargetType) ->FJRouteTarget.InnerTargetType? {
+        if target.path.path == originalTarget.path.path, target.path.caseSensitive == originalTarget.path.caseSensitive {
+            return self
+        }
+        for st in subInnerTargets {
+            if let sft = st.find(target: target) {
+                return sft
+            }
+        }
+        return nil
+    }
     
+    func routeChain() -> [any FJRouteTargetType] {
+        var chainRoute = [self]
+        var ppt: FJRouteTarget.InnerTargetType? = self
+        while let p = ppt?.parentTarget {
+            chainRoute.append(p)
+            ppt = p
+        }
+        return chainRoute.reversed().map { $0.originalTarget }
+    }
 }

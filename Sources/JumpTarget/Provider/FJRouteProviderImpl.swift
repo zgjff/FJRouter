@@ -16,17 +16,14 @@ final class FJRouteProviderImpl: FJRouteProvider, @unchecked Sendable {
 }
 
 extension FJRouteProviderImpl {
-    @FJRouteActor
     func register(_ route: any FJRouteTargetType) async {
         await store.addRoute(route)
     }
     
-    @FJRouteActor
     func go(_ route: any FJRouteTargetType) async {
         
     }
     
-    @FJRouteActor
     func go(_ url: URL) async {
         
     }
