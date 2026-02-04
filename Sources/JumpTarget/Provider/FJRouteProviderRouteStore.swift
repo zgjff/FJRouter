@@ -28,53 +28,66 @@ extension FJRouteProviderRouteStore {
         }
     }
     
-    func matchRoute(_ route: any FJRouteTargetType) {
-        var findInnerTarget: FJRouteTarget.InnerTargetType?
-        for r in routes {
-            if let frt = r.find(target: route) {
-                findInnerTarget = frt
-                break
-            }
-        }
-        guard let findInnerTarget else {
+    func matchRoute(_ route: any FJRouteTargetType) async {
+        guard let findInnerTarget = findInnerTarget(for: route) else {
             return
         }
-        
+        let chain = findInnerTarget.routeChain()
+        let a = await tryRedirect(routeChain: chain)
     }
 }
 
-private extension FJRouteProviderRouteStore  {
-    /// 检查路由path是否符合约定
-    func checkRoutePath(_ routes: [any FJRouteTargetType]) {
-        
-//        for route in routes {
-//            let rp = route.path.path
-//            assert(!rp.isEmpty, "\(String(describing: route)) 路由path不能为空")
-//            if rp != "/" {
-//                assert(!rp.hasSuffix("/"), "除了最顶层的'/'路由外, 其它任何路由都不能以'/'结尾. 当前路由: \(String(describing: route))")
-//            }
-//            checkRoutePath(route.subTargets)
-//        }
+private extension FJRouteProviderRouteStore {
+    func findInnerTarget(for route: any FJRouteTargetType) -> FJRouteTarget.InnerTargetType? {
+        for r in routes {
+            if let frt = r.find(target: route) {
+                return frt
+            }
+        }
+        return nil
     }
     
-    /// 检查路由及其子路由是否存在相同的路由参数
-    /// - Parameters:
-    ///   - routes: 路由
-    ///   - usedPathParams: [参数key: 路由]
-    func checkNoDuplicatePathParameter(_ routes: [any FJRouteTargetType], usedPathParams: [String: any FJRouteTargetType]) {
-//        var p = usedPathParams
-//        for route in routes {
-//            for ppk in route.pathParams.keys {
-//                if p.keys.contains(ppk) {
-//                    let sameRoute = p[ppk]
-//                    assert(false, "在路由: \(String(describing: sameRoute))及其子路由: \(String(describing: route))中发现重复的路由参数: \(ppk)")
-//                }
-//                p.updateValue(route, forKey: ppk)
-//            }
-//            checkNoDuplicatePathParameter(route.subTargets, usedPathParams: p)
-//            route.pathParams.keys.forEach { k in
-//                p.removeValue(forKey: k)
-//            }
-//        }
+    // TODO: - 返回result
+    func tryRedirect(routeChain: FJRouteChain) async -> FJRouteMatchChain {
+        if routeChain.parents.isEmpty {
+            return FJRouteMatchChain(originalDestinationRoute: routeChain, redirects: [])
+        }
+        var matchChain = FJRouteMatchChain(originalDestinationRoute: routeChain, redirects: [])
+        var rps = Array(routeChain.parents.reversed())
+        var proute = rps.popLast()
+        while let pr = proute {
+            // TODO: - 优先级排序
+            var pinterceptors = pr.interceptors.sorted(by: { $0.priority < $1.priority })
+            var pi = pinterceptors.popLast()
+            while let p = pi {
+                let action = await p.onActive(route: pr, chain: matchChain)
+                switch action {
+                case .guard:
+                    // TODO: - 不执行任何动作, 直接返回错误
+                    break
+                case .pass:
+                    pi = pinterceptors.popLast()
+                case let .redirect(nr):
+                    if matchChain.containsRedirect(route: nr) {
+                        // TODO: - 返回错误
+                        
+                    }
+                    // TODO: - check redirect数量
+                    guard let findInnerTarget = findInnerTarget(for: nr) else {
+                        // TODO: - 返回错误
+                        break
+                    }
+                    let fr = findInnerTarget.routeChain()
+                    let redirectChain = await tryRedirect(routeChain: fr)
+                    let newMatchChain = FJRouteMatchChain(originalDestinationRoute: routeChain, redirects: [
+                        FJRouteRedirectInfo(from: pr, to: fr),
+                    ])
+                    matchChain = newMatchChain
+                    // TODO: - 直接返回
+                }
+            }
+            proute = rps.popLast()
+        }
+        return matchChain
     }
 }

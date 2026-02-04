@@ -93,13 +93,13 @@ extension FJRouteTarget.InnerTargetType {
         return nil
     }
     
-    func routeChain() -> [any FJRouteTargetType] {
-        var chainRoute = [self]
+    func routeChain() -> FJRouteChain {
+        var parentsRoute: [any FJRouteTargetType] = []
         var ppt: FJRouteTarget.InnerTargetType? = self
         while let p = ppt?.parentTarget {
-            chainRoute.append(p)
+            parentsRoute.append(p.originalTarget)
             ppt = p
         }
-        return chainRoute.reversed().map { $0.originalTarget }
+        return FJRouteChain(route: originalTarget, parents: parentsRoute.reversed())
     }
 }
