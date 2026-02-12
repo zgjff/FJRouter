@@ -1,0 +1,39 @@
+//
+//  FJRouteJumpProvider.swift
+//  FJRouter
+//
+//  Created by zgjff on 2025/12/27.
+//
+
+import Foundation
+import UIKit.UIViewController
+extension FJRouter {
+    /// 创建新的路由跳转管理中心。
+    /// 注意⚠️: 返回的并非是单例对象, 需要应用层app持有此对象;
+    ///
+    /// - Parameter config: 配置
+    /// - Returns: 具体的路由跳转管理
+    public static func jumpProvider(config: (_ config: inout FJRouteJumpProviderConfig) -> () = { _ in }) -> any FJRouteJumpProvider {
+        var fconfig = FJRouteJumpProviderConfig()
+        config(&fconfig)
+        return FJRouteJumpProviderImpl(config: fconfig)
+    }
+}
+
+/// 路由跳转管理协议
+public protocol FJRouteJumpProvider: Sendable {
+    /// 注册路由
+    ///
+    /// TODO: - 其它注册相关注释： 重复注册/注册子路由.....
+    ///
+    /// - Parameter route: 路由描述
+    func register(_ route: any FJRouteTargetType) async throws(FJRouteTarget.RegisterError)
+    
+    func go(_ route: any FJRouteTargetType) async
+    
+    func go(_ url: URL) async
+    
+    func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> UIViewController
+    
+    func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> UIViewController
+}

@@ -9,12 +9,12 @@ import Foundation
 
 /// 路由对象协议
 public protocol FJRouteTargetType: Sendable {
-    /// 路由路径: 强烈建议子路由的`path`不要以`/`为开头
+    /// 路由资源: 强烈建议子路由的`path`不要以`/`为开头
     ///
     /// 该路径还支持路径参数. eg:
     ///
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
-    var path: any FJRouteTargetPath { get }
+    var uri: any FJRouteTargetURI { get }
     
     /// 路由参数, 如果提供的与path中需要的不一致, 或者缺少, 则后续在匹配的时候抛出错误. eg:
     ///
@@ -40,7 +40,7 @@ public protocol FJRouteTargetType: Sendable {
     /// 关联的子路由: ⚠️注意循环问题
     ///
     /// 匹配子路由/直接使用子路由时, 会查找父路由的拦截器规则.
-    var subTargets: [any FJRouteTargetType] { get }
+    var children: [any FJRouteTargetType] { get }
 }
 
 extension FJRouteTargetType {
@@ -48,13 +48,7 @@ extension FJRouteTargetType {
         return []
     }
     
-    public var subTargets: [any FJRouteTargetType] {
+    public var children: [any FJRouteTargetType] {
         return []
-    }
-}
-
-extension FJRouteTargetType {
-    public func show() async {
-        await FJRouter.jumpa().go(self)
     }
 }

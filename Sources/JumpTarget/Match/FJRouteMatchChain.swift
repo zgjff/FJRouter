@@ -22,7 +22,7 @@ extension FJRouteMatchChain {
     func containsRedirect(route: any FJRouteTargetType) -> Bool {
         for redirect in self.redirects {
             let rr = redirect.to.route
-            if rr.path.path == route.path.path && rr.path.caseSensitive == rr.path.caseSensitive {
+            if rr.uri.path == route.uri.path && rr.uri.caseSensitive == rr.uri.caseSensitive {
                 return true
             }
         }

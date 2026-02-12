@@ -15,6 +15,6 @@ extension FJRouteTarget {
         public let fromVC: UIViewController?
         // TODO: - 替换
         /// 匹配到的路由信息
-        public let matchState: FJRouterState
+//        public let matchState: FJRouterState
     }
 }

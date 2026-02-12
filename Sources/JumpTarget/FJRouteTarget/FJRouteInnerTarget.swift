@@ -22,67 +22,127 @@ extension FJRouteTarget {
         private let regExp: NSRegularExpression?
         /// 路由`path`解析出来的参数名称数组
         public let pathParameters: [String]
-        init(originalTarget: any FJRouteTargetType) throws {
-            precondition(!originalTarget.path.path.isEmpty, "路由\(String(describing: originalTarget))的path不能为空")
-            
-            (regExp, pathParameters) = try originalTarget.path.resolveRouteInfo()
-            
-            self.originalTarget = originalTarget
-            self.parentTarget = nil
-            self.chainDepth = 0
-            
-            var cp: Set<String> = []
-            for parameter in pathParameters {
-                precondition(!cp.contains(parameter), "路由\(String(describing: originalTarget))的path解析出包含相同的参数名称: \(parameter)")
-                cp.insert(parameter)
+        init(originalTarget: any FJRouteTargetType, assertErrorInDebug: Bool) throws(FJRouteTarget.RegisterError) {
+            let p = originalTarget.uri.path.trimmingCharacters(in: .whitespacesAndNewlines)
+            if p.isEmpty {
+                if assertErrorInDebug {
+                    assert(false, "路由\(String(describing: originalTarget))的path不能为空")
+                }
+                throw .uri(target: originalTarget, err: .emptyPath)
             }
             
-            subInnerTargets = originalTarget.subTargets.compactMap({ try? FJRouteTarget.InnerTargetType(originalTarget: $0, parentTarget: self, chainDepth: chainDepth + 1) })
+            do {
+                (regExp, pathParameters) = try originalTarget.uri.resolveRouteInfo()
+                
+                self.originalTarget = originalTarget
+                self.parentTarget = nil
+                self.chainDepth = 0
+                
+                var cp: Set<String> = []
+                for parameter in pathParameters {
+                    if cp.contains(parameter) {
+                        if assertErrorInDebug {
+                            assert(false, "路由\(String(describing: originalTarget))的path解析出包含相同的参数名称: \(parameter)")
+                        }
+                        throw FJRouteTarget.RegisterError.sameParameter(target: originalTarget, parameter: parameter)
+                    }
+                    cp.insert(parameter)
+                }
+                
+                var sits: [InnerTargetType] = []
+                
+                subInnerTargets = originalTarget.children.compactMap({ try? FJRouteTarget.InnerTargetType(originalTarget: $0, parentTarget: self, chainDepth: chainDepth + 1, assertErrorInDebug: assertErrorInDebug) })
+                
+                for oc in originalTarget.children {
+                    let ic = try FJRouteTarget.InnerTargetType(originalTarget: oc, parentTarget: self, chainDepth: chainDepth + 1, assertErrorInDebug: assertErrorInDebug)
+                    sits.append(ic)
+                }
+                subInnerTargets = sits
+            } catch {
+                if let err = error as? FJRouteTarget.RegisterURIError {
+                    throw .uri(target: originalTarget, err: err)
+                }
+                if let err = error as? FJRouteTarget.RegisterError {
+                    throw err
+                }
+                // 不会出现, 但是必须得返回
+                throw .uri(target: originalTarget, err: .emptyPath)
+            }
         }
         
-        private init(originalTarget: any FJRouteTargetType, parentTarget: InnerTargetType, chainDepth: Int) throws {
-            precondition(!originalTarget.path.path.isEmpty, "路由\(String(describing: originalTarget))的path不能为空")
-            
-            if originalTarget.path.path != "/" {
-                precondition(!originalTarget.path.path.hasSuffix("/"), "除了最顶层的'/'路由外, 其它任何路由都不能以'/'结尾. 当前路由: \(String(describing: originalTarget))")
-            }
-            
-            precondition(chainDepth <= 100, "⚠️\(String(describing: originalTarget))在整个路由链路中位置过深, 可能是子路由循环指向问题, 请仔细排查")
-            
-            (regExp, pathParameters) = try originalTarget.path.resolveRouteInfo()
-            
-            self.originalTarget = originalTarget
-            self.parentTarget = parentTarget
-            self.chainDepth = chainDepth
-            
-            var cp: Set<String> = []
-            for parameter in pathParameters {
-                precondition(!cp.contains(parameter), "路由\(String(describing: originalTarget))的path解析出包含相同的参数名称: \(parameter)")
-                cp.insert(parameter)
-            }
-            
-            var ppt: InnerTargetType? = parentTarget
-            while let p = ppt {
-                for pp in p.pathParameters {
-                    precondition(!pathParameters.contains(pp), "在路由: \(String(describing: p.originalTarget))及其子路由: \(String(describing: originalTarget))中发现重复的路由参数: \(pp)")
+        private init(originalTarget: any FJRouteTargetType, parentTarget: InnerTargetType, chainDepth: Int, assertErrorInDebug: Bool) throws(FJRouteTarget.RegisterError) {
+            if chainDepth > 99 {
+                if assertErrorInDebug {
+                    assert(false, "⚠️\(String(describing: originalTarget))在整个路由链路中位置过深, 可能是子路由循环指向问题, 请仔细排查")
                 }
-                ppt = p.parentTarget
+                throw .childrenTargetNodeTooDepth(target: originalTarget, parentTarget: parentTarget.originalTarget)
             }
             
-            var st: [InnerTargetType] = []
-            for r in originalTarget.subTargets {
-                if let srt = try? FJRouteTarget.InnerTargetType(originalTarget: r, parentTarget: parentTarget, chainDepth: chainDepth + 1) {
-                    st.append(srt)
+            let p = originalTarget.uri.path.trimmingCharacters(in: .whitespacesAndNewlines)
+            if p.isEmpty {
+                if assertErrorInDebug {
+                    assert(false, "路由\(String(describing: originalTarget))的path不能为空")
                 }
+                throw .uri(target: originalTarget, err: .emptyPath)
             }
-            subInnerTargets = st
+            
+            if p != "/" && p.hasSuffix("/") {
+                if assertErrorInDebug {
+                    assert(false, "除了最顶层的'/'路由外, 其它任何路由都不能以'/'结尾. 当前路由: \(String(describing: originalTarget))")
+                }
+                throw .childrenTargetUriSuffixWithSlash(target: originalTarget)
+            }
+            
+            do {
+                (regExp, pathParameters) = try originalTarget.uri.resolveRouteInfo()
+                
+                self.originalTarget = originalTarget
+                self.parentTarget = parentTarget
+                self.chainDepth = chainDepth
+                
+                var cp: Set<String> = []
+                for parameter in pathParameters {
+                    if cp.contains(parameter) {
+                        if assertErrorInDebug {
+                            assert(false, "路由\(String(describing: originalTarget))的path解析出包含相同的参数名称: \(parameter)")
+                        }
+                        throw FJRouteTarget.RegisterError.sameParameter(target: originalTarget, parameter: parameter)
+                    }
+                    cp.insert(parameter)
+                }
+                
+                var ppt: InnerTargetType? = parentTarget
+                while let p = ppt {
+                    for pp in p.pathParameters {
+                        assert(!pathParameters.contains(pp), "在路由: \(String(describing: p.originalTarget))及其子路由: \(String(describing: originalTarget))中发现重复的路由参数: \(pp)")
+                    }
+                    ppt = p.parentTarget
+                }
+                
+                var st: [InnerTargetType] = []
+                for r in originalTarget.children {
+                    if let srt = try? FJRouteTarget.InnerTargetType(originalTarget: r, parentTarget: parentTarget, chainDepth: chainDepth + 1, assertErrorInDebug: assertErrorInDebug) {
+                        st.append(srt)
+                    }
+                }
+                subInnerTargets = st
+            } catch {
+                if let err = error as? FJRouteTarget.RegisterURIError {
+                    throw .uri(target: originalTarget, err: err)
+                }
+                if let err = error as? FJRouteTarget.RegisterError {
+                    throw err
+                }
+                // 不会出现, 但是必须得返回
+                throw .uri(target: originalTarget, err: .emptyPath)
+            }
         }
     }
 }
 
 extension FJRouteTarget.InnerTargetType {
     func find(target: any FJRouteTargetType) ->FJRouteTarget.InnerTargetType? {
-        if target.path.path == originalTarget.path.path, target.path.caseSensitive == originalTarget.path.caseSensitive {
+        if target.uri.path == originalTarget.uri.path, target.uri.caseSensitive == originalTarget.uri.caseSensitive {
             return self
         }
         for st in subInnerTargets {

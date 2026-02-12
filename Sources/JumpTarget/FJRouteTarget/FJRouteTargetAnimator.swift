@@ -12,8 +12,8 @@ extension FJRouteTarget {
     ///
     /// 框架内部提供了多种内置实现: FJRoute.XXXXAnimator
     public struct Animator: @unchecked Sendable {
-        private let animator: @MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteAnimator
-        public init(_ animator: @MainActor @Sendable @escaping (_ info: AnimatorInfo) -> any FJRouteAnimator) {
+        private let animator: @MainActor @Sendable (_ info: AnimatorInfo) -> any FJRouteTargetAnimatorProvider
+        public init(_ animator: @MainActor @Sendable @escaping (_ info: AnimatorInfo) -> any FJRouteTargetAnimatorProvider) {
             self.animator = animator
         }
     }

@@ -4,7 +4,7 @@ import Foundation
 
 struct FJPathUtilsTests {
     @Test func patternToRegExpWithoutParameter() async throws {
-        let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: "/settings/detail")
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: "/settings/detail", caseSensitive: false)
         #expect(pathParameter.isEmpty)
         #expect(matchPathSuccess(regExp: reg, string: "/settings/detail"))
         #expect(matchPathSuccess(regExp: reg, string: "/settings/detail/"))
@@ -18,7 +18,7 @@ struct FJPathUtilsTests {
     }
     
     @Test func patternToRegExpWithParameter() async throws {
-        let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: "/user/:id/book/:bookId")
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: "/user/:id/book/:bookId", caseSensitive: false)
         #expect(pathParameter == ["id", "bookId"])
         
         let string = "/user/123/book/456/18"
@@ -37,7 +37,7 @@ struct FJPathUtilsTests {
     
     @Test func patternToPathWithoutParameter() async throws {
         let pattern = "/settings/detail"
-        let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: pattern)
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: pattern, caseSensitive: false)
         
         let url = "/settings/detail"
         let match = reg.firstMatch(in: url, range: NSRange(location: 0, length: url.count))
@@ -50,7 +50,7 @@ struct FJPathUtilsTests {
     
     @Test func patternToPathWithParameter() async throws {
         let pattern = "/user/:id/book/:bookId"
-        let (reg, pathParameter) = try await FJPathUtils.default.patternToRegExp(pattern: pattern)
+        let (reg, pathParameter) = try FJPathUtils.default.patternToRegExp(pattern: pattern, caseSensitive: false)
         
         let url = "/user/123/book/456"
         let match = reg.firstMatch(in: url, range: NSRange(location: 0, length: url.count))

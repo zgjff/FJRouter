@@ -1,5 +1,5 @@
 //
-//  FJRouteTargetPath.swift
+//  FJRouteTargetURI.swift
 //  FJRouter
 //
 //  Created by zgjff on 2025/12/27.
@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// 路由path协议
-public protocol FJRouteTargetPath {
+/// 路由uri协议
+public protocol FJRouteTargetURI {
     /// 路由的路径: 支持路径参数. eg:
     ///
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
@@ -18,7 +18,7 @@ public protocol FJRouteTargetPath {
     var caseSensitive: Bool { get }
 }
 
-extension FJRouteTargetPath {
+extension FJRouteTargetURI {
     /// 解析出匹配正则, 以及参数数组.具体的匹配数据以及测试代码可以参考: `FJPathUtilsTests`
     ///
     ///  无参数:
@@ -30,21 +30,21 @@ extension FJRouteTargetPath {
     ///  多个参数:
     ///
     ///     path为"/user/:id/book/:bookId", 则解析出的正则为: "^\/user\/(?<id>[^/]+)\/book\/(?<bookId>[^/]+)(?=/|$)", 参数数组为["id", "bookId"]
-    func resolveRouteInfo() throws(FJRouter.RegisterURIError) -> (regExp: NSRegularExpression, parameters: [String]) {
+    func resolveRouteInfo() throws(FJRouteTarget.RegisterURIError) -> (regExp: NSRegularExpression, parameters: [String]) {
         let p = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if p.isEmpty {
-            throw FJRouter.RegisterURIError.emptyPath
+            throw FJRouteTarget.RegisterURIError.emptyPath
         }
         do {
-            let (regExp, pathParameters) = try FJPathUtils.default.patternToRegExpSync(pattern: p, caseSensitive: caseSensitive)
+            let (regExp, pathParameters) = try FJPathUtils.default.patternToRegExp(pattern: p, caseSensitive: caseSensitive)
             return (regExp, pathParameters)
         } catch {
-            throw FJRouter.RegisterURIError.regExp(error)
+            throw FJRouteTarget.RegisterURIError.regExp(error)
         }
     }
 }
 
-extension String: FJRouteTargetPath {
+extension String: FJRouteTargetURI {
     public var path: String {
         self
     }
@@ -55,8 +55,18 @@ extension String: FJRouteTargetPath {
 }
 
 extension FJRouteTarget {
+    /// 注册路由uri错误
+    public enum RegisterURIError: Error {
+        /// path为空
+        case emptyPath
+        /// 生成正则表达式错误
+        case regExp(_ error: Error)
+    }
+}
+
+extension FJRouteTarget {
     /// 通用path 实现
-    public struct CommonPath: FJRouteTargetPath, Sendable {
+    public struct CommonPath: FJRouteTargetURI, Sendable {
         public let path: String
         public let caseSensitive: Bool
         public init(path: String, caseSensitive: Bool = true) {

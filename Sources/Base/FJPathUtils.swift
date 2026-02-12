@@ -16,50 +16,7 @@ internal struct FJPathUtils: Sendable {
 }
 
 extension FJPathUtils {
-    internal func patternToRegExp(pattern: String) async throws -> (reg: NSRegularExpression, parameters: [String]) {
-        try await withCheckedThrowingContinuation { continuation in
-            let matchs = FJPathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
-            let pstart = pattern.startIndex
-            var start = 0
-            var buffer: String
-            if #available(iOS 14.0, *) {
-                buffer = String(unsafeUninitializedCapacity: pattern.count + 1, initializingUTF8With: { _ in 0 })
-            } else {
-                buffer = ""
-            }
-            buffer += "^"
-            var parameters: [String] = []
-            for match in matchs {
-                if match.range.location > start {
-                    let startIdx = pattern.index(pstart, offsetBy: start)
-                    let endIdx = pattern.index(startIdx, offsetBy: match.range.location - start)
-                    buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
-                }
-                let startIdx = pattern.index(pstart, offsetBy: match.range.location + 1)
-                let endIdx = pattern.index(startIdx, offsetBy: match.range.length - 1)
-                let name = String(describing: pattern[startIdx..<endIdx])
-                parameters.append(name)
-                buffer += "(?<\(name)>[^/]+)"
-                start = match.range.location + match.range.length
-            }
-            if start < pattern.count {
-                let startIdx = pattern.index(pstart, offsetBy: start)
-                let endIdx = pattern.index(startIdx, offsetBy: pattern.count - start)
-                buffer += NSRegularExpression.escapedPattern(for: String(describing: pattern[startIdx..<endIdx]))
-            }
-            if !pattern.hasSuffix("/") {
-                buffer.append("(?=/|$)")
-            }
-            do {
-                let exp = try NSRegularExpression(pattern: buffer, options: [])
-                continuation.resume(returning: (exp, parameters))
-            } catch {
-                continuation.resume(throwing: error)
-            }
-        }
-    }
-    
-    internal func patternToRegExpSync(pattern: String, caseSensitive: Bool) throws -> (reg: NSRegularExpression, parameters: [String]) {
+    internal func patternToRegExp(pattern: String, caseSensitive: Bool) throws -> (reg: NSRegularExpression, parameters: [String]) {
         let matchs = FJPathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
         let pstart = pattern.startIndex
         var start = 0
@@ -144,7 +101,7 @@ extension FJPathUtils {
         return zip(parameters, matchResults).reduce([String: String](), { $0.merging([$1.0: $1.1]) { (_, new) in new } })
     }
     
-    internal func convertNewUrlPath(from path: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertError) -> String {
+    internal func convertNewUrlPath(from path: String, params: [String: String] = [:], queryParams: [String: String] = [:]) throws(FJRouter.ConvertURLError) -> String {
         let newParams = params.reduce([String: String]()) { partialResult, pairs in
             var f = partialResult
             f.updateValue(pairs.value, forKey: pairs.key)
@@ -160,7 +117,7 @@ extension FJPathUtils {
             cop?.queryItems = queryItems
         }
         guard let final = cop?.string else {
-            throw FJRouter.ConvertError.urlConvert
+            throw FJRouter.ConvertURLError.urlConvert
         }
         guard final.count > 1 else {
             return final
@@ -175,7 +132,7 @@ extension FJPathUtils {
         return final
     }
     
-    internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) throws(FJRouter.ConvertError) -> String {
+    internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) throws(FJRouter.ConvertURLError) -> String {
         var buffer: String
         if #available(iOS 14.0, *) {
             buffer = String(unsafeUninitializedCapacity: pattern.count, initializingUTF8With: { _ in 0 })
