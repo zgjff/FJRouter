@@ -65,8 +65,8 @@ extension FJRouteTarget {
 }
 
 extension FJRouteTarget {
-    /// 通用path 实现
-    public struct CommonPath: FJRouteTargetURI, Sendable {
+    /// 通用URI 实现
+    public struct CommonURI: FJRouteTargetURI, Sendable {
         public let path: String
         public let caseSensitive: Bool
         public init(path: String, caseSensitive: Bool = true) {

@@ -13,7 +13,7 @@ extension FJRouter {
     ///
     /// - Parameter config: 配置
     /// - Returns: 具体的路由跳转管理
-    public static func jumpProvider(config: (_ config: inout FJRouteJumpProviderConfig) -> () = { _ in }) -> any FJRouteJumpProvider {
+    public static func startJumpProvider(withConfig config: (_ config: inout FJRouteJumpProviderConfig) -> () = { _ in }) -> any FJRouteJumpProvider {
         var fconfig = FJRouteJumpProviderConfig()
         config(&fconfig)
         return FJRouteJumpProviderImpl(config: fconfig)

@@ -16,12 +16,6 @@ public protocol FJRouteTargetType: Sendable {
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
     var uri: any FJRouteTargetURI { get }
     
-    /// 路由参数, 如果提供的与path中需要的不一致, 或者缺少, 则后续在匹配的时候抛出错误. eg:
-    ///
-    ///     如path为`/family/:fid`, 则必须提供fid, ["fid": "xxx"]
-    ///     如path为`/user/:uid/books/:bid`, 则必须提供uid和bid, ["uid": "xxx", "bid": "xxx"]
-    var pathParams: [String: Any] { get }
-    
     /// 构建路由方式
     var  builder: FJRouteTarget.Builder? { get }
     
