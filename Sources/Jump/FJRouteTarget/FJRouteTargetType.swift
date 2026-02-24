@@ -10,10 +10,6 @@ import Foundation
 /// 路由对象协议
 public protocol FJRouteTargetType: Sendable {
     /// 路由资源: 强烈建议子路由的`path`不要以`/`为开头
-    ///
-    /// 该路径还支持路径参数. eg:
-    ///
-    ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
     var uri: any FJRouteTargetURI { get }
     
     /// 构建路由方式

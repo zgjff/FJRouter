@@ -8,7 +8,13 @@
 import Foundation
 
 /// 路由uri协议
-public protocol FJRouteTargetURI {
+///
+/// 为了一致性保障, 请实现此协议的对象遵守`Identifiable`, 且其`ID`类型为`UUID`;
+///
+/// 需要确保其`id`在整个生命周期内多次获取时保障一致性, 不会重新生成。
+///
+/// 可以使用框架提供的默认实现: `FJRouteTarget.CommonURI`
+public protocol FJRouteTargetURI: Identifiable where ID == UUID {
     /// 路由的路径: 支持路径参数. eg:
     ///
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
@@ -44,16 +50,6 @@ extension FJRouteTargetURI {
     }
 }
 
-extension String: FJRouteTargetURI {
-    public var path: String {
-        self
-    }
-    
-    public var caseSensitive: Bool {
-        true
-    }
-}
-
 extension FJRouteTarget {
     /// 注册路由uri错误
     public enum RegisterURIError: Error {
@@ -66,12 +62,14 @@ extension FJRouteTarget {
 
 extension FJRouteTarget {
     /// 通用URI 实现
-    public struct CommonURI: FJRouteTargetURI, Sendable {
+    public struct CommonURI: FJRouteTargetURI, Sendable, Hashable {
         public let path: String
         public let caseSensitive: Bool
+        public let id: UUID
         public init(path: String, caseSensitive: Bool = true) {
             self.path = path
             self.caseSensitive = caseSensitive
+            id = UUID()
         }
     }
 }
