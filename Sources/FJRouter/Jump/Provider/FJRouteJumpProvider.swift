@@ -29,6 +29,7 @@ public protocol FJRouteJumpProvider: Sendable {
     /// - Parameter route: 路由描述
     func register(_ route: any FJRouteTargetType) async throws(FJRouteTarget.RegisterError)
     
+    // TODO: - 返回可取消, 因为`FJRouteTargetInterceptor`是异步耗时操作, 可能时间比较长
     func go(_ route: any FJRouteTargetType) async
     
     func go(_ url: URL) async

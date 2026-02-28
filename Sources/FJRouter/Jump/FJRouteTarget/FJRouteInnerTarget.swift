@@ -159,7 +159,7 @@ extension FJRouteTarget {
 
 extension FJRouteTarget.InnerTargetType {
     func find(target: any FJRouteTargetType) ->FJRouteTarget.InnerTargetType? {
-        if target.uri.id == originalTarget.uri.id && target.uri.path == originalTarget.uri.path && target.uri.caseSensitive == originalTarget.uri.caseSensitive  {
+        if target.uri.id == originalTarget.uri.id {
             return self
         }
         for st in subInnerTargets {

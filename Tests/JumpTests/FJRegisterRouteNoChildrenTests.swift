@@ -1,17 +1,23 @@
 import Testing
 import Foundation
+import UIKit
 @testable import FJRouter
 
 @Suite("无子路由注册测试")
 struct FJRegisterRouteNoChildrenTests {
-    
+    @Test("无参数路由注册") func registerNoParameters() async throws {
+        let route = FJRouter.startJumpProvider { config in
+            config.assertRegisterErrorInDebug = false
+        }
+        await #expect(throws: Never.self) {
+            try await route.register(Routes.tab)
+        }
+    }
 }
 
 fileprivate extension FJRegisterRouteNoChildrenTests {
     enum Routes: FJRouteTargetType {
-        case app
-        case tab
-        case home
+        case app, tab, home
         
         var uri: any FJRouteTargetURI {
             switch self {
@@ -28,27 +34,16 @@ fileprivate extension FJRegisterRouteNoChildrenTests {
             switch self {
             case .app:
                 return nil
-            case .tab:
-                return nil
-            case .home:
-                return nil
+            case .tab, .home:
+                return FJRouteTarget.Builder { @MainActor @Sendable info in
+                    return UIViewController()
+                }
             }
         }
         
         var animator: FJRouteTarget.Animator {
-            switch self {
-            case .app:
-                return FJRouteTarget.Animator { info in
-                    return FJRouteAnimatorProviders.AppRootController()
-                }
-            case .tab:
-                return FJRouteTarget.Animator { info in
-                    return FJRouteAnimatorProviders.AppRootController()
-                }
-            case .home:
-                return FJRouteTarget.Animator { info in
-                    return FJRouteAnimatorProviders.AutomaticAnimator()
-                }
+            return FJRouteTarget.Animator { info in
+                return FJRouteAnimatorProviders.AppRootController()
             }
         }
         
