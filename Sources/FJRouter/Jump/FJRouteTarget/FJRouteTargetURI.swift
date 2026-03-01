@@ -9,12 +9,12 @@ import Foundation
 
 /// 路由uri协议
 ///
-/// 为了一致性保障, 请实现此协议的对象遵守`Identifiable`, 且其`ID`类型为`UUID`;
+/// 为了一致性保障, 请实现此协议的对象遵守`Identifiable`, 且其`ID`类型为`String`;
 ///
 /// 需要确保其`id`在整个生命周期内多次获取时保障一致性, 不会重新生成。
 ///
 /// 可以使用框架提供的默认实现: `FJRouteTarget.CommonURI`
-public protocol FJRouteTargetURI: Identifiable where ID == UUID {
+public protocol FJRouteTargetURI: Identifiable where ID == String {
     /// 路由的路径: 支持路径参数. eg:
     ///
     ///     路径`/family/:fid`, 可以匹配以`/family/...`开始的url, eg: `/family/123`, `/family/456` and etc.
@@ -65,11 +65,28 @@ extension FJRouteTarget {
     public struct CommonURI: FJRouteTargetURI, Sendable, Hashable {
         public let path: String
         public let caseSensitive: Bool
-        public let id: UUID
-        public init(path: String, caseSensitive: Bool = true) {
+        public let id: String
+        
+        /// 初始化
+        /// - Parameters:
+        ///   - path: 路由路径
+        ///   - caseSensitive: 是否区分大小写
+        ///   - file: 所属file
+        ///   - line: 所在line
+        public init(path: String, caseSensitive: Bool = true, file: StaticString = #file, line: UInt = #line) {
             self.path = path
             self.caseSensitive = caseSensitive
-            id = UUID()
+            id = String(describing: file) + String(describing: line)
+        }
+        
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.id == rhs.id && lhs.path == rhs.path && lhs.caseSensitive == rhs.caseSensitive
+        }
+        
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(path)
+            hasher.combine(caseSensitive)
+            hasher.combine(id)
         }
     }
 }

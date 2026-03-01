@@ -13,6 +13,7 @@ public struct RouteUri: PeerMacro {
         guard let caseDecl = declaration.as(EnumCaseDeclSyntax.self) else {
             throw FJRouterMacroError(text: "@Uri only support enum case")
         }
+        context.lexicalContext
         return [
             """
                 var uri: any FJRouteTargetURI {

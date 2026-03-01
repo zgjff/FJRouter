@@ -5,6 +5,7 @@
 //  Created by zgjff on 2026/2/28.
 //
 
+#if canImport(SwiftCompilerPlugin)
 import SwiftCompilerPlugin
 import SwiftSyntaxMacros
 
@@ -12,6 +13,8 @@ import SwiftSyntaxMacros
 struct FJRouterMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         RouteUri.self,
-        CaseDetectionImpl.self
+        FJRouteMacroImpl.self
     ]
 }
+
+#endif
