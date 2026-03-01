@@ -21,7 +21,7 @@ extension FJPathUtils {
         let pstart = pattern.startIndex
         var start = 0
         var buffer: String
-        if #available(iOS 14.0, *) {
+        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
             buffer = String(unsafeUninitializedCapacity: pattern.count + 1, initializingUTF8With: { _ in 0 })
         } else {
             buffer = ""
@@ -134,7 +134,7 @@ extension FJPathUtils {
     
     internal func patternToPath(pattern: String, pathParameters parameters: [String: String]) throws(FJRouter.ConvertURLError) -> String {
         var buffer: String
-        if #available(iOS 14.0, *) {
+        if #available(macOS 11.0, iOS 14.0, watchOS 7.0, tvOS 14.0, *) {
             buffer = String(unsafeUninitializedCapacity: pattern.count, initializingUTF8With: { _ in 0 })
         } else {
             buffer = ""

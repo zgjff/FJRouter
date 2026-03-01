@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import UIKit.UIViewController
 
 /// 路由跳转管理实现
 final class FJRouteJumpProviderImpl: FJRouteJumpProvider, @unchecked Sendable {
@@ -29,11 +28,11 @@ extension FJRouteJumpProviderImpl {
         
     }
     
-    func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> UIViewController {
+    func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> IViewController {
         throw FJRouteMatchError.unRegister(route)
     }
     
-    func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> UIViewController {
+    func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> IViewController {
         fatalError()
     }
 }

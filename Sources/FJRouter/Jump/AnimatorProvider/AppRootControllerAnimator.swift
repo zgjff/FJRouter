@@ -6,8 +6,11 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
+#if canImport(UIKit)
 extension FJRouteAnimatorProviders {
     /// 设置app window的rootViewController
     public struct AppRootController: FJRouteTargetAnimatorProvider {
@@ -17,3 +20,4 @@ extension FJRouteAnimatorProviders {
         }
     }
 }
+#endif

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import UIKit.UIViewController
+
 extension FJRouter {
     /// 创建新的路由跳转管理中心。
     /// 注意⚠️: 返回的并非是单例对象, 需要应用层app持有此对象;
@@ -34,7 +34,7 @@ public protocol FJRouteJumpProvider: Sendable {
     
     func go(_ url: URL) async
     
-    func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> UIViewController
+    func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> IViewController
     
-    func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> UIViewController
+    func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> IViewController
 }

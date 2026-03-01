@@ -11,7 +11,7 @@ extension URL: FJRouterWrapperValue {}
 
 extension FJRouter.Wrapper where Object == URL {
     public var versionPath: String {
-        if #available(iOS 16.0, *) {
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             return object.path()
         } else {
             return object.path

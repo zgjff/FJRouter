@@ -20,7 +20,7 @@ import Foundation
     private let excutor: any SerialExecutor
     private init() {
         let queue = DispatchQueue(label: "com.RouteActorExcutor.FJRouter", qos: .userInitiated)
-        if #available(iOS 17.0, *) {
+        if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
             excutor = FJRouteExecutor(queue: queue)
         } else {
             excutor = FJRouteExecutorBelow17(queue: queue)
@@ -68,7 +68,7 @@ extension FJRouteActor {
             let unownedJob = UnownedJob(job)
 //            print("enqueue----will enqueue:", Thread.current)
             queue.async {
-                if #available(iOS 18.0, *) {
+                if #available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *) {
                     unownedJob.runSynchronously(isolatedTo: self.asUnownedSerialExecutor(), taskExecutor: self.asUnownedTaskExecutor())
 //                    print("enqueue----did run:", Thread.current)
                 } else {
@@ -82,7 +82,7 @@ extension FJRouteActor {
             UnownedSerialExecutor(ordinary: self)
         }
         
-        @available(iOS 18.0, *)
+        @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
         @inlinable
         func asUnownedTaskExecutor() -> UnownedTaskExecutor {
             UnownedTaskExecutor(ordinary: self)

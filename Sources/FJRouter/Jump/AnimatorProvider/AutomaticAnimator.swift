@@ -6,8 +6,11 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
+#if canImport(UIKit)
 extension FJRouteAnimatorProviders {
     /// 根据情况自动选择动画方式
     ///
@@ -26,3 +29,4 @@ extension FJRouteAnimatorProviders {
         }
     }
 }
+#endif

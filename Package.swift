@@ -6,7 +6,11 @@ import CompilerPluginSupport
 
 let package = Package(
     name: "FJRouter",
-    platforms: [.iOS(.v13)],
+    platforms: [
+        .macOS(.v10_15), // why: support test macros, macros only can test for mac
+        .iOS(.v13),
+        .macCatalyst(.v13),
+    ],
     products: [
         .library(name: "FJRouter", targets: ["FJRouter"]),
     ],
@@ -21,15 +25,18 @@ let package = Package(
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
+        
         .target(name: "FJRouter",
             dependencies: ["FJRouterMacros"],
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
-        .testTarget(name: "FJRouterTests",
+        
+        .testTarget(
+            name: "MacroTest",
             dependencies: [
-                "FJRouter",
+                "FJRouterMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
-            ]
+            ],
         ),
     ],
     swiftLanguageModes: [.v6]
