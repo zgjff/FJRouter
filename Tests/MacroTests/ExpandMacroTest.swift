@@ -4,7 +4,6 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
-@testable import FJRouter
 #if canImport(FJRouterMacros)
 @testable import FJRouterMacros
 let testMacros: [String: Macro.Type] = [
@@ -56,16 +55,5 @@ final class RouteUriTest: XCTestCase {
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
-    }
-}
-
-@FJRoute
-enum AAAA {
-case home
-}
-
-extension AAAA {
-    var a: String {
-        return "aaa"
     }
 }

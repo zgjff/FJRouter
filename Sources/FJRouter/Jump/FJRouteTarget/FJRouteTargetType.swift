@@ -31,10 +31,8 @@ public protocol FJRouteTargetType: Sendable {
     /// 职能单一, 方便测试
     var interceptors: [any FJRouteTargetInterceptor] { get }
     
-    /// 关联的子路由: ⚠️注意循环问题
-    ///
-    /// 匹配子路由/直接使用子路由时, 会查找父路由的拦截器规则.
-    var children: [any FJRouteTargetType] { get }
+    /// 关联的🧧路由: ⚠️注意循环问题
+    var parent: (any FJRouteTargetType)? { get }
 }
 
 extension FJRouteTargetType {
@@ -42,7 +40,7 @@ extension FJRouteTargetType {
         return []
     }
     
-    public var children: [any FJRouteTargetType] {
-        return []
+    public var parent: (any FJRouteTargetType)? {
+        return nil
     }
 }

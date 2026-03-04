@@ -21,6 +21,10 @@ public protocol FJRouteTargetURI: Identifiable where ID == String {
     var path: String { get }
     
     /// 路由匹配正则是否支持`NSRegularExpression.Options.caseInsensitive`
+    ///
+    /// true: 不区分大小写
+    ///
+    /// false: 区分大小写
     var caseSensitive: Bool { get }
 }
 
@@ -48,6 +52,24 @@ extension FJRouteTargetURI {
             throw FJRouteTarget.RegisterURIError.regExp(error)
         }
     }
+
+    /// 判断两个uri的path是否相等
+    /// - Parameter other: 要匹配的uri
+    /// - Returns: 结果
+    func equtalPath(to other: any FJRouteTargetURI) -> Bool {
+        switch (caseSensitive, other.caseSensitive) {
+        case (false, false): // 都区分大小写
+            return path == other.path
+        case (true, true): // 都不区分大小写
+            return path.caseInsensitiveCompare(other.path) == .orderedSame
+        case (true, false):
+            let v = path.caseInsensitiveCompare(other.path)
+            return v == .orderedSame
+        case (false, true):
+            let v = other.path.caseInsensitiveCompare(path)
+            return v == .orderedSame
+        }
+    }
 }
 
 extension FJRouteTarget {
@@ -69,24 +91,21 @@ extension FJRouteTarget {
         
         /// 初始化
         /// - Parameters:
-        ///   - path: 路由路径
-        ///   - caseSensitive: 是否区分大小写
-        ///   - file: 所属file
-        ///   - line: 所在line
-        public init(path: String, caseSensitive: Bool = true, file: StaticString = #file, line: UInt = #line) {
+        ///   - path: path
+        ///   - caseSensitive: 路由匹配正则是否支持`NSRegularExpression.Options.caseInsensitive`大小写. true: 不区分大小写, false: 区分大小写
+        ///   - idTransform: 转换id, 默认`id = String(describing: fileId) + ":\(line)"`
+        ///   - fileId: file ID
+        ///   - line: line
+        public init(path: String, caseSensitive: Bool = true, idTransform: (_ value: String) -> String = { $0 }, fileId: StaticString = #fileID, line: UInt = #line) {
+            let fidstr = String(describing: fileId) + ":\(line)"
+            id = idTransform(fidstr)
+//            if path == "/" {
+//                self.path = path
+//            } else {
+//                self.path = path.hasPrefix("/") ? path : "/\(path)"
+//            }
             self.path = path
             self.caseSensitive = caseSensitive
-            id = String(describing: file) + String(describing: line)
-        }
-        
-        public static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.id == rhs.id && lhs.path == rhs.path && lhs.caseSensitive == rhs.caseSensitive
-        }
-        
-        public func hash(into hasher: inout Hasher) {
-            hasher.combine(path)
-            hasher.combine(caseSensitive)
-            hasher.combine(id)
         }
     }
 }

@@ -18,23 +18,34 @@ let package = Package(
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1"),
     ],
     targets: [
+        .target(name: "FJRouter",
+            resources: [.process("PrivacyInfo.xcprivacy")]
+        ),
+        
+        .testTarget(
+            name: "RouterTest",
+            dependencies: [
+                "FJRouter",
+            ],
+        ),
+        
         .macro(
-            name: "FJRouterMacros",
+            name: "FJRouterMacroPlugins",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
         
-        .target(name: "FJRouter",
-            dependencies: ["FJRouterMacros"],
-            resources: [.process("PrivacyInfo.xcprivacy")]
+        .target(name: "FJRouterMacro",
+            dependencies: ["FJRouterMacroPlugins"]
         ),
         
         .testTarget(
             name: "MacroTest",
             dependencies: [
-                "FJRouterMacros",
+                "FJRouterMacro",
+                "FJRouterMacroPlugins",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ],
         ),

@@ -12,7 +12,6 @@ import SwiftSyntaxMacros
 @main
 struct FJRouterMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        RouteUri.self,
         FJRouteMacroImpl.self
     ]
 }
