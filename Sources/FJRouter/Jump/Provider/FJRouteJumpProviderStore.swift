@@ -28,17 +28,15 @@ extension FJRouteJumpProviderStore {
             return ir
         }
         // 检测pr是否已经注册
-        guard let pir = findInnerTarget(for: pr) else {
-            // 没注册
-            // TODO: -
-            let pir = try FJRouteTarget.InnerTarget(originalTarget: pr, assertErrorInDebug: config.assertRegisterErrorInDebug)
-            
-            return pir
+        if let pir = findInnerTarget(for: pr) {
+            // 已注册
+            try ir.tryAddParent(ptarget: pir, assertErrorInDebug: config.assertRegisterErrorInDebug)
+            return ir
         }
-        // 已注册
-        // TODO: -
-        
-        return pir
+        // 没注册
+        let pir = try addRoute(pr)
+        try ir.tryAddParent(ptarget: pir, assertErrorInDebug: config.assertRegisterErrorInDebug)
+        return ir
     }
     
     func matchRoute(_ route: any FJRouteTargetType) async throws(FJRouteMatchError) {

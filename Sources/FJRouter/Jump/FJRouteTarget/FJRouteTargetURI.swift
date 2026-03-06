@@ -74,11 +74,22 @@ extension FJRouteTargetURI {
 
 extension FJRouteTarget {
     /// 注册路由uri错误
-    public enum RegisterURIError: Error {
+    public enum RegisterURIError: @unchecked Sendable, Error, Equatable {
         /// path为空
         case emptyPath
         /// 生成正则表达式错误
         case regExp(_ error: Error)
+        
+        public static func == (lhs: Self, rhs: Self) -> Bool {
+            switch (lhs, rhs) {
+            case (.emptyPath, .emptyPath):
+                return true
+            case (.regExp, .regExp):
+                return true
+            case (.emptyPath, .regExp), (.regExp, .emptyPath):
+                return false
+            }
+        }
     }
 }
 

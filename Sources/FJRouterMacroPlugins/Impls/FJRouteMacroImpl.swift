@@ -13,7 +13,7 @@ public struct FJRouteMacroImpl: ExtensionMacro {
         guard let enumDecl = declaration.as(EnumDeclSyntax.self) else {
             throw FJRouterMacroError(text: "@FJRoute macro now is only for `enum`.")
         }
-        let v = declaration
+//        let v = declaration
         
         var isPublic = false
         if let mf = declaration.modifiers.first, mf.tokens(viewMode: .sourceAccurate).contains(where: { $0.tokenKind == .keyword(.public) }) {
@@ -34,13 +34,13 @@ public struct FJRouteMacroImpl: ExtensionMacro {
         let preExtensionStr = isPublic ? "public " : " "
         
         if !routeTargetExists {
-            let routeDecl = try ExtensionDeclSyntax(
-                """
-                extension \(type.trimmed): FJRouteTargetType {
-                
-                }
-                """
-            )
+//            let routeDecl = try ExtensionDeclSyntax(
+//                """
+//                extension \(type.trimmed): FJRouteTargetType {
+//                
+//                }
+//                """
+//            )
 //            decls.append(routeDecl)
         }
         

@@ -9,7 +9,7 @@ import Foundation
 
 extension FJRouteTarget {
     /// 注册添加路由错误
-    public enum RegisterError: Error {
+    public enum RegisterError: @unchecked Sendable, Error {
         /// builder以及interceptors均没有设置
         case noPage
         
@@ -30,7 +30,38 @@ extension FJRouteTarget {
         /// 同一个路由链路中存在循环指向
         case loop(target: any FJRouteTargetType, parentTarget: any FJRouteTargetType)
         
-        /// 子路由节点过深, 可能存在循环指向
-        case childrenTargetNodeTooDepth(target: any FJRouteTargetType, parentTarget: any FJRouteTargetType)
+        /// 同一个路由下的子路由中存在相同的uri path判定
+        case equtalPath(lhs: any FJRouteTargetType, rhs: any FJRouteTargetType, parentTarget: any FJRouteTargetType)
+    }
+}
+
+extension FJRouteTarget.RegisterError: Equatable {
+    public static func == (lhs: FJRouteTarget.RegisterError, rhs: FJRouteTarget.RegisterError) -> Bool {
+        switch (lhs, rhs) {
+        case (.noPage, .noPage):
+            return true
+        case let (.uri(lt, err: lr), .uri(rt, err: rr)):
+            return equal(lhs: lt, rhs: rt) && (lr == rr)
+        case let (.sameParameter(lt, parameter: lp), .sameParameter(rt, parameter: rp)):
+            return (lp == rp) && equal(lhs: lt, rhs: rt)
+        case let (.sameParameterInLink(lpt, target: lt, parameter: lp), .sameParameterInLink(rpt, target: rt, parameter: rp)):
+            return (lp == rp) && equal(lhs: lt, rhs: rt) && equal(lhs: lpt, rhs: rpt)
+        case let (.uriSuffixWithSlash(target: lt), .uriSuffixWithSlash(target: rt)):
+            return equal(lhs: lt, rhs: rt)
+        case let (.loop(target: lt, parentTarget: lpt), .loop(target: rt, parentTarget: rpt)):
+            return equal(lhs: lt, rhs: rt) && equal(lhs: lpt, rhs: rpt)
+        case let (.equtalPath(lhs: llt, rhs: lrt, parentTarget: lpt), .equtalPath(lhs: rlt, rhs: rrt, parentTarget: rpt)):
+            return equal(lhs: llt, rhs: rlt) && equal(lhs: lrt, rhs: rrt) && equal(lhs: lpt, rhs: rpt)
+        default:
+            return false
+        }
+    }
+}
+
+extension FJRouteTarget.RegisterError {
+    private static func equal(lhs: any FJRouteTargetType, rhs: any FJRouteTargetType) -> Bool {
+        let luri = lhs.uri
+        let ruri = rhs.uri
+        return luri.id == ruri.id && luri.path == ruri.path && luri.caseSensitive == ruri.caseSensitive
     }
 }
