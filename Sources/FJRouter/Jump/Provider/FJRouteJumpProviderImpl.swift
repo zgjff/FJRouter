@@ -28,11 +28,24 @@ extension FJRouteJumpProviderImpl {
         
     }
     
+    func tryGo(_ maybeRoute: Any) async {
+        if let route = maybeRoute as? FJRouteTargetType {
+            return await go(route)
+        }
+        if let url = maybeRoute as? URL {
+            return await go(url)
+        }
+    }
+    
     func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> IViewController {
         throw FJRouteMatchError.unRegister(route)
     }
     
     func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> IViewController {
+        fatalError()
+    }
+    
+    func viewControllerFor(maybeRoute route: Any, ignoreInterceptor: Bool) async throws -> IViewController {
         fatalError()
     }
 }

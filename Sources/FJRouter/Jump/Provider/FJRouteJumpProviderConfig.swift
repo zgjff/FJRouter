@@ -11,9 +11,9 @@ public struct FJRouteJumpProviderConfig: @unchecked Sendable {
     /// 当注册路由错误时, 是否触发系统`assert`断言方法: 系统`assert`断言方法只在`Debug`环境生效。
     ///
     /// 此参数修饰符非`public`, 只在框架内部可修改, 方便`test`; 项目引用时是`true`, 也即是鼓励在开发阶段发现
-    /// 路由的`uri.path`问题.
+    /// 路由注册时的问题.
     ///
-    /// 如果为`false`, 则注册时path有问题, 也不会触发`assert`断言;
+    /// 如果为`false`, 则注册时有问题, 也不会触发`assert`断言;
     /// 如果为`true`, 可以在开发阶段提前发现注册路由相关错误, 触发`assert`断言:
     ///
     /// 1: path为空;

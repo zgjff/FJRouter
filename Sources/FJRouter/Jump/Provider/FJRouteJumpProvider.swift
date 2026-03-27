@@ -34,7 +34,20 @@ public protocol FJRouteJumpProvider: Sendable {
     
     func go(_ url: URL) async
     
+    /// 尝试跳转
+    /// - Parameter maybeRoute: 路由对象
+    ///
+    /// why: 在模块化开发下, 有可能路由的声明和实现是放在不同的模块中的; 需要跳转的地方无法访问到实现路由的模块,
+    /// 也就无法确定声明是否实现了`FJRouteTargetType`协议.
+    ///
+    /// 在实现内部, 会优先判断`maybeRoute`是否实现了`FJRouteTargetType`协议, 实现了则走`func go(_ route: any FJRouteTargetType) async`方法;
+    ///
+    /// 其次再判断`maybeRoute`如果是`URL`, 则走`func go(_ url: URL) async`方法;
+    func tryGo(_ maybeRoute: Any) async
+    
     func viewControllerFor(route: any FJRouteTargetType, ignoreInterceptor: Bool) async throws -> IViewController
     
     func viewControllerFor(url: URL, ignoreInterceptor: Bool) async throws -> IViewController
+    
+    func viewControllerFor(maybeRoute route: Any, ignoreInterceptor: Bool) async throws -> IViewController
 }

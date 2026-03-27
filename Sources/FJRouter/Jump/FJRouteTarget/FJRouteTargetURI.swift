@@ -26,6 +26,9 @@ public protocol FJRouteTargetURI: Identifiable where ID == String {
     ///
     /// false: 区分大小写
     var caseSensitive: Bool { get }
+    
+    /// 路由的名称
+    var name: String? { get }
 }
 
 extension FJRouteTargetURI {
@@ -98,6 +101,7 @@ extension FJRouteTarget {
     public struct CommonURI: FJRouteTargetURI, Sendable, Hashable {
         public let path: String
         public let caseSensitive: Bool
+        public let name: String?
         public let id: String
         
         /// 初始化
@@ -107,7 +111,7 @@ extension FJRouteTarget {
         ///   - idTransform: 转换id, 默认`id = String(describing: fileId) + ":\(line)"`
         ///   - fileId: file ID
         ///   - line: line
-        public init(path: String, caseSensitive: Bool = true, idTransform: (_ value: String) -> String = { $0 }, fileId: StaticString = #fileID, line: UInt = #line) {
+        public init(path: String, caseSensitive: Bool = true, name: String?, idTransform: (_ value: String) -> String = { $0 }, fileId: StaticString = #fileID, line: UInt = #line) {
             let fidstr = String(describing: fileId) + ":\(line)"
             id = idTransform(fidstr)
 //            if path == "/" {
@@ -117,6 +121,7 @@ extension FJRouteTarget {
 //            }
             self.path = path
             self.caseSensitive = caseSensitive
+            self.name = name
         }
     }
 }

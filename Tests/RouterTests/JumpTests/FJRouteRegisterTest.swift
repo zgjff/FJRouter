@@ -38,9 +38,9 @@ extension FJRouteRegisterTest {
         var uri: any FJRouteTargetURI {
             switch self {
             case .app:
-                return FJRouteTarget.CommonURI(path: "/")
+                return FJRouteTarget.CommonURI(path: "/", name: nil)
             case .a1:
-                return FJRouteTarget.CommonURI(path: "/a1/")
+                return FJRouteTarget.CommonURI(path: "/a1/", name: nil)
             }
         }
         

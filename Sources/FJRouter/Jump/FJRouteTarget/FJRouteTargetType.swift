@@ -7,10 +7,6 @@
 
 import Foundation
 
-// TODO: - uri, interceptors, children 使用宏
-// TODO: - uri: @uri("xxx"), @uri("xxxx", false)
-// TODO: - interceptors: @interceptors([])
-// TODO: - children:不再需要, 需要@parent(xxx)
 /// 路由对象协议
 public protocol FJRouteTargetType: Sendable {
     /// 路由资源: 强烈建议子路由的`path`不要以`/`为开头

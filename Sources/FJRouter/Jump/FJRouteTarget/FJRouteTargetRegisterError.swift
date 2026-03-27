@@ -25,6 +25,15 @@ extension FJRouteTarget {
         case sameParameterInLink(parentTarget: any FJRouteTargetType, target: any FJRouteTargetType, parameter: String)
         
         /// 路由以`/`结尾: 除了最顶层的'/'路由外, 其它任何路由都不能以'/'结尾
+        ///
+        /// why: 在`URL`标准规定里, queryItems不能直接放在/后面,
+        /// 在使用Universal link时, url基本会有queryItems, 此时正确的写法是
+        ///
+        ///     https://xx.xxx.com/path?a=1&b=2
+        ///
+        /// 而非
+        ///
+        ///     https://xx.xxx.com/?a=1&b=2
         case uriSuffixWithSlash(target: any FJRouteTargetType)
         
         /// 同一个路由链路中存在循环指向

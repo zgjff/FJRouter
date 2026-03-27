@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -15,7 +15,7 @@ let package = Package(
         .library(name: "FJRouter", targets: ["FJRouter"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "603.0.0-latest"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0-latest"),
     ],
     targets: [
         .target(name: "FJRouter",
