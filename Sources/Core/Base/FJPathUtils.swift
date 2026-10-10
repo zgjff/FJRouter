@@ -7,17 +7,19 @@
 
 import Foundation
 
-internal struct FJPathUtils: Sendable {
-    internal static let `default` = FJPathUtils()
-    private let parameterRegExp: NSRegularExpression
-    private init() {
-        parameterRegExp = try! NSRegularExpression(pattern: #":(\w+)(\((?:\\.|[^\\()])+\))?"#, options: [])
+extension FJRouter {
+    internal final class PathUtils: Sendable {
+        internal static let `default` = PathUtils()
+        private let parameterRegExp: NSRegularExpression
+        private init() {
+            parameterRegExp = try! NSRegularExpression(pattern: #":(\w+)(\((?:\\.|[^\\()])+\))?"#, options: [])
+        }
     }
 }
 
-extension FJPathUtils {
-    internal func patternToRegExp(pattern: String, caseSensitive: Bool) throws -> (reg: NSRegularExpression, parameters: [String]) {
-        let matchs = FJPathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
+extension FJRouter.PathUtils {
+    internal func resolve(pattern: String, caseSensitive: Bool) throws -> (reg: NSRegularExpression, parameters: [String]) {
+        let matchs = FJRouter.PathUtils.default.parameterRegExp.matches(in: pattern, options: .reportProgress, range: NSRange(location: 0, length: pattern.count))
         let pstart = pattern.startIndex
         var start = 0
         var buffer: String
@@ -50,8 +52,8 @@ extension FJPathUtils {
             buffer.append("(?=/|$)")
         }
         var opt: NSRegularExpression.Options = []
-        if caseSensitive {
-            opt = [.caseInsensitive]
+        if !caseSensitive {
+            opt.insert(.caseInsensitive)
         }
         let exp = try NSRegularExpression(pattern: buffer, options: opt)
         return (exp, parameters)
@@ -107,7 +109,7 @@ extension FJPathUtils {
             f.updateValue(pairs.value, forKey: pairs.key)
             return f
         }
-        let location = try FJPathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
+        let location = try FJRouter.PathUtils.default.patternToPath(pattern: path, pathParameters: newParams)
         var cop = URLComponents(string: location)
         if !queryParams.isEmpty {
             var queryItems = cop?.queryItems ?? []

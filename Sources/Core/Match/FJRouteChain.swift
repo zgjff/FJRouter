@@ -7,7 +7,7 @@
 
 import Foundation
 /// 路由链路信息
-public struct FJRouteChain: Sendable {
+struct FJRouteChain: Sendable {
     /// 当前路由
     let route: any FJRouteTargetType
     /// 父路由链路

@@ -16,7 +16,7 @@ let package = Package(
             resources: [.process("PrivacyInfo.xcprivacy")]
         ),
         .testTarget(
-            name: "RouterTests",
+            name: "FJRouterTests",
             dependencies: [
                 "FJRouter",
             ],

@@ -27,7 +27,7 @@ public protocol FJRouteTargetType: Sendable {
     /// 职能单一, 方便测试
     var interceptors: [any FJRouteTargetInterceptor] { get }
     
-    /// 关联的🧧路由: ⚠️注意循环问题
+    /// 关联的父路由: ⚠️注意循环问题
     var parent: (any FJRouteTargetType)? { get }
 }
 

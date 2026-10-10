@@ -1,5 +1,5 @@
 //
-//  FJRouteJumpProviderConfig.swift
+//  FJRouterProviderConfig.swift
 //  FJRouter
 //
 //  Created by zgjff on 2026/2/12.
@@ -7,7 +7,7 @@
 
 import Foundation
 /// 路由跳转管理中心配置
-public struct FJRouteJumpProviderConfig: @unchecked Sendable {
+public struct FJRouterProviderConfig: @unchecked Sendable {
     /// 当注册路由错误时, 是否触发系统`assert`断言方法: 系统`assert`断言方法只在`Debug`环境生效。
     ///
     /// 此参数修饰符非`public`, 只在框架内部可修改, 方便`test`; 项目引用时是`true`, 也即是鼓励在开发阶段发现
@@ -26,4 +26,7 @@ public struct FJRouteJumpProviderConfig: @unchecked Sendable {
     ///
     /// 5: 其它错误;
     var assertRegisterErrorInDebug = true
+    
+    /// 限制路由重定向次数。
+    public var redirectLimit = 5
 }

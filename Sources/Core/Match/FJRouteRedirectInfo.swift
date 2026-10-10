@@ -9,5 +9,6 @@ import Foundation
 /// 路由重定向信息
 public struct FJRouteRedirectInfo: Sendable {
     public let from: any FJRouteTargetType
-    public let to: FJRouteChain
+    public let interceptor: any FJRouteTargetInterceptor
+    public let to: (any FJRouteTargetType)?
 }

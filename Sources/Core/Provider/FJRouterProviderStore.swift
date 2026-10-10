@@ -1,5 +1,5 @@
 //
-//  FJRouteJumpProviderStore.swift
+//  FJRouterProviderStore.swift
 //  FJRouter
 //
 //  Created by zgjff on 2026/1/16.
@@ -7,19 +7,19 @@
 
 import Foundation
 
-final actor FJRouteJumpProviderStore {
+final actor FJRouterProviderStore {
     private var routes: [FJRouteTarget.InnerTarget]
-    private let config: FJRouteJumpProviderConfig
+    private let config: FJRouterProviderConfig
     nonisolated let unownedExecutor: UnownedSerialExecutor
-    init(config: FJRouteJumpProviderConfig) {
-        unownedExecutor = FJRouteActor.sharedUnownedExecutor
+    init(config: FJRouterProviderConfig) {
+        unownedExecutor = FJRouterActor.sharedUnownedExecutor
         self.config = config
         routes = []
         routes.reserveCapacity(64)
     }
 }
 
-extension FJRouteJumpProviderStore {
+extension FJRouterProviderStore {
     @discardableResult
     func addRoute(_ route: any FJRouteTargetType) throws(FJRouteTarget.RegisterError) -> FJRouteTarget.InnerTarget {
         let ir = try FJRouteTarget.InnerTarget(originalTarget: route, assertErrorInDebug: config.assertRegisterErrorInDebug)
@@ -39,16 +39,21 @@ extension FJRouteJumpProviderStore {
         return ir
     }
     
-    func matchRoute(_ route: any FJRouteTargetType) async throws(FJRouteMatchError) {
-        
+    func matchRoute(_ route: any FJRouteTargetType) async throws(FJRouteMatchError) -> FJRouteMatchChain {
+        var rcs: [any FJRouteTargetType] = []
+        var p: (any FJRouteTargetType)? = route
+        while let pp = p {
+            rcs.append(pp)
+            p = pp.parent
+        }
+        if Task.isCancelled {
+            // TODO: -
+        }
+        return FJRouteMatchChain(originalDestination: .route(route), redirects: [])
     }
 }
 
-private extension FJRouteJumpProviderStore {
-    
-}
-
-private extension FJRouteJumpProviderStore {
+private extension FJRouterProviderStore {
     func findInnerTarget(for route: any FJRouteTargetType) -> FJRouteTarget.InnerTarget? {
         for r in routes {
             if let frt = r.find(target: route) {
@@ -60,7 +65,7 @@ private extension FJRouteJumpProviderStore {
     
     // TODO: - 返回result
     func tryRedirect(routeChain: FJRouteChain) async throws(FJRouteMatchError) -> FJRouteMatchChain {
-        return FJRouteMatchChain(originalDestinationRoute: routeChain, redirects: [])
+        throw .unRegister(routeChain.route)
 //        var matchChain = FJRouteMatchChain(originalDestinationRoute: routeChain, redirects: [])
 //        var rps = Array(routeChain.parents.reversed())
 //        var proute = rps.popLast()

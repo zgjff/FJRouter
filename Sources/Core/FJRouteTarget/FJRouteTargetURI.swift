@@ -49,7 +49,7 @@ extension FJRouteTargetURI {
             throw FJRouteTarget.RegisterURIError.emptyPath
         }
         do {
-            let (regExp, pathParameters) = try FJPathUtils.default.patternToRegExp(pattern: p, caseSensitive: caseSensitive)
+            let (regExp, pathParameters) = try FJRouter.PathUtils.default.resolve(pattern: p, caseSensitive: caseSensitive)
             return (regExp, pathParameters)
         } catch {
             throw FJRouteTarget.RegisterURIError.regExp(error)

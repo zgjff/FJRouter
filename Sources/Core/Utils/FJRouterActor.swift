@@ -1,5 +1,5 @@
 //
-//  FJRouteActor.swift
+//  FJRouterActor.swift
 //  FJRouter
 //
 //  Created by zgjff on 2025/12/26.
@@ -8,9 +8,9 @@
 import Foundation
 
 /// 路由全局actor
-@globalActor public final actor FJRouteActor: GlobalActor {
-    public typealias ActorType = FJRouteActor
-    public static let shared = FJRouteActor()
+@globalActor public final actor FJRouterActor: GlobalActor {
+    public typealias ActorType = FJRouterActor
+    public static let shared = FJRouterActor()
     public nonisolated static var sharedUnownedExecutor: UnownedSerialExecutor {
         shared.unownedExecutor
     }
@@ -21,23 +21,23 @@ import Foundation
     private init() {
         let queue = DispatchQueue(label: "com.RouteActorExcutor.FJRouter", qos: .userInitiated)
         if #available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *) {
-            excutor = FJRouteExecutor(queue: queue)
+            excutor = FJRouterExecutor(queue: queue)
         } else {
-            excutor = FJRouteExecutorBelow17(queue: queue)
+            excutor = FJRouterExecutorBelow17(queue: queue)
         }
     }
 }
 
-extension FJRouteActor {
-    public static func run<T>(resultType: T.Type = T.self, body: @FJRouteActor @Sendable () throws -> T) async rethrows -> T where T : Sendable {
+extension FJRouterActor {
+    public static func run<T>(resultType: T.Type = T.self, body: @FJRouterActor @Sendable () throws -> T) async rethrows -> T where T : Sendable {
         return try await body()
     }
 }
 
-extension FJRouteActor {
+extension FJRouterActor {
     @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-    @available(iOS, introduced: 13.0, deprecated: 17.0, message: "Use FJRouteExecutor instead.")
-    internal final class FJRouteExecutorBelow17: SerialExecutor {
+    @available(iOS, introduced: 13.0, deprecated: 17.0, message: "Use FJRouterExecutor instead.")
+    internal final class FJRouterExecutorBelow17: SerialExecutor {
         private let queue: DispatchQueue
         init(queue: DispatchQueue) {
             self.queue = queue
@@ -56,9 +56,9 @@ extension FJRouteActor {
     }
 }
 
-extension FJRouteActor {
+extension FJRouterActor {
     @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-    internal final class FJRouteExecutor: SerialExecutor, TaskExecutor {
+    internal final class FJRouterExecutor: SerialExecutor, TaskExecutor {
         private let queue: DispatchQueue
         init(queue: DispatchQueue) {
             self.queue = queue

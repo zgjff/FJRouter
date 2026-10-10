@@ -3,12 +3,12 @@ import Testing
 @testable import FJRouter
 #if canImport(UIKit)
 import UIKit
-@Suite("register route test")
-struct FJRouteRegisterTest {
-    @Test("equtalPath test for caseSensitive = true") func equtalPathCaseSensitive() async {
-        var config = FJRouteJumpProviderConfig()
+@Suite("route store test")
+struct FJRouteStoreTest {
+    @Test func equtalPathCaseSensitive() async throws {
+        var config = FJRouterProviderConfig()
         config.assertRegisterErrorInDebug = false
-        let store = FJRouteJumpProviderStore(config: config)
+        let store = FJRouterProviderStore(config: config)
         
         await #expect(throws: Never.self) {
             try await store.addRoute(Route1.app)
@@ -17,10 +17,12 @@ struct FJRouteRegisterTest {
         await #expect(throws: FJRouteTarget.RegisterError.uriSuffixWithSlash(target: Route1.a1)) {
             try await store.addRoute(Route1.a1)
         }
+        
+        try await store.matchRoute(Route1.a2)
     }
 }
 
-extension FJRouteRegisterTest {
+extension FJRouteStoreTest {
     fileprivate class RouteCheckLoginInterceptor: @unchecked Sendable, FJRouteTargetInterceptor {
         var priority: Int {
             return 0
@@ -34,6 +36,7 @@ extension FJRouteRegisterTest {
     fileprivate enum Route1: FJRouteTargetType {
         case app
         case a1
+        case a2
         
         var uri: any FJRouteTargetURI {
             switch self {
@@ -41,6 +44,8 @@ extension FJRouteRegisterTest {
                 return FJRouteTarget.CommonURI(path: "/", name: nil)
             case .a1:
                 return FJRouteTarget.CommonURI(path: "/a1/", name: nil)
+            case .a2:
+                return FJRouteTarget.CommonURI(path: "/a2", name: nil)
             }
         }
         
@@ -48,7 +53,7 @@ extension FJRouteRegisterTest {
             switch self {
             case .app:
                 return nil
-            case .a1:
+            case .a1, .a2:
                 return FJRouteTarget.Builder { info in
                     return UIViewController()
                 }
@@ -65,7 +70,7 @@ extension FJRouteRegisterTest {
             switch self {
             case .app:
                 return [RouteCheckLoginInterceptor()]
-            case .a1:
+            case .a1, .a2:
                  return []
             }
         }
@@ -74,6 +79,8 @@ extension FJRouteRegisterTest {
             switch self {
             case .app, .a1:
                 return nil
+            case .a2:
+                return Route1.app
             }
         }
     }
